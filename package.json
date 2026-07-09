@@ -30,11 +30,16 @@
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/exec": "^7.1.0",
     "@semantic-release/git": "^10.0.1",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "@typescript/native": "npm:typescript@latest",
     "conventional-changelog-conventionalcommits": "^10.2.1",
     "husky": "latest",
     "lint-staged": "latest",
     "semantic-release": "^25.0.5",
     "turbo": "latest",
-    "typescript": "latest"
+    "typescript": "npm:@typescript/typescript6@latest",
+    "typescript-7": "npm:typescript@latest"
   }
 }

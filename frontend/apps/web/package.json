@@ -1,11 +1,35 @@
 {
   "name": "@flarelock/web",
   "private": true,
+  "version": "0.1.0",
   "scripts": {
-    "dev": "echo web app not initialized yet",
-    "build": "echo web build not initialized yet",
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
     "lint": "biome check .",
     "format": "biome format . --write",
     "check": "biome check . --write"
+  },
+  "dependencies": {
+    "@flarelock/config": "workspace:*",
+    "@flarelock/ui": "workspace:*",
+    "@flarelock/web3": "workspace:*",
+    "@tanstack/react-query": "latest",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "viem": "latest",
+    "wagmi": "latest",
+    "zustand": "latest"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "@typescript/native": "npm:typescript@latest",
+    "tailwindcss": "latest",
+    "typescript": "npm:@typescript/typescript6@latest",
+    "typescript-7": "npm:typescript@latest"
   }
 }

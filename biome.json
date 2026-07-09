@@ -4,13 +4,14 @@
   "files": {
     "includes": [
       "**",
-      "!!.git",
-      "!!.yarn",
-      "!!node_modules",
-      "!!dist",
-      "!!build",
-      "!!.next",
-      "!!.turbo",
+      "!**/.git",
+      "!**/.yarn",
+      "!**/node_modules",
+      "!**/.next",
+      "!**/dist",
+      "!**/build",
+      "!**/coverage",
+      "!**/.turbo",
       "!**/.pnp.*"
     ],
     "ignoreUnknown": true
