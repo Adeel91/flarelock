@@ -8,43 +8,22 @@
         "preset": "conventionalcommits",
         "releaseRules": [
           {
-            "type": "feat",
-            "release": "patch"
-          },
-          {
-            "type": "fix",
-            "release": "patch"
-          },
-          {
-            "type": "docs",
-            "release": "patch"
-          },
-          {
-            "type": "chore",
-            "release": "patch"
-          },
-          {
-            "type": "refactor",
-            "release": "patch"
-          },
-          {
-            "type": "style",
-            "release": "patch"
-          },
-          {
-            "type": "test",
-            "release": "patch"
-          },
-          {
-            "type": "ci",
-            "release": "patch"
-          },
-          {
-            "type": "build",
+            "type": "release",
+            "scope": "patch",
             "release": "patch"
           },
           {
             "type": "release",
+            "scope": "minor",
+            "release": "minor"
+          },
+          {
+            "type": "release",
+            "scope": "major",
+            "release": "major"
+          },
+          {
+            "type": "*",
             "release": false
           }
         ]
@@ -57,6 +36,12 @@
       }
     ],
     [
+      "@semantic-release/changelog",
+      {
+        "changelogFile": "CHANGELOG.md"
+      }
+    ],
+    [
       "@semantic-release/exec",
       {
         "prepareCmd": "node scripts/semantic-release-prepare.mjs ${nextRelease.version} ${nextRelease.type}"
@@ -65,7 +50,7 @@
     [
       "@semantic-release/git",
       {
-        "assets": ["package.json"],
+        "assets": ["package.json", "CHANGELOG.md"],
         "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
       }
     ],

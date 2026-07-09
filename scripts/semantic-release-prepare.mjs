@@ -18,7 +18,5 @@ fs.writeFileSync(packagePath, `${JSON.stringify(pkg, null, 2)}\n`);
 if (releaseType === "patch") {
   try {
     execSync("git checkout -- CHANGELOG.md", { stdio: "ignore" });
-  } catch {
-    // CHANGELOG.md may not exist or may not be tracked yet.
-  }
+  } catch {}
 }
