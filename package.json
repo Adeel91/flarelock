@@ -1,0 +1,32 @@
+{
+  "name": "flarelock",
+  "private": true,
+  "packageManager": "yarn@4.17.1",
+  "workspaces": [
+    "frontend/apps/*",
+    "frontend/packages/*",
+    "backend/apps/*",
+    "backend/packages/*",
+    "confidential/*"
+  ],
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "biome check .",
+    "format": "biome format . --write",
+    "check": "biome check . --write",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,jsonc,css,md}": [
+      "biome check --write --no-errors-on-unmatched"
+    ]
+  },
+  "devDependencies": {
+    "@biomejs/biome": "latest",
+    "husky": "latest",
+    "lint-staged": "latest",
+    "turbo": "latest",
+    "typescript": "latest"
+  }
+}

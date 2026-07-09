@@ -1,0 +1,11 @@
+{
+  "name": "@flarelock/web",
+  "private": true,
+  "scripts": {
+    "dev": "echo web app not initialized yet",
+    "build": "echo web build not initialized yet",
+    "lint": "biome check .",
+    "format": "biome format . --write",
+    "check": "biome check . --write"
+  }
+}

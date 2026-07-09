@@ -1,0 +1,11 @@
+{
+  "name": "@flarelock/api",
+  "private": true,
+  "scripts": {
+    "dev": "echo api not initialized yet",
+    "build": "echo api build not initialized yet",
+    "lint": "biome check .",
+    "format": "biome format . --write",
+    "check": "biome check . --write"
+  }
+}
