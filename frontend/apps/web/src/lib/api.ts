@@ -40,3 +40,28 @@ export async function getRiskPreview(asset = "FXRP"): Promise<RiskPreview> {
 
   return response.json();
 }
+
+export type ChainStatus = {
+  service: string;
+  status: "ok";
+  targetNetwork: {
+    name: string;
+    chainId: number;
+    nativeCurrency: string;
+    rpc: string;
+  };
+  modes: Record<string, string>;
+  timestamp: string;
+};
+
+export async function getChainStatus(): Promise<ChainStatus> {
+  const response = await fetch(`${apiUrl}/chain/status`, {
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error("Chain status API is unavailable.");
+  }
+
+  return response.json();
+}

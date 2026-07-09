@@ -4,6 +4,7 @@ import { coston2 } from "@flarelock/web3/chains";
 import { useQuery } from "@tanstack/react-query";
 import { formatEther } from "viem";
 import { useAccount, useBalance, useChainId } from "wagmi";
+import { LiveChainBaseline } from "@/components/console/live-chain-baseline";
 import { SiteHeader } from "@/components/site-header";
 import { getRiskPreview } from "@/lib/api";
 
@@ -170,6 +171,8 @@ export function RiskConsole() {
             </div>
           </div>
         </div>
+
+        <LiveChainBaseline />
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <section className="rounded-[2.4rem] border border-white/10 bg-white/[0.055] p-5 shadow-2xl shadow-blue-500/10 backdrop-blur-2xl sm:p-6">
