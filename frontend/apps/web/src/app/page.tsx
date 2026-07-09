@@ -1,10 +1,4 @@
-import { ConnectWallet } from "@/components/connect-wallet";
-
-const nav = [
-  { href: "#risk", label: "Risk" },
-  { href: "#execution", label: "Execution" },
-  { href: "#native", label: "Native" },
-];
+import { SiteHeader } from "@/components/site-header";
 
 const ticker = [
   "FAssets",
@@ -66,30 +60,6 @@ const stack = [
   ["Privacy", "FCC private compute path"],
   ["Settlement", "Escrow contracts on Flare"],
 ];
-
-function LogoMark() {
-  return (
-    <svg aria-hidden="true" className="h-10 w-10 sm:h-11 sm:w-11" viewBox="0 0 64 64">
-      <defs>
-        <linearGradient id="flarelock-logo" x1="10" x2="54" y1="8" y2="58">
-          <stop stopColor="#7DF9FF" />
-          <stop offset="0.5" stopColor="#376BFF" />
-          <stop offset="1" stopColor="#9B8CFF" />
-        </linearGradient>
-      </defs>
-      <rect fill="#F8FBFF" height="64" rx="18" width="64" />
-      <path
-        d="M17 34C17 24.61 24.61 17 34 17H49C49 26.39 41.39 34 32 34H17Z"
-        fill="url(#flarelock-logo)"
-      />
-      <path
-        d="M15 40H32C41.39 40 49 32.39 49 23V49H25C19.48 49 15 44.52 15 39V40Z"
-        fill="#050712"
-      />
-      <circle className="logo-dot" cx="45" cy="45" fill="#7DF9FF" r="4.5" />
-    </svg>
-  );
-}
 
 function SignalMap() {
   return (
@@ -302,28 +272,7 @@ export default function HomePage() {
     <main className="overflow-hidden">
       <section className="relative min-h-[100svh] px-4 py-4 sm:px-8 sm:py-5 lg:px-12" id="top">
         <SignalMap />
-
-        <nav className="relative z-20 mx-auto flex max-w-[1500px] items-center justify-between gap-3 rounded-[1.4rem] border border-white/10 bg-[#050712]/80 px-4 py-3 shadow-2xl shadow-black/30 backdrop-blur-2xl sm:rounded-[1.6rem] sm:px-5 sm:py-4">
-          <a className="flex min-w-0 items-center gap-3" href="/">
-            <LogoMark />
-            <div className="min-w-0">
-              <p className="text-base font-black tracking-[-0.04em] sm:text-lg">FlareLock</p>
-              <p className="mono hidden text-[10px] font-semibold uppercase tracking-[0.24em] text-white/42 sm:block">
-                Private FAsset layer
-              </p>
-            </div>
-          </a>
-
-          <div className="hidden items-center gap-9 text-sm font-black text-white/45 lg:flex">
-            {nav.map((item) => (
-              <a className="transition hover:text-cyan-200" href={item.href} key={item.href}>
-                {item.label}
-              </a>
-            ))}
-          </div>
-
-          <ConnectWallet />
-        </nav>
+        <SiteHeader />
 
         <div className="relative z-10 mx-auto flex min-h-[calc(100svh-88px)] max-w-[1500px] flex-col justify-center pb-10 pt-10 sm:min-h-[calc(100svh-96px)] sm:pb-12 sm:pt-12">
           <div className="max-w-[1050px]">
@@ -355,9 +304,9 @@ export default function HomePage() {
             >
               <a
                 className="rounded-full bg-white px-6 py-3 text-sm font-black text-[#050712] shadow-2xl shadow-cyan-500/10 transition hover:bg-cyan-200 sm:px-8 sm:py-4"
-                href="#risk"
+                href="/console"
               >
-                Explore risk layer
+                Launch console
               </a>
 
               <a

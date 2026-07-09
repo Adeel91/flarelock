@@ -1,11 +1,25 @@
 {
   "name": "@flarelock/api",
   "private": true,
+  "version": "0.1.0",
   "scripts": {
-    "dev": "echo api not initialized yet",
-    "build": "echo api build not initialized yet",
+    "dev": "tsx watch src/main.ts",
+    "build": "tsx --tsconfig tsconfig.json src/main.ts",
+    "start": "tsx src/main.ts",
     "lint": "biome check .",
     "format": "biome format . --write",
     "check": "biome check . --write"
+  },
+  "dependencies": {
+    "@flarelock/risk-engine": "workspace:*",
+    "@nestjs/common": "latest",
+    "@nestjs/core": "latest",
+    "@nestjs/platform-fastify": "latest",
+    "reflect-metadata": "latest",
+    "rxjs": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "tsx": "latest"
   }
 }
