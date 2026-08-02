@@ -3,7 +3,8 @@
 import { coston2 } from "@flarelock/web3/chains";
 import { useQuery } from "@tanstack/react-query";
 import { formatEther } from "viem";
-import { useAccount, useBalance, useBlockNumber, useChainId } from "wagmi";
+import { useBalance, useBlockNumber } from "wagmi";
+import { useFlareWallet } from "@/components/wallet/wallet-provider";
 import { getChainStatus } from "@/lib/api";
 
 function shortenAddress(address: string) {
@@ -46,8 +47,7 @@ function ChainPoint({ label, value, detail, delay, isLive = true }: ChainPointPr
 }
 
 export function LiveChainBaseline() {
-  const chainId = useChainId();
-  const { address } = useAccount();
+  const { address, chainId } = useFlareWallet();
 
   const isCoston2 = chainId === coston2.id;
 

@@ -1,176 +1,72 @@
 "use client";
 
 import { coston2 } from "@flarelock/web3/chains";
-import { useRef, useState } from "react";
-import { useAccount, useChainId, useConnect, useDisconnect, useSwitchChain } from "wagmi";
-
-type EthereumWindow = Window & {
-  ethereum?: unknown;
-};
-
-const WALLET_REQUEST_TIMEOUT_MS = 12_000;
+import { useState } from "react";
+import { useFlareWallet } from "@/components/wallet/wallet-provider";
 
 function shortenAddress(address: string) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
-function hasInjectedWallet() {
-  if (typeof window === "undefined") {
+function isWalletMissing(error: unknown) {
+  return error instanceof Error && error.message.toLowerCase().includes("wallet not found");
+}
+
+function isRejected(error: unknown) {
+  if (!(error instanceof Error)) {
     return false;
   }
 
-  return Boolean((window as EthereumWindow).ethereum);
-}
-
-function getErrorMessage(error: unknown) {
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  if (typeof error === "object" && error && "message" in error) {
-    return String(error.message);
-  }
-
-  return "Wallet request failed.";
-}
-
-function isUserRejectedError(message: string) {
-  const value = message.toLowerCase();
+  const message = error.message.toLowerCase();
 
   return (
-    value.includes("user rejected") ||
-    value.includes("user denied") ||
-    value.includes("request rejected") ||
-    value.includes("rejected the request") ||
-    value.includes("user closed") ||
-    value.includes("user cancelled") ||
-    value.includes("user canceled")
+    message.includes("rejected") || message.includes("denied") || message.includes("cancelled")
   );
-}
-
-function isProviderNotFoundError(message: string) {
-  return (
-    message.toLowerCase().includes("provider not found") ||
-    message.toLowerCase().includes("no provider")
-  );
-}
-
-function getFriendlyWalletError(error: unknown) {
-  const message = getErrorMessage(error);
-
-  if (isUserRejectedError(message)) {
-    return null;
-  }
-
-  if (isProviderNotFoundError(message)) {
-    return "install";
-  }
-
-  return "Wallet connection failed. Please try again.";
 }
 
 export function ConnectWallet() {
-  const requestIdRef = useRef(0);
+  const wallet = useFlareWallet();
 
-  const [walletError, setWalletError] = useState<string | null>(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
-  const [isConnecting, setIsConnecting] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
   const [isSwitchingNetwork, setIsSwitchingNetwork] = useState(false);
 
-  const chainId = useChainId();
-  const { address, isConnected } = useAccount();
-  const { connectAsync, connectors } = useConnect();
-  const { disconnect } = useDisconnect();
-  const { switchChainAsync } = useSwitchChain();
-
-  const connector = connectors.find((item) => {
-    const name = item.name.toLowerCase();
-
-    return (
-      name.includes("metamask") ||
-      name.includes("bifrost") ||
-      name.includes("luminite") ||
-      name.includes("injected")
-    );
-  });
-
-  function resetWalletUi(requestId: number) {
-    if (requestIdRef.current === requestId) {
-      setIsConnecting(false);
-    }
-  }
-
   async function handleConnect() {
-    if (isConnecting) {
-      return;
-    }
-
-    setWalletError(null);
     setShowInstallPrompt(false);
-
-    if (!hasInjectedWallet() || !connector) {
-      setShowInstallPrompt(true);
-      return;
-    }
-
-    const requestId = requestIdRef.current + 1;
-    requestIdRef.current = requestId;
-
-    setIsConnecting(true);
-
-    const handleFocus = () => {
-      window.setTimeout(() => resetWalletUi(requestId), 500);
-    };
-
-    const timeoutId = window.setTimeout(() => {
-      resetWalletUi(requestId);
-    }, WALLET_REQUEST_TIMEOUT_MS);
-
-    window.addEventListener("focus", handleFocus, { once: true });
+    setLocalError(null);
 
     try {
-      await connectAsync({ chainId: coston2.id, connector });
+      await wallet.connect();
     } catch (error) {
-      const friendlyError = getFriendlyWalletError(error);
-
-      if (friendlyError === "install") {
+      if (isWalletMissing(error)) {
         setShowInstallPrompt(true);
-      } else if (friendlyError) {
-        setWalletError(friendlyError);
+        return;
       }
-    } finally {
-      window.clearTimeout(timeoutId);
-      window.removeEventListener("focus", handleFocus);
-      resetWalletUi(requestId);
+
+      if (isRejected(error)) {
+        setLocalError("Wallet request was cancelled.");
+        return;
+      }
+
+      setLocalError(error instanceof Error ? error.message : "Wallet connection failed.");
     }
   }
 
   async function handleSwitchChain() {
-    if (isSwitchingNetwork) {
-      return;
-    }
-
-    setWalletError(null);
-    setShowInstallPrompt(false);
+    setLocalError(null);
     setIsSwitchingNetwork(true);
 
     try {
-      await switchChainAsync({ chainId: coston2.id });
+      await wallet.switchToCoston2();
     } catch (error) {
-      const friendlyError = getFriendlyWalletError(error);
-
-      if (friendlyError === "install") {
-        setShowInstallPrompt(true);
-      } else if (friendlyError) {
-        setWalletError(friendlyError);
-      }
+      setLocalError(error instanceof Error ? error.message : "Network switch failed.");
     } finally {
       setIsSwitchingNetwork(false);
     }
   }
 
-  if (isConnected && address) {
-    const isCoston2 = chainId === coston2.id;
+  if (wallet.isConnected && wallet.address) {
+    const isCoston2 = wallet.chainId === coston2.id;
 
     return (
       <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center">
@@ -187,14 +83,16 @@ export function ConnectWallet() {
 
         <button
           className="rounded-full bg-white px-5 py-3 text-sm font-black text-[#050712] transition hover:bg-cyan-200"
-          onClick={() => disconnect()}
+          onClick={wallet.disconnect}
           type="button"
         >
-          {shortenAddress(address)}
+          {shortenAddress(wallet.address)}
         </button>
 
-        {walletError && (
-          <p className="max-w-64 text-right text-xs font-semibold text-cyan-200">{walletError}</p>
+        {(localError || wallet.errorMessage) && (
+          <p className="max-w-72 text-right text-xs font-semibold text-cyan-200">
+            {localError ?? wallet.errorMessage}
+          </p>
         )}
       </div>
     );
@@ -204,11 +102,11 @@ export function ConnectWallet() {
     <div className="relative flex flex-col items-end gap-2">
       <button
         className="rounded-full bg-white px-5 py-3 text-sm font-black text-[#050712] shadow-lg shadow-black/20 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-60"
-        disabled={isConnecting}
+        disabled={wallet.status === "connecting"}
         onClick={handleConnect}
         type="button"
       >
-        {isConnecting ? "Connecting" : "Connect Flare wallet"}
+        {wallet.status === "connecting" ? "Connecting" : "Connect Flare wallet"}
       </button>
 
       {showInstallPrompt && (
@@ -221,8 +119,10 @@ export function ConnectWallet() {
         </div>
       )}
 
-      {walletError && (
-        <p className="max-w-64 text-right text-xs font-semibold text-cyan-200">{walletError}</p>
+      {(localError || wallet.errorMessage) && (
+        <p className="max-w-72 text-right text-xs font-semibold text-cyan-200">
+          {localError ?? wallet.errorMessage}
+        </p>
       )}
     </div>
   );

@@ -65,3 +65,65 @@ export async function getChainStatus(): Promise<ChainStatus> {
 
   return response.json();
 }
+
+export type ConvertAsset = "FXRP" | "C2FLR" | "FLR" | "FBTC" | "FDOGE";
+export type ConvertSide = "buy" | "sell";
+
+export type ConvertQuote = {
+  quoteId: string;
+  quoteHash: string;
+  mockMode: boolean;
+  side: ConvertSide;
+  fromAsset: ConvertAsset;
+  toAsset: ConvertAsset;
+  inputAmount: number;
+  outputAmount: number;
+  receiveAmount: number;
+  rate: number;
+  feeBps: number;
+  feeAmount: number;
+  feeAsset: ConvertAsset;
+  expiresAt: string;
+  riskCheck: {
+    mode: "mock";
+    status: "passed";
+    score: number;
+    message: string;
+  };
+  privateIntent: {
+    status: "ready_to_seal";
+    visibility: "encrypted_before_match";
+    commitmentHash: string;
+  };
+  settlement: {
+    mode: "preview";
+    network: "Coston2";
+    escrowStatus: "not_created";
+    nextStep: string;
+  };
+  route: string[];
+};
+
+export async function getConvertQuote(params: {
+  amount: string;
+  fromAsset: ConvertAsset;
+  side: ConvertSide;
+  toAsset: ConvertAsset;
+}): Promise<ConvertQuote> {
+  const search = new URLSearchParams({
+    amount: params.amount,
+    fromAsset: params.fromAsset,
+    side: params.side,
+    toAsset: params.toAsset,
+  });
+
+  const response = await fetch(`${apiUrl}/convert/quote?${search.toString()}`, {
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error("Convert quote API is unavailable.");
+  }
+
+  return response.json();
+}
