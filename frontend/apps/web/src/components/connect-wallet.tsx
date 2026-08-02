@@ -69,20 +69,20 @@ export function ConnectWallet() {
     const isCoston2 = wallet.chainId === coston2.id;
 
     return (
-      <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center">
+      <div className="relative flex items-center gap-2">
         {!isCoston2 && (
           <button
-            className="rounded-full bg-cyan-200 px-5 py-3 text-sm font-black text-[#050712] transition hover:bg-white disabled:opacity-60"
+            className="clean-button rounded-full bg-amber-100 px-5 py-3 text-[15px] font-semibold text-amber-800 hover:bg-amber-200 disabled:opacity-60"
             disabled={isSwitchingNetwork}
             onClick={handleSwitchChain}
             type="button"
           >
-            {isSwitchingNetwork ? "Switching" : "Switch to Coston2"}
+            {isSwitchingNetwork ? "Switching" : "Switch network"}
           </button>
         )}
 
         <button
-          className="rounded-full bg-white px-5 py-3 text-sm font-black text-[#050712] transition hover:bg-cyan-200"
+          className="clean-button rounded-full border border-slate-200 bg-white px-5 py-3 text-[15px] font-semibold text-[#0a0b0d] hover:border-slate-300 hover:shadow-sm"
           onClick={wallet.disconnect}
           type="button"
         >
@@ -90,7 +90,7 @@ export function ConnectWallet() {
         </button>
 
         {(localError || wallet.errorMessage) && (
-          <p className="max-w-72 text-right text-xs font-semibold text-cyan-200">
+          <p className="absolute right-0 top-14 w-72 rounded-2xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-600 shadow-xl">
             {localError ?? wallet.errorMessage}
           </p>
         )}
@@ -99,28 +99,27 @@ export function ConnectWallet() {
   }
 
   return (
-    <div className="relative flex flex-col items-end gap-2">
+    <div className="relative">
       <button
-        className="rounded-full bg-white px-5 py-3 text-sm font-black text-[#050712] shadow-lg shadow-black/20 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-60"
+        className="clean-button rounded-full border border-slate-200 bg-white px-5 py-3 text-[15px] font-semibold text-[#0a0b0d] hover:border-slate-300 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
         disabled={wallet.status === "connecting"}
         onClick={handleConnect}
         type="button"
       >
-        {wallet.status === "connecting" ? "Connecting" : "Connect Flare wallet"}
+        {wallet.status === "connecting" ? "Connecting" : "Connect wallet"}
       </button>
 
       {showInstallPrompt && (
-        <div className="absolute right-0 top-14 z-50 w-72 rounded-3xl border border-white/10 bg-[#050712]/95 p-5 text-left shadow-2xl shadow-black/40 backdrop-blur-2xl">
-          <p className="text-sm font-black text-white">Wallet required</p>
-          <p className="mt-2 text-sm leading-6 text-slate-300">
-            Install MetaMask, Bifrost, Luminite, or another Flare compatible browser wallet, then
-            refresh this page.
+        <div className="absolute right-0 top-14 z-50 w-72 rounded-3xl border border-slate-200 bg-white p-5 text-left shadow-2xl">
+          <p className="text-sm font-semibold text-slate-950">Wallet required</p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            Install MetaMask in this browser profile, then refresh this page.
           </p>
         </div>
       )}
 
       {(localError || wallet.errorMessage) && (
-        <p className="max-w-72 text-right text-xs font-semibold text-cyan-200">
+        <p className="absolute right-0 top-14 w-72 rounded-2xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-600 shadow-xl">
           {localError ?? wallet.errorMessage}
         </p>
       )}

@@ -4,54 +4,51 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ConnectWallet } from "@/components/connect-wallet";
 
+const appUrl = "/swap";
+
 export function SiteHeader() {
   const pathname = usePathname();
-  const isConsole = pathname?.startsWith("/console");
+  const isApp = pathname?.startsWith("/swap");
 
   return (
-    <nav className="relative z-20 mx-auto flex max-w-[1500px] items-center justify-between rounded-[1.6rem] border border-white/10 bg-white/[0.055] px-4 py-3 shadow-2xl shadow-black/30 backdrop-blur-2xl sm:px-5 sm:py-4">
-      <Link className="flex min-w-0 items-center gap-3" href="/">
-        <div className="relative grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white font-black text-[#050712]">
-          F
-          <span className="logo-dot absolute -right-1 -top-1 h-3 w-3 rounded-full bg-cyan-300" />
-        </div>
+    <header className="border-b border-slate-200 bg-white">
+      <nav className="mx-auto flex h-[76px] max-w-[1440px] items-center justify-between px-8">
+        <Link className="flex items-center gap-3" href="/">
+          <div className="grid h-11 w-11 place-items-center rounded-full bg-[#0052ff] text-lg font-semibold text-white">
+            F
+          </div>
 
-        <div className="min-w-0">
-          <p className="truncate text-lg font-black tracking-[-0.04em]">FlareLock</p>
-          <p className="mono hidden text-[10px] font-semibold uppercase tracking-[0.24em] text-white/42 sm:block">
-            Private FAsset protection
-          </p>
-        </div>
-      </Link>
-
-      <div className="hidden items-center gap-2 lg:flex">
-        <Link
-          className="rounded-full px-4 py-2 text-sm font-bold text-slate-300 transition hover:bg-white/10 hover:text-white"
-          href="/"
-        >
-          Home
+          <div>
+            <p className="text-xl font-semibold tracking-[-0.02em] text-[#0a0b0d]">FlareLock</p>
+            <p className="text-xs font-medium text-slate-500">Private FAsset swaps</p>
+          </div>
         </Link>
 
-        <Link
-          className="rounded-full px-4 py-2 text-sm font-bold text-slate-300 transition hover:bg-white/10 hover:text-white"
-          href="/console"
-        >
-          Console
-        </Link>
-      </div>
-
-      <div className="flex items-center gap-3">
-        {!isConsole && (
-          <Link
-            className="hidden rounded-full border border-white/10 bg-white/[0.06] px-5 py-3 text-sm font-black text-white transition hover:bg-white/10 sm:block"
-            href="/console"
-          >
-            Launch console
+        <div className="hidden items-center gap-10 md:flex">
+          <Link className="text-[15px] font-medium text-[#0a0b0d]" href="/">
+            Home
           </Link>
-        )}
+          <Link className="text-[15px] font-medium text-[#0a0b0d]" href={appUrl}>
+            Swap
+          </Link>
+          <a className="text-[15px] font-medium text-[#0a0b0d]" href="/#how">
+            How it works
+          </a>
+        </div>
 
-        <ConnectWallet />
-      </div>
-    </nav>
+        <div className="flex items-center gap-3">
+          {!isApp && (
+            <Link
+              className="clean-button hidden rounded-full bg-[#0052ff] px-6 py-3 text-[15px] font-semibold text-white shadow-lg shadow-blue-600/15 hover:bg-[#0042cc] sm:block"
+              href={appUrl}
+            >
+              Open app
+            </Link>
+          )}
+
+          <ConnectWallet />
+        </div>
+      </nav>
+    </header>
   );
 }
