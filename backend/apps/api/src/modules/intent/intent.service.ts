@@ -3,6 +3,9 @@ import { chmod, mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { getAddress, type Hex, isAddress, keccak256, toBytes, verifyMessage } from "viem";
 
+export type OrderType = "market" | "limit" | "stop";
+export type TimeInForce = "IOC" | "GTC";
+
 export type IntentQuote = {
   quoteId: string;
   quoteHash: Hex;
@@ -14,10 +17,19 @@ export type IntentQuote = {
   expiresAt: string;
 };
 
+export type IntentOrder = {
+  type: OrderType;
+  limitPrice?: number;
+  stopPrice?: number;
+  timeInForce: TimeInForce;
+  validUntil: string;
+};
+
 export type SealIntentRequest = {
   address: string;
   signature: Hex;
   quote: IntentQuote;
+  order: IntentOrder;
 };
 
 type PrivateIntentPayload = {
@@ -27,6 +39,10 @@ type PrivateIntentPayload = {
   toAsset: string;
   inputAmount: number;
   receiveAmount: number;
+  orderType: OrderType;
+  limitPrice?: number;
+  stopPrice?: number;
+  timeInForce: TimeInForce;
 };
 
 type EncryptedPayload = {
@@ -36,7 +52,27 @@ type EncryptedPayload = {
   ciphertext: string;
 };
 
+type IntentStatus = "sealed" | "expired";
+type MatchStatus = "searching" | "expired";
+
 type StoredIntent = {
+  version: 3;
+  intentId: string;
+  intentHash: Hex;
+  quoteId: string;
+  quoteHash: Hex;
+  owner: `0x${string}`;
+  market: string;
+  orderType: OrderType;
+  encryptedPayload: EncryptedPayload;
+  status: IntentStatus;
+  matchStatus: MatchStatus;
+  settlementStatus: "not_started";
+  createdAt: string;
+  expiresAt: string;
+};
+
+type StoredIntentV2 = {
   version: 2;
   intentId: string;
   intentHash: Hex;
@@ -52,25 +88,6 @@ type StoredIntent = {
   expiresAt: string;
 };
 
-type LegacyIntent = {
-  intentId: string;
-  intentHash: Hex;
-  quoteId: string;
-  quoteHash: Hex;
-  owner: `0x${string}`;
-  side: "buy" | "sell";
-  fromAsset: string;
-  toAsset: string;
-  inputAmount: number;
-  receiveAmount: number;
-  signature: Hex;
-  status: "sealed";
-  matchStatus: "searching";
-  settlementStatus: "not_started";
-  createdAt: string;
-  expiresAt: string;
-};
-
 export type PublicSealedIntent = {
   intentId: string;
   intentHash: Hex;
@@ -78,9 +95,10 @@ export type PublicSealedIntent = {
   quoteHash: Hex;
   owner: `0x${string}`;
   market: string;
+  orderType: OrderType;
   privacy: "encrypted";
-  status: "sealed";
-  matchStatus: "searching";
+  status: IntentStatus;
+  matchStatus: MatchStatus;
   settlementStatus: "not_started";
   createdAt: string;
   expiresAt: string;
@@ -91,9 +109,9 @@ const DATA_FILE = path.join(DATA_DIRECTORY, "sealed-intents.json");
 const TEMP_FILE = path.join(DATA_DIRECTORY, "sealed-intents.tmp.json");
 const KEY_FILE = path.join(DATA_DIRECTORY, ".intent-key");
 
-function normaliseAmount(value: number): string {
+function normalisePositiveNumber(value: number, field: string): string {
   if (!Number.isFinite(value) || value <= 0) {
-    throw new Error("Intent amount must be greater than zero.");
+    throw new Error(`${field} must be greater than zero.`);
   }
 
   return value.toString();
@@ -103,7 +121,7 @@ function buildMarket(fromAsset: string, toAsset: string): string {
   return [fromAsset.trim().toUpperCase(), toAsset.trim().toUpperCase()].sort().join("/");
 }
 
-function isLegacyIntent(value: unknown): value is LegacyIntent {
+function isStoredIntentV3(value: unknown): value is StoredIntent {
   if (typeof value !== "object" || value === null) {
     return false;
   }
@@ -111,15 +129,13 @@ function isLegacyIntent(value: unknown): value is LegacyIntent {
   const record = value as Record<string, unknown>;
 
   return (
-    record.version !== 2 &&
-    typeof record.signature === "string" &&
-    typeof record.side === "string" &&
-    typeof record.fromAsset === "string" &&
-    typeof record.toAsset === "string"
+    record.version === 3 &&
+    typeof record.intentId === "string" &&
+    typeof record.encryptedPayload === "object"
   );
 }
 
-function isStoredIntent(value: unknown): value is StoredIntent {
+function isStoredIntentV2(value: unknown): value is StoredIntentV2 {
   if (typeof value !== "object" || value === null) {
     return false;
   }
@@ -133,21 +149,29 @@ function isStoredIntent(value: unknown): value is StoredIntent {
   );
 }
 
-export function buildPrivateIntentMessage(address: string, quote: IntentQuote): string {
+export function buildPrivateIntentMessage(
+  address: string,
+  quote: IntentQuote,
+  order: IntentOrder,
+): string {
   const owner = getAddress(address).toLowerCase();
 
   return [
     "FlareLock Private Intent",
-    "Version: 1",
+    "Version: 2",
     `Wallet: ${owner}`,
     `Quote ID: ${quote.quoteId}`,
     `Quote Hash: ${quote.quoteHash}`,
     `Side: ${quote.side}`,
     `From Asset: ${quote.fromAsset}`,
     `To Asset: ${quote.toAsset}`,
-    `Input Amount: ${normaliseAmount(quote.inputAmount)}`,
-    `Receive Amount: ${normaliseAmount(quote.receiveAmount)}`,
-    `Expires At: ${quote.expiresAt}`,
+    `Input Amount: ${normalisePositiveNumber(quote.inputAmount, "Input amount")}`,
+    `Receive Amount: ${normalisePositiveNumber(quote.receiveAmount, "Receive amount")}`,
+    `Order Type: ${order.type}`,
+    `Limit Price: ${order.limitPrice?.toString() ?? "none"}`,
+    `Stop Price: ${order.stopPrice?.toString() ?? "none"}`,
+    `Time In Force: ${order.timeInForce}`,
+    `Valid Until: ${order.validUntil}`,
     "Network: Coston2",
     "Chain ID: 114",
   ].join("\n");
@@ -160,7 +184,7 @@ export class IntentService {
     this.validateRequest(request);
 
     const owner = getAddress(request.address);
-    const message = buildPrivateIntentMessage(owner, request.quote);
+    const message = buildPrivateIntentMessage(owner, request.quote, request.order);
 
     const signatureIsValid = await verifyMessage({
       address: owner,
@@ -173,6 +197,7 @@ export class IntentService {
     }
 
     const intents = await this.readIntents();
+    await this.expireStaleIntents(intents);
 
     const duplicate = intents.find(
       (intent) =>
@@ -197,22 +222,27 @@ export class IntentService {
       toAsset: request.quote.toAsset,
       inputAmount: request.quote.inputAmount,
       receiveAmount: request.quote.receiveAmount,
+      orderType: request.order.type,
+      limitPrice: request.order.limitPrice,
+      stopPrice: request.order.stopPrice,
+      timeInForce: request.order.timeInForce,
     };
 
     const sealedIntent: StoredIntent = {
-      version: 2,
+      version: 3,
       intentId: `intent_${randomUUID()}`,
       intentHash,
       quoteId: request.quote.quoteId,
       quoteHash: request.quote.quoteHash,
       owner,
       market: buildMarket(request.quote.fromAsset, request.quote.toAsset),
+      orderType: request.order.type,
       encryptedPayload: await this.encryptPayload(privatePayload),
       status: "sealed",
       matchStatus: "searching",
       settlementStatus: "not_started",
       createdAt,
-      expiresAt: request.quote.expiresAt,
+      expiresAt: request.order.validUntil,
     };
 
     await this.persistIntents([...intents, sealedIntent]);
@@ -222,6 +252,11 @@ export class IntentService {
 
   async getIntents(): Promise<PublicSealedIntent[]> {
     const intents = await this.readIntents();
+    const changed = await this.expireStaleIntents(intents);
+
+    if (changed) {
+      await this.persistIntents(intents);
+    }
 
     return intents
       .filter((intent) => intent.status === "sealed")
@@ -231,6 +266,12 @@ export class IntentService {
 
   async getIntent(intentId: string): Promise<PublicSealedIntent | null> {
     const intents = await this.readIntents();
+    const changed = await this.expireStaleIntents(intents);
+
+    if (changed) {
+      await this.persistIntents(intents);
+    }
+
     const intent = intents.find((entry) => entry.intentId === intentId) ?? null;
 
     return intent ? this.toPublicIntent(intent) : null;
@@ -238,13 +279,29 @@ export class IntentService {
 
   async getPrivateIntentForMatching(intentId: string): Promise<PrivateIntentPayload | null> {
     const intents = await this.readIntents();
-    const intent = intents.find((entry) => entry.intentId === intentId) ?? null;
+    const intent =
+      intents.find((entry) => entry.intentId === intentId && entry.status === "sealed") ?? null;
 
     if (!intent) {
       return null;
     }
 
     return this.decryptPayload(intent.encryptedPayload);
+  }
+
+  private async expireStaleIntents(intents: StoredIntent[]): Promise<boolean> {
+    const now = Date.now();
+    let changed = false;
+
+    for (const intent of intents) {
+      if (intent.status === "sealed" && Date.parse(intent.expiresAt) <= now) {
+        intent.status = "expired";
+        intent.matchStatus = "expired";
+        changed = true;
+      }
+    }
+
+    return changed;
   }
 
   private toPublicIntent(intent: StoredIntent): PublicSealedIntent {
@@ -255,6 +312,7 @@ export class IntentService {
       quoteHash: intent.quoteHash,
       owner: intent.owner,
       market: intent.market,
+      orderType: intent.orderType,
       privacy: "encrypted",
       status: intent.status,
       matchStatus: intent.matchStatus,
@@ -272,12 +330,10 @@ export class IntentService {
     const plaintext = Buffer.from(JSON.stringify(payload), "utf8");
     const ciphertext = Buffer.concat([cipher.update(plaintext), cipher.final()]);
 
-    const authTag = cipher.getAuthTag();
-
     return {
       algorithm: "aes-256-gcm",
       iv: iv.toString("base64"),
-      authTag: authTag.toString("base64"),
+      authTag: cipher.getAuthTag().toString("base64"),
       ciphertext: ciphertext.toString("base64"),
     };
   }
@@ -332,30 +388,30 @@ export class IntentService {
     }
   }
 
-  private async migrateLegacyIntent(legacy: LegacyIntent): Promise<StoredIntent> {
-    const privatePayload: PrivateIntentPayload = {
-      signature: legacy.signature,
-      side: legacy.side,
-      fromAsset: legacy.fromAsset,
-      toAsset: legacy.toAsset,
-      inputAmount: legacy.inputAmount,
-      receiveAmount: legacy.receiveAmount,
+  private async migrateV2Intent(intent: StoredIntentV2): Promise<StoredIntent> {
+    const oldPayload = await this.decryptPayload(intent.encryptedPayload);
+
+    const migratedPayload: PrivateIntentPayload = {
+      ...oldPayload,
+      orderType: "market",
+      timeInForce: "IOC",
     };
 
     return {
-      version: 2,
-      intentId: legacy.intentId,
-      intentHash: legacy.intentHash,
-      quoteId: legacy.quoteId,
-      quoteHash: legacy.quoteHash,
-      owner: getAddress(legacy.owner),
-      market: buildMarket(legacy.fromAsset, legacy.toAsset),
-      encryptedPayload: await this.encryptPayload(privatePayload),
-      status: legacy.status,
-      matchStatus: legacy.matchStatus,
-      settlementStatus: legacy.settlementStatus,
-      createdAt: legacy.createdAt,
-      expiresAt: legacy.expiresAt,
+      version: 3,
+      intentId: intent.intentId,
+      intentHash: intent.intentHash,
+      quoteId: intent.quoteId,
+      quoteHash: intent.quoteHash,
+      owner: intent.owner,
+      market: intent.market,
+      orderType: "market",
+      encryptedPayload: await this.encryptPayload(migratedPayload),
+      status: Date.parse(intent.expiresAt) <= Date.now() ? "expired" : "sealed",
+      matchStatus: Date.parse(intent.expiresAt) <= Date.now() ? "expired" : "searching",
+      settlementStatus: intent.settlementStatus,
+      createdAt: intent.createdAt,
+      expiresAt: intent.expiresAt,
     };
   }
 
@@ -372,10 +428,14 @@ export class IntentService {
       throw new Error("A valid wallet signature is required.");
     }
 
-    const quote = request.quote;
+    const { quote, order } = request;
 
     if (!quote) {
       throw new Error("Quote data is required.");
+    }
+
+    if (!order) {
+      throw new Error("Order configuration is required.");
     }
 
     if (!quote.quoteId?.trim()) {
@@ -390,25 +450,49 @@ export class IntentService {
       throw new Error("Intent side must be buy or sell.");
     }
 
-    if (!quote.fromAsset?.trim() || !quote.toAsset?.trim()) {
-      throw new Error("Both intent assets are required.");
-    }
-
     if (quote.fromAsset.trim().toUpperCase() === quote.toAsset.trim().toUpperCase()) {
       throw new Error("Source and destination assets must be different.");
     }
 
-    normaliseAmount(quote.inputAmount);
-    normaliseAmount(quote.receiveAmount);
+    normalisePositiveNumber(quote.inputAmount, "Input amount");
+    normalisePositiveNumber(quote.receiveAmount, "Receive amount");
 
-    const expiry = Date.parse(quote.expiresAt);
-
-    if (!Number.isFinite(expiry)) {
-      throw new Error("Quote expiry is invalid.");
+    if (!["market", "limit", "stop"].includes(order.type)) {
+      throw new Error("Order type is invalid.");
     }
 
-    if (expiry <= Date.now()) {
-      throw new Error("The quote has expired. Preview a new quote.");
+    if (order.type === "limit" && order.limitPrice === undefined) {
+      throw new Error("Limit price is required.");
+    }
+
+    if (order.type === "stop" && order.stopPrice === undefined) {
+      throw new Error("Stop price is required.");
+    }
+
+    if (order.limitPrice !== undefined) {
+      normalisePositiveNumber(order.limitPrice, "Limit price");
+    }
+
+    if (order.stopPrice !== undefined) {
+      normalisePositiveNumber(order.stopPrice, "Stop price");
+    }
+
+    if (!["IOC", "GTC"].includes(order.timeInForce)) {
+      throw new Error("Time in force is invalid.");
+    }
+
+    const validUntil = Date.parse(order.validUntil);
+
+    if (!Number.isFinite(validUntil)) {
+      throw new Error("Order expiry is invalid.");
+    }
+
+    if (validUntil <= Date.now()) {
+      throw new Error("Order expiry must be in the future.");
+    }
+
+    if (Date.parse(quote.expiresAt) <= Date.now()) {
+      throw new Error("The quote has expired. Preview a fresh quote.");
     }
   }
 
@@ -423,26 +507,26 @@ export class IntentService {
         return [];
       }
 
-      const stored: StoredIntent[] = [];
+      const intents: StoredIntent[] = [];
       let migrationRequired = false;
 
       for (const entry of parsed) {
-        if (isStoredIntent(entry)) {
-          stored.push(entry);
+        if (isStoredIntentV3(entry)) {
+          intents.push(entry);
           continue;
         }
 
-        if (isLegacyIntent(entry)) {
-          stored.push(await this.migrateLegacyIntent(entry));
+        if (isStoredIntentV2(entry)) {
+          intents.push(await this.migrateV2Intent(entry));
           migrationRequired = true;
         }
       }
 
       if (migrationRequired) {
-        await this.persistIntents(stored);
+        await this.persistIntents(intents);
       }
 
-      return stored;
+      return intents;
     } catch (error) {
       const code =
         typeof error === "object" && error !== null && "code" in error

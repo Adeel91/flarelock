@@ -30,9 +30,7 @@ export type RiskPreview = {
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 export async function getRiskPreview(asset = "FXRP"): Promise<RiskPreview> {
-  const response = await fetch(`${apiUrl}/risk/preview?asset=${asset}`, {
-    cache: "no-store",
-  });
+  const response = await fetch(`${apiUrl}/risk/preview?asset=${asset}`, { cache: "no-store" });
 
   if (!response.ok) {
     throw new Error("Risk API is unavailable.");
@@ -69,6 +67,8 @@ export async function getChainStatus(): Promise<ChainStatus> {
 export type ConvertAsset = "FXRP" | "C2FLR" | "FLR" | "FBTC" | "FDOGE";
 
 export type ConvertSide = "buy" | "sell";
+export type OrderType = "market" | "limit" | "stop";
+export type TimeInForce = "IOC" | "GTC";
 
 export type ConvertQuote = {
   quoteId: string;
@@ -129,6 +129,14 @@ export async function getConvertQuote(params: {
   return response.json();
 }
 
+export type IntentOrder = {
+  type: OrderType;
+  limitPrice?: number;
+  stopPrice?: number;
+  timeInForce: TimeInForce;
+  validUntil: string;
+};
+
 export type SealedIntent = {
   intentId: string;
   intentHash: `0x${string}`;
@@ -136,9 +144,10 @@ export type SealedIntent = {
   quoteHash: `0x${string}`;
   owner: `0x${string}`;
   market: string;
+  orderType: OrderType;
   privacy: "encrypted";
-  status: "sealed";
-  matchStatus: "searching";
+  status: "sealed" | "expired";
+  matchStatus: "searching" | "expired";
   settlementStatus: "not_started";
   createdAt: string;
   expiresAt: string;
@@ -157,16 +166,16 @@ export type SealIntentInput = {
     receiveAmount: number;
     expiresAt: string;
   };
+  order: IntentOrder;
 };
 
 export function buildPrivateIntentMessage(input: Omit<SealIntentInput, "signature">) {
-  const { address, quote } = input;
-  const canonicalAddress = address.toLowerCase();
+  const { address, quote, order } = input;
 
   return [
     "FlareLock Private Intent",
-    "Version: 1",
-    `Wallet: ${canonicalAddress}`,
+    "Version: 2",
+    `Wallet: ${address.toLowerCase()}`,
     `Quote ID: ${quote.quoteId}`,
     `Quote Hash: ${quote.quoteHash}`,
     `Side: ${quote.side}`,
@@ -174,7 +183,11 @@ export function buildPrivateIntentMessage(input: Omit<SealIntentInput, "signatur
     `To Asset: ${quote.toAsset}`,
     `Input Amount: ${quote.inputAmount.toString()}`,
     `Receive Amount: ${quote.receiveAmount.toString()}`,
-    `Expires At: ${quote.expiresAt}`,
+    `Order Type: ${order.type}`,
+    `Limit Price: ${order.limitPrice?.toString() ?? "none"}`,
+    `Stop Price: ${order.stopPrice?.toString() ?? "none"}`,
+    `Time In Force: ${order.timeInForce}`,
+    `Valid Until: ${order.validUntil}`,
     "Network: Coston2",
     "Chain ID: 114",
   ].join("\n");
@@ -183,17 +196,11 @@ export function buildPrivateIntentMessage(input: Omit<SealIntentInput, "signatur
 export async function sealPrivateIntent(input: SealIntentInput): Promise<SealedIntent> {
   const response = await fetch(`${apiUrl}/intents/seal`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
   });
 
-  const result = (await response.json()) as
-    | SealedIntent
-    | {
-        message?: string | string[];
-      };
+  const result = (await response.json()) as SealedIntent | { message?: string | string[] };
 
   if (!response.ok) {
     const message =

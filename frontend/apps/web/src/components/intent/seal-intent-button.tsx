@@ -5,15 +5,17 @@ import { useFlareWallet } from "@/components/wallet/wallet-provider";
 import {
   buildPrivateIntentMessage,
   type ConvertQuote,
+  type IntentOrder,
   type SealedIntent,
   sealPrivateIntent,
 } from "@/lib/api";
 
-type SealIntentButtonProps = {
+type Props = {
   quote: ConvertQuote;
+  order: IntentOrder;
 };
 
-export function SealIntentButton({ quote }: SealIntentButtonProps) {
+export function SealIntentButton({ quote, order }: Props) {
   const wallet = useFlareWallet();
 
   const [status, setStatus] = useState<"idle" | "signing" | "submitting" | "sealed" | "error">(
@@ -25,7 +27,7 @@ export function SealIntentButton({ quote }: SealIntentButtonProps) {
   async function handleSealIntent() {
     if (!wallet.address) {
       setStatus("error");
-      setErrorMessage("Connect your wallet before sealing the intent.");
+      setErrorMessage("Connect your wallet before signing.");
       return;
     }
 
@@ -45,6 +47,7 @@ export function SealIntentButton({ quote }: SealIntentButtonProps) {
           receiveAmount: quote.receiveAmount,
           expiresAt: quote.expiresAt,
         },
+        order,
       };
 
       const message = buildPrivateIntentMessage(unsignedIntent);
@@ -70,32 +73,18 @@ export function SealIntentButton({ quote }: SealIntentButtonProps) {
       <div className="quote-pop mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-medium text-emerald-700">Intent sealed</p>
-            <p className="mt-1 text-lg font-semibold text-emerald-950">Signature verified</p>
+            <p className="text-sm font-medium text-emerald-700">Private intent sealed</p>
+            <p className="mt-1 text-lg font-semibold capitalize text-emerald-950">
+              {sealedIntent.orderType} order verified
+            </p>
           </div>
 
-          <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
-            Searching
+          <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold capitalize text-emerald-700">
+            {sealedIntent.matchStatus}
           </span>
         </div>
 
-        <div className="mt-4 grid gap-3">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.08em] text-emerald-700">
-              Intent ID
-            </p>
-            <p className="mono mt-1 break-all text-sm text-emerald-950">{sealedIntent.intentId}</p>
-          </div>
-
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.08em] text-emerald-700">
-              Intent hash
-            </p>
-            <p className="mono mt-1 break-all text-sm text-emerald-950">
-              {sealedIntent.intentHash}
-            </p>
-          </div>
-        </div>
+        <p className="mono mt-4 break-all text-xs text-emerald-900">{sealedIntent.intentHash}</p>
       </div>
     );
   }
@@ -111,13 +100,9 @@ export function SealIntentButton({ quote }: SealIntentButtonProps) {
         {status === "signing"
           ? "Confirm in MetaMask"
           : status === "submitting"
-            ? "Verifying signature"
-            : "Seal private intent"}
+            ? "Encrypting intent"
+            : `Seal ${order.type} intent`}
       </button>
-
-      <p className="mt-3 text-center text-sm leading-6 text-slate-500">
-        MetaMask opens only after clicking this button.
-      </p>
 
       {errorMessage && (
         <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700">

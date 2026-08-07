@@ -45,6 +45,10 @@ export function ConvertTicket({ disabled }: ConvertTicketProps) {
   const [toAsset, setToAsset] = useState<ConvertAsset>("C2FLR");
   const [amount, setAmount] = useState("1");
   const [quote, setQuote] = useState<ConvertQuote | null>(null);
+  const [orderType, setOrderType] = useState<OrderType>("market");
+  const [limitPrice, setLimitPrice] = useState("");
+  const [stopPrice, setStopPrice] = useState("");
+  const [validMinutes, setValidMinutes] = useState("60");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -121,6 +125,64 @@ export function ConvertTicket({ disabled }: ConvertTicketProps) {
           </button>
         </div>
       </div>
+
+      <div className="mt-8 grid grid-cols-3 rounded-2xl bg-slate-100 p-1">
+        {(["market", "limit", "stop"] as OrderType[]).map((type) => (
+          <button
+            className={
+              orderType === type
+                ? "rounded-xl bg-white px-4 py-3 text-sm font-semibold capitalize text-slate-950 shadow-sm"
+                : "rounded-xl px-4 py-3 text-sm font-semibold capitalize text-slate-500"
+            }
+            key={type}
+            onClick={() => {
+              setOrderType(type);
+              setQuote(null);
+            }}
+            type="button"
+          >
+            {type === "stop" ? "Stop loss" : type}
+          </button>
+        ))}
+      </div>
+
+      {orderType !== "market" && (
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <label className="rounded-2xl bg-slate-50 p-4">
+            <span className="text-sm font-medium text-slate-500">
+              {orderType === "limit" ? "Limit price" : "Stop price"}
+            </span>
+            <input
+              className="mt-2 w-full bg-transparent text-2xl font-medium outline-none"
+              inputMode="decimal"
+              onChange={(event) => {
+                if (orderType === "limit") {
+                  setLimitPrice(event.target.value);
+                } else {
+                  setStopPrice(event.target.value);
+                }
+                setQuote(null);
+              }}
+              placeholder="0.00"
+              value={orderType === "limit" ? limitPrice : stopPrice}
+            />
+          </label>
+
+          <label className="rounded-2xl bg-slate-50 p-4">
+            <span className="text-sm font-medium text-slate-500">Valid for</span>
+            <select
+              className="mt-2 w-full bg-transparent text-lg font-semibold outline-none"
+              onChange={(event) => setValidMinutes(event.target.value)}
+              value={validMinutes}
+            >
+              <option value="15">15 minutes</option>
+              <option value="60">1 hour</option>
+              <option value="1440">24 hours</option>
+              <option value="10080">7 days</option>
+            </select>
+          </label>
+        </div>
+      )}
 
       <div className="mt-8 grid gap-4">
         <label className="block rounded-[1.7rem] bg-slate-50 p-6">
@@ -220,7 +282,18 @@ export function ConvertTicket({ disabled }: ConvertTicketProps) {
             </p>
           </div>
 
-          <SealIntentButton quote={quote} />
+          <SealIntentButton
+            order={
+              {
+                type: orderType,
+                limitPrice: orderType === "limit" ? Number(limitPrice) : undefined,
+                stopPrice: orderType === "stop" ? Number(stopPrice) : undefined,
+                timeInForce: orderType === "market" ? "IOC" : "GTC",
+                validUntil: new Date(Date.now() + Number(validMinutes) * 60_000).toISOString(),
+              } satisfies IntentOrder
+            }
+            quote={quote}
+          />
         </div>
       )}
     </section>
