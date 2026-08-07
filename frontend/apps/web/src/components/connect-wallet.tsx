@@ -82,7 +82,7 @@ export function ConnectWallet() {
         )}
 
         <button
-          className="clean-button rounded-full border border-slate-200 bg-white px-5 py-3 text-[15px] font-semibold text-[#0a0b0d] hover:border-slate-300 hover:shadow-sm"
+          className="clean-button rounded-full border border-slate-200/90 bg-white px-5 py-3 text-[15px] font-semibold text-[#0a0b0d] hover:border-slate-300 hover:shadow-sm"
           onClick={wallet.disconnect}
           type="button"
         >
@@ -90,7 +90,7 @@ export function ConnectWallet() {
         </button>
 
         {(localError || wallet.errorMessage) && (
-          <p className="absolute right-0 top-14 w-72 rounded-2xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-600 shadow-xl">
+          <p className="absolute right-0 top-14 w-72 rounded-2xl border border-slate-200/90 bg-white p-3 text-xs font-medium text-slate-600 shadow-xl">
             {localError ?? wallet.errorMessage}
           </p>
         )}
@@ -101,7 +101,7 @@ export function ConnectWallet() {
   return (
     <div className="relative">
       <button
-        className="clean-button rounded-full border border-slate-200 bg-white px-5 py-3 text-[15px] font-semibold text-[#0a0b0d] hover:border-slate-300 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
+        className="clean-button rounded-full border border-slate-200/90 bg-white px-5 py-3 text-[15px] font-semibold text-[#0a0b0d] hover:border-slate-300 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
         disabled={wallet.status === "connecting"}
         onClick={handleConnect}
         type="button"
@@ -110,7 +110,7 @@ export function ConnectWallet() {
       </button>
 
       {showInstallPrompt && (
-        <div className="absolute right-0 top-14 z-50 w-72 rounded-3xl border border-slate-200 bg-white p-5 text-left shadow-2xl">
+        <div className="absolute right-0 top-14 z-50 w-72 rounded-3xl border border-slate-200/90 bg-white p-5 text-left shadow-2xl">
           <p className="text-sm font-semibold text-slate-950">Wallet required</p>
           <p className="mt-2 text-sm leading-6 text-slate-600">
             Install MetaMask in this browser profile, then refresh this page.
@@ -119,7 +119,7 @@ export function ConnectWallet() {
       )}
 
       {(localError || wallet.errorMessage) && (
-        <p className="absolute right-0 top-14 w-72 rounded-2xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-600 shadow-xl">
+        <p className="absolute right-0 top-14 w-72 rounded-2xl border border-slate-200/90 bg-white p-3 text-xs font-medium text-slate-600 shadow-xl">
           {localError ?? wallet.errorMessage}
         </p>
       )}
