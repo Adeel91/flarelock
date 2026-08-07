@@ -4,45 +4,63 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ConnectWallet } from "@/components/connect-wallet";
 
-const appUrl = "/markets/fxrp-c2flr";
+const marketUrl = "/markets/fxrp-c2flr";
 
 export function SiteHeader() {
   const pathname = usePathname();
-  const isApp = pathname?.startsWith("/markets");
+  const isMarket = pathname?.startsWith("/markets");
 
   return (
-    <header className="border-b border-slate-200 bg-white">
-      <nav className="mx-auto flex h-[76px] max-w-[1440px] items-center justify-between px-8">
-        <Link className="flex items-center gap-3" href="/">
-          <div className="grid h-11 w-11 place-items-center rounded-full bg-[#0052ff] text-lg font-semibold text-white">
+    <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/88 backdrop-blur-xl">
+      <nav className="site-shell flex h-[76px] items-center justify-between">
+        <Link className="group flex items-center gap-3" href="/">
+          <div className="pulse-ring grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-[#ef3568] to-[#d9154f] text-[18px] font-semibold text-white shadow-lg shadow-rose-600/20 transition group-hover:scale-[1.03]">
             F
           </div>
 
           <div>
-            <p className="text-xl font-semibold tracking-[-0.02em] text-[#0a0b0d]">FlareLock</p>
-            <p className="text-xs font-medium text-slate-500">Private FAsset execution</p>
+            <p className="text-[20px] font-semibold tracking-[-0.025em] text-[#111318]">
+              FlareLock
+            </p>
+            <p className="text-[12px] font-medium text-slate-500">Private FAsset execution</p>
           </div>
         </Link>
 
-        <div className="hidden items-center gap-10 md:flex">
-          <Link className="text-[15px] font-medium text-[#0a0b0d]" href="/">
+        <div className="hidden items-center gap-9 md:flex">
+          <Link
+            className="text-[14px] font-medium text-slate-600 transition hover:text-[#111318]"
+            href="/"
+          >
             Home
           </Link>
 
-          <Link className="text-[15px] font-medium text-[#0a0b0d]" href={appUrl}>
+          <Link
+            className="text-[14px] font-medium text-slate-600 transition hover:text-[#111318]"
+            href={marketUrl}
+          >
             Market
           </Link>
 
-          <a className="text-[15px] font-medium text-[#0a0b0d]" href="/#how">
+          <a
+            className="text-[14px] font-medium text-slate-600 transition hover:text-[#111318]"
+            href="/#how"
+          >
             How it works
+          </a>
+
+          <a
+            className="text-[14px] font-medium text-slate-600 transition hover:text-[#111318]"
+            href="/#technology"
+          >
+            Technology
           </a>
         </div>
 
         <div className="flex items-center gap-3">
-          {!isApp && (
+          {!isMarket && (
             <Link
-              className="clean-button hidden rounded-full bg-[#0052ff] px-6 py-3 text-[15px] font-semibold text-white shadow-lg shadow-blue-600/15 hover:bg-[#0042cc] sm:block"
-              href={appUrl}
+              className="primary-button hidden rounded-full px-6 py-3 text-[14px] font-semibold sm:block"
+              href={marketUrl}
             >
               Open market
             </Link>

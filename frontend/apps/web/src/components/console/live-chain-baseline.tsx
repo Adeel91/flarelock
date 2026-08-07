@@ -47,7 +47,7 @@ export function LiveChainBaseline() {
   });
 
   return (
-    <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="rounded-[28px] border border-slate-200/90 bg-white p-6 shadow-sm">
       <p className="text-sm font-black uppercase tracking-[0.16em] text-slate-400">Live status</p>
 
       <div className="mt-5 grid gap-4">

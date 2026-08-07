@@ -288,13 +288,17 @@ export class IntentService {
 
     return this.decryptPayload(intent.encryptedPayload);
   }
-
   private async expireStaleIntents(intents: StoredIntent[]): Promise<boolean> {
     const now = Date.now();
     let changed = false;
 
     for (const intent of intents) {
-      if (intent.status === "sealed" && Date.parse(intent.expiresAt) <= now) {
+      const normalExpiryReached = Date.parse(intent.expiresAt) <= now;
+
+      const marketIocExpiryReached =
+        intent.orderType === "market" && Date.parse(intent.createdAt) + 60_000 <= now;
+
+      if (intent.status === "sealed" && (normalExpiryReached || marketIocExpiryReached)) {
         intent.status = "expired";
         intent.matchStatus = "expired";
         changed = true;
@@ -489,6 +493,10 @@ export class IntentService {
 
     if (validUntil <= Date.now()) {
       throw new Error("Order expiry must be in the future.");
+    }
+
+    if (order.type === "market" && validUntil > Date.now() + 60_000) {
+      throw new Error("Market IOC intents cannot remain active for more than 60 seconds.");
     }
 
     if (Date.parse(quote.expiresAt) <= Date.now()) {

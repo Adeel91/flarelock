@@ -30,7 +30,9 @@ export type RiskPreview = {
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 export async function getRiskPreview(asset = "FXRP"): Promise<RiskPreview> {
-  const response = await fetch(`${apiUrl}/risk/preview?asset=${asset}`, { cache: "no-store" });
+  const response = await fetch(`${apiUrl}/risk/preview?asset=${asset}`, {
+    cache: "no-store",
+  });
 
   if (!response.ok) {
     throw new Error("Risk API is unavailable.");
@@ -64,8 +66,7 @@ export async function getChainStatus(): Promise<ChainStatus> {
   return response.json();
 }
 
-export type ConvertAsset = "FXRP" | "C2FLR" | "FLR" | "FBTC" | "FDOGE";
-
+export type ConvertAsset = "FXRP" | "C2FLR";
 export type ConvertSide = "buy" | "sell";
 export type OrderType = "market" | "limit" | "stop";
 export type TimeInForce = "IOC" | "GTC";
@@ -73,7 +74,9 @@ export type TimeInForce = "IOC" | "GTC";
 export type ConvertQuote = {
   quoteId: string;
   quoteHash: `0x${string}`;
-  mockMode: boolean;
+  mockMode: false;
+  quoteMode: "ftso_reference";
+  executable: false;
   side: ConvertSide;
   fromAsset: ConvertAsset;
   toAsset: ConvertAsset;
@@ -81,14 +84,28 @@ export type ConvertQuote = {
   outputAmount: number;
   receiveAmount: number;
   rate: number;
-  feeBps: number;
-  feeAmount: number;
+  feeBps: 0;
+  feeAmount: 0;
   feeAsset: ConvertAsset;
   expiresAt: string;
+  referenceData: {
+    source: "Flare FTSOv2";
+    network: "Coston2";
+    contractAddress: `0x${string}`;
+    xrpUsd: number;
+    flrUsd: number;
+    xrpInFlr: number;
+    feedTimestamp: string;
+    fetchedAt: string;
+    feeds: {
+      xrpUsd: `0x${string}`;
+      flrUsd: `0x${string}`;
+    };
+  };
   riskCheck: {
-    mode: "mock";
-    status: "passed";
-    score: number;
+    mode: "not_assessed";
+    status: "not_assessed";
+    score: null;
     message: string;
   };
   privateIntent: {
@@ -97,7 +114,7 @@ export type ConvertQuote = {
     commitmentHash: string;
   };
   settlement: {
-    mode: "preview";
+    mode: "reference_only";
     network: "Coston2";
     escrowStatus: "not_created";
     nextStep: string;
@@ -122,11 +139,24 @@ export async function getConvertQuote(params: {
     cache: "no-store",
   });
 
+  const result = (await response.json()) as
+    | ConvertQuote
+    | {
+        message?: string | string[];
+      };
+
   if (!response.ok) {
-    throw new Error("Execution quote API is unavailable.");
+    const message =
+      "message" in result && Array.isArray(result.message)
+        ? result.message.join(" ")
+        : "message" in result && typeof result.message === "string"
+          ? result.message
+          : "Live FTSO reference rate is unavailable.";
+
+    throw new Error(message);
   }
 
-  return response.json();
+  return result as ConvertQuote;
 }
 
 export type IntentOrder = {
@@ -196,11 +226,17 @@ export function buildPrivateIntentMessage(input: Omit<SealIntentInput, "signatur
 export async function sealPrivateIntent(input: SealIntentInput): Promise<SealedIntent> {
   const response = await fetch(`${apiUrl}/intents/seal`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(input),
   });
 
-  const result = (await response.json()) as SealedIntent | { message?: string | string[] };
+  const result = (await response.json()) as
+    | SealedIntent
+    | {
+        message?: string | string[];
+      };
 
   if (!response.ok) {
     const message =

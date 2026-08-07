@@ -1,13 +1,11 @@
 "use client";
 
 import { coston2 } from "@flarelock/web3/chains";
-import { useQuery } from "@tanstack/react-query";
 import { ConvertTicket } from "@/components/console/convert-ticket";
 import { LiveChainBaseline } from "@/components/console/live-chain-baseline";
 import { OrderBookPanel } from "@/components/console/order-book-panel";
 import { SiteHeader } from "@/components/site-header";
 import { useFlareWallet } from "@/components/wallet/wallet-provider";
-import { getRiskPreview } from "@/lib/api";
 
 function LockedConvert() {
   return (
@@ -37,19 +35,12 @@ export function RiskConsole() {
 
   const isCoston2 = chainId === coston2.id;
   const isWalletReady = isConnected && Boolean(address);
-
-  const riskPreview = useQuery({
-    queryKey: ["risk-preview", "FXRP"],
-    queryFn: () => getRiskPreview("FXRP"),
-    enabled: isWalletReady && isCoston2,
-  });
-
   if (!isWalletReady || !address) {
     return <LockedConvert />;
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f9fc]">
+    <main className="min-h-screen bg-[#f8f9fb]">
       <SiteHeader />
 
       <section className="mx-auto max-w-[1440px] px-8 py-8">
@@ -60,8 +51,8 @@ export function RiskConsole() {
             </h1>
 
             <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-600">
-              Create an FXRP/C2FLR execution intent, verify risk, and seal it for confidential
-              matching.
+              Create an FXRP/C2FLR execution intent, review the live reference price, and seal it
+              for confidential matching.
             </p>
           </div>
 
@@ -78,8 +69,8 @@ export function RiskConsole() {
             >
               {isCoston2 ? "Coston2" : "Wrong network"}
             </span>
-            <span className="rounded-full bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">
-              Risk {riskPreview.data ? riskPreview.data.score : "Pending"}
+            <span className="rounded-full bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700">
+              Risk not assessed
             </span>
           </div>
         </div>
@@ -89,7 +80,7 @@ export function RiskConsole() {
             <ConvertTicket disabled={!isCoston2} />
 
             <div className="grid gap-6 lg:grid-cols-2">
-              <div className="clean-card rounded-[2rem] p-7">
+              <div className="clean-card rounded-[28px] p-7">
                 <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-400">
                   Execution path
                 </p>
@@ -97,7 +88,10 @@ export function RiskConsole() {
                 <div className="mt-5 grid gap-4">
                   {[
                     ["Intent", "Prepare the FXRP/C2FLR execution request and protocol fee."],
-                    ["Risk", riskPreview.data?.summary ?? "Risk check has not run yet."],
+                    [
+                      "Risk",
+                      "Risk scoring is not implemented yet. The current value is a live Flare FTSOv2 reference price.",
+                    ],
                     ["Seal", "Sign and submit the private execution intent."],
                     ["Settle", "Matched intents progress to attested Flare settlement."],
                   ].map(([title, body]) => (

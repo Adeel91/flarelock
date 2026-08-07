@@ -73,9 +73,9 @@ export function SealIntentButton({ quote, order }: Props) {
       <div className="quote-pop mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-medium text-emerald-700">Private intent sealed</p>
+            <p className="text-sm font-medium text-emerald-700">Signed intent sealed</p>
             <p className="mt-1 text-lg font-semibold capitalize text-emerald-950">
-              {sealedIntent.orderType} order verified
+              {sealedIntent.orderType} intent verified
             </p>
           </div>
 
@@ -92,7 +92,7 @@ export function SealIntentButton({ quote, order }: Props) {
   return (
     <div className="mt-5">
       <button
-        className="clean-button w-full rounded-2xl bg-[#0052ff] px-5 py-4 text-base font-semibold text-white shadow-lg shadow-blue-600/20 hover:bg-[#0042cc] disabled:cursor-not-allowed disabled:opacity-50"
+        className="clean-button w-full rounded-2xl bg-gradient-to-br from-[#ef3568] to-[#d9154f] px-5 py-4 text-base font-semibold text-white shadow-lg shadow-rose-600/20 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
         disabled={status === "signing" || status === "submitting"}
         onClick={handleSealIntent}
         type="button"
