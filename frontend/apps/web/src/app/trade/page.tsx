@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function TradeRedirectPage() {
-  redirect("/swap");
+  redirect("/markets/fxrp-c2flr");
 }

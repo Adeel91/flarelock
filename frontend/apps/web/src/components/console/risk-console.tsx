@@ -17,7 +17,7 @@ function LockedConvert() {
       <section className="mx-auto grid min-h-[calc(100vh-77px)] max-w-[1440px] gap-12 px-8 py-14 lg:grid-cols-[1fr_480px] lg:items-center">
         <div>
           <h1 className="max-w-4xl text-[4.5rem] font-normal leading-[1.02] tracking-[-0.055em] text-[#0a0b0d]">
-            Connect wallet to open private swaps
+            Connect wallet to open the private market
           </h1>
 
           <p className="mt-7 max-w-2xl text-[1.25rem] leading-8 text-slate-600">
@@ -56,12 +56,12 @@ export function RiskConsole() {
         <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <h1 className="text-6xl font-normal leading-none tracking-[-0.055em] text-[#0a0b0d]">
-              Swap
+              Private execution
             </h1>
 
             <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-600">
-              Preview FXRP/C2FLR quote, check risk, then seal private intent. No real transaction
-              yet.
+              Create an FXRP/C2FLR execution intent, verify risk, and seal it for confidential
+              matching.
             </p>
           </div>
 
@@ -79,7 +79,7 @@ export function RiskConsole() {
               {isCoston2 ? "Coston2" : "Wrong network"}
             </span>
             <span className="rounded-full bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">
-              Risk {riskPreview.data ? riskPreview.data.score : "Mock"}
+              Risk {riskPreview.data ? riskPreview.data.score : "Pending"}
             </span>
           </div>
         </div>
@@ -96,10 +96,10 @@ export function RiskConsole() {
 
                 <div className="mt-5 grid gap-4">
                   {[
-                    ["Quote", "Preview FXRP/C2FLR price and protocol fee."],
-                    ["Risk", riskPreview.data?.summary ?? "Mock risk check loads from backend."],
-                    ["Seal", "Wallet signed private intent is the next milestone."],
-                    ["Settle", "Matched intents settle through escrow later."],
+                    ["Intent", "Prepare the FXRP/C2FLR execution request and protocol fee."],
+                    ["Risk", riskPreview.data?.summary ?? "Risk check has not run yet."],
+                    ["Seal", "Sign and submit the private execution intent."],
+                    ["Settle", "Matched intents progress to attested Flare settlement."],
                   ].map(([title, body]) => (
                     <div className="border-t border-slate-100 pt-4" key={title}>
                       <p className="text-lg font-medium text-[#0a0b0d]">{title}</p>

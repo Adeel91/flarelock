@@ -5,241 +5,271 @@ import {
   type ReactNode,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
-type WalletStatus = "idle" | "connecting" | "connected" | "disconnected" | "error";
-
 type EthereumProvider = {
   isMetaMask?: boolean;
+  isTronLink?: boolean;
   providers?: EthereumProvider[];
   request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
-  on?: (event: string, listener: (value: unknown) => void) => void;
-  removeListener?: (event: string, listener: (value: unknown) => void) => void;
 };
 
 type EthereumWindow = Window & {
   ethereum?: EthereumProvider;
 };
 
+type WalletStatus = "idle" | "connecting" | "connected" | "error";
+
 type WalletContextValue = {
   address: `0x${string}` | null;
   chainId: number | null;
-  status: WalletStatus;
-  isConnected: boolean;
   errorMessage: string | null;
+  isConnected: boolean;
+  status: WalletStatus;
   connect: () => Promise<void>;
   disconnect: () => void;
+  refreshWallet: () => Promise<void>;
+  signMessage: (message: string) => Promise<`0x${string}`>;
   switchToCoston2: () => Promise<void>;
 };
 
 const WalletContext = createContext<WalletContextValue | null>(null);
 
-function getEthereum() {
+function getMetaMaskProvider(): EthereumProvider {
   if (typeof window === "undefined") {
-    return null;
+    throw new Error("Wallet access is unavailable during server rendering.");
   }
 
   const ethereum = (window as EthereumWindow).ethereum;
 
   if (!ethereum) {
-    return null;
+    throw new Error("MetaMask wallet not found.");
   }
 
-  const metamaskProvider = ethereum.providers?.find((provider) => provider.isMetaMask);
+  const providers = ethereum.providers ?? [ethereum];
 
-  return metamaskProvider ?? ethereum;
+  const provider =
+    providers.find((candidate) => candidate.isMetaMask === true && candidate.isTronLink !== true) ??
+    providers.find((candidate) => candidate.isMetaMask === true);
+
+  if (!provider) {
+    throw new Error("MetaMask was not found in this browser profile.");
+  }
+
+  return provider;
 }
 
-function parseChainId(value: unknown) {
-  if (typeof value === "string") {
-    return Number.parseInt(value, 16);
-  }
-
-  if (typeof value === "number") {
-    return value;
-  }
-
-  return null;
-}
-
-function getFirstAccount(value: unknown): `0x${string}` | null {
+function parseAddress(value: unknown): `0x${string}` | null {
   if (!Array.isArray(value)) {
     return null;
   }
 
-  const [account] = value;
+  const account = value.find(
+    (item): item is string => typeof item === "string" && /^0x[a-fA-F0-9]{40}$/.test(item),
+  );
 
-  if (typeof account === "string" && account.startsWith("0x")) {
-    return account as `0x${string}`;
-  }
-
-  return null;
+  return account ? (account as `0x${string}`) : null;
 }
 
-function getErrorCode(error: unknown) {
-  if (typeof error === "object" && error && "code" in error) {
-    return Number(error.code);
+function parseChainId(value: unknown): number | null {
+  if (typeof value !== "string") {
+    return null;
   }
 
-  return null;
+  const parsed = Number.parseInt(value, value.startsWith("0x") ? 16 : 10);
+
+  return Number.isFinite(parsed) ? parsed : null;
 }
 
 export function WalletProvider({ children }: { children: ReactNode }) {
+  const providerRef = useRef<EthereumProvider | null>(null);
+
   const [address, setAddress] = useState<`0x${string}` | null>(null);
   const [chainId, setChainId] = useState<number | null>(null);
   const [status, setStatus] = useState<WalletStatus>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const refreshWallet = useCallback(async () => {
-    const ethereum = getEthereum();
-
-    if (!ethereum) {
-      setStatus("disconnected");
-      return;
+  const getProvider = useCallback(() => {
+    if (providerRef.current) {
+      return providerRef.current;
     }
 
-    const [accounts, chain] = await Promise.all([
-      ethereum.request({ method: "eth_accounts" }),
-      ethereum.request({ method: "eth_chainId" }),
-    ]);
+    const provider = getMetaMaskProvider();
+    providerRef.current = provider;
 
-    const nextAddress = getFirstAccount(accounts);
-    const nextChainId = parseChainId(chain);
-
-    setAddress(nextAddress);
-    setChainId(nextChainId);
-    setStatus(nextAddress ? "connected" : "disconnected");
+    return provider;
   }, []);
 
   const connect = useCallback(async () => {
-    const ethereum = getEthereum();
-
-    if (!ethereum) {
-      throw new Error("Wallet not found.");
-    }
-
     setStatus("connecting");
     setErrorMessage(null);
 
     try {
-      const accounts = await ethereum.request({ method: "eth_requestAccounts" });
-      const chain = await ethereum.request({ method: "eth_chainId" });
+      // The provider is accessed only after the user clicks Connect wallet.
+      const provider = getProvider();
 
-      const nextAddress = getFirstAccount(accounts);
-      const nextChainId = parseChainId(chain);
+      const accounts = await provider.request({
+        method: "eth_requestAccounts",
+      });
+
+      const nextAddress = parseAddress(accounts);
+
+      if (!nextAddress) {
+        throw new Error(
+          "No MetaMask account was returned. Unlock MetaMask, choose an account, and approve the connection.",
+        );
+      }
+
+      const currentChain = await provider.request({
+        method: "eth_chainId",
+      });
 
       setAddress(nextAddress);
-      setChainId(nextChainId);
-      setStatus(nextAddress ? "connected" : "disconnected");
+      setChainId(parseChainId(currentChain));
+      setStatus("connected");
+      setErrorMessage(null);
     } catch (error) {
+      const message = error instanceof Error ? error.message : "Wallet connection failed.";
+
+      setAddress(null);
+      setChainId(null);
       setStatus("error");
-      setErrorMessage(error instanceof Error ? error.message : "Wallet connection failed.");
+      setErrorMessage(message);
+
       throw error;
     }
-  }, []);
+  }, [getProvider]);
 
-  const disconnect = useCallback(() => {
-    setAddress(null);
-    setStatus("disconnected");
-  }, []);
-
-  const switchToCoston2 = useCallback(async () => {
-    const ethereum = getEthereum();
-
-    if (!ethereum) {
-      throw new Error("Wallet not found.");
+  const refreshWallet = useCallback(async () => {
+    if (!address) {
+      return;
     }
 
+    const provider = getProvider();
+
+    const [accounts, currentChain] = await Promise.all([
+      provider.request({ method: "eth_accounts" }),
+      provider.request({ method: "eth_chainId" }),
+    ]);
+
+    const nextAddress = parseAddress(accounts);
+
+    setAddress(nextAddress);
+    setChainId(parseChainId(currentChain));
+    setStatus(nextAddress ? "connected" : "idle");
+  }, [address, getProvider]);
+
+  const disconnect = useCallback(() => {
+    providerRef.current = null;
+    setAddress(null);
+    setChainId(null);
+    setStatus("idle");
     setErrorMessage(null);
+  }, []);
+
+  const signMessage = useCallback(
+    async (message: string): Promise<`0x${string}`> => {
+      if (!address) {
+        throw new Error("Connect your wallet before signing.");
+      }
+
+      const provider = getProvider();
+
+      const signature = await provider.request({
+        method: "personal_sign",
+        params: [message, address],
+      });
+
+      if (typeof signature !== "string" || !signature.startsWith("0x")) {
+        throw new Error("MetaMask returned an invalid signature.");
+      }
+
+      return signature as `0x${string}`;
+    },
+    [address, getProvider],
+  );
+
+  const switchToCoston2 = useCallback(async () => {
+    const provider = getProvider();
 
     try {
-      await ethereum.request({
+      await provider.request({
         method: "wallet_switchEthereumChain",
         params: [{ chainId: "0x72" }],
       });
     } catch (error) {
-      if (getErrorCode(error) !== 4902) {
+      const code =
+        typeof error === "object" && error !== null && "code" in error
+          ? Number((error as { code: unknown }).code)
+          : null;
+
+      if (code !== 4902) {
         throw error;
       }
 
-      await ethereum.request({
+      await provider.request({
         method: "wallet_addEthereumChain",
         params: [
           {
-            blockExplorerUrls: ["https://coston2-explorer.flare.network"],
             chainId: "0x72",
             chainName: "Coston2",
             nativeCurrency: {
-              decimals: 18,
               name: "Coston2 Flare",
               symbol: "C2FLR",
+              decimals: 18,
             },
             rpcUrls: ["https://coston2-api.flare.network/ext/C/rpc"],
+            blockExplorerUrls: ["https://coston2-explorer.flare.network"],
           },
         ],
       });
     }
 
-    await refreshWallet();
-  }, [refreshWallet]);
-
-  useEffect(() => {
-    refreshWallet().catch(() => {
-      setStatus("disconnected");
+    const currentChain = await provider.request({
+      method: "eth_chainId",
     });
 
-    const ethereum = getEthereum();
+    setChainId(parseChainId(currentChain));
+  }, [getProvider]);
 
-    if (!ethereum?.on) {
-      return;
-    }
-
-    const handleAccountsChanged = (value: unknown) => {
-      const nextAddress = getFirstAccount(value);
-
-      setAddress(nextAddress);
-      setStatus(nextAddress ? "connected" : "disconnected");
-    };
-
-    const handleChainChanged = (value: unknown) => {
-      setChainId(parseChainId(value));
-    };
-
-    ethereum.on("accountsChanged", handleAccountsChanged);
-    ethereum.on("chainChanged", handleChainChanged);
-
-    return () => {
-      ethereum.removeListener?.("accountsChanged", handleAccountsChanged);
-      ethereum.removeListener?.("chainChanged", handleChainChanged);
-    };
-  }, [refreshWallet]);
-
-  const value = useMemo(
+  const value = useMemo<WalletContextValue>(
     () => ({
+      address,
+      chainId,
+      errorMessage,
+      isConnected: Boolean(address),
+      status,
+      connect,
+      disconnect,
+      refreshWallet,
+      signMessage,
+      switchToCoston2,
+    }),
+    [
       address,
       chainId,
       connect,
       disconnect,
       errorMessage,
-      isConnected: Boolean(address),
+      refreshWallet,
+      signMessage,
       status,
       switchToCoston2,
-    }),
-    [address, chainId, connect, disconnect, errorMessage, status, switchToCoston2],
+    ],
   );
 
   return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;
 }
 
 export function useFlareWallet() {
-  const value = useContext(WalletContext);
+  const context = useContext(WalletContext);
 
-  if (!value) {
+  if (!context) {
     throw new Error("useFlareWallet must be used inside WalletProvider.");
   }
 
-  return value;
+  return context;
 }

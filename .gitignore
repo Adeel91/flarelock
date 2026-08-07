@@ -14,3 +14,10 @@ coverage
 .env.*.local
 .DS_Store
 .turbo
+
+# Local signed intent persistence
+backend/apps/api/data/sealed-intents.json
+backend/apps/api/data/sealed-intents.tmp.json
+
+# Local private intent encryption key
+backend/apps/api/data/.intent-key

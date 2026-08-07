@@ -67,11 +67,12 @@ export async function getChainStatus(): Promise<ChainStatus> {
 }
 
 export type ConvertAsset = "FXRP" | "C2FLR" | "FLR" | "FBTC" | "FDOGE";
+
 export type ConvertSide = "buy" | "sell";
 
 export type ConvertQuote = {
   quoteId: string;
-  quoteHash: string;
+  quoteHash: `0x${string}`;
   mockMode: boolean;
   side: ConvertSide;
   fromAsset: ConvertAsset;
@@ -122,8 +123,100 @@ export async function getConvertQuote(params: {
   });
 
   if (!response.ok) {
-    throw new Error("Convert quote API is unavailable.");
+    throw new Error("Execution quote API is unavailable.");
   }
 
   return response.json();
+}
+
+export type SealedIntent = {
+  intentId: string;
+  intentHash: `0x${string}`;
+  quoteId: string;
+  quoteHash: `0x${string}`;
+  owner: `0x${string}`;
+  market: string;
+  privacy: "encrypted";
+  status: "sealed";
+  matchStatus: "searching";
+  settlementStatus: "not_started";
+  createdAt: string;
+  expiresAt: string;
+};
+
+export type SealIntentInput = {
+  address: `0x${string}`;
+  signature: `0x${string}`;
+  quote: {
+    quoteId: string;
+    quoteHash: `0x${string}`;
+    side: ConvertSide;
+    fromAsset: string;
+    toAsset: string;
+    inputAmount: number;
+    receiveAmount: number;
+    expiresAt: string;
+  };
+};
+
+export function buildPrivateIntentMessage(input: Omit<SealIntentInput, "signature">) {
+  const { address, quote } = input;
+  const canonicalAddress = address.toLowerCase();
+
+  return [
+    "FlareLock Private Intent",
+    "Version: 1",
+    `Wallet: ${canonicalAddress}`,
+    `Quote ID: ${quote.quoteId}`,
+    `Quote Hash: ${quote.quoteHash}`,
+    `Side: ${quote.side}`,
+    `From Asset: ${quote.fromAsset}`,
+    `To Asset: ${quote.toAsset}`,
+    `Input Amount: ${quote.inputAmount.toString()}`,
+    `Receive Amount: ${quote.receiveAmount.toString()}`,
+    `Expires At: ${quote.expiresAt}`,
+    "Network: Coston2",
+    "Chain ID: 114",
+  ].join("\n");
+}
+
+export async function sealPrivateIntent(input: SealIntentInput): Promise<SealedIntent> {
+  const response = await fetch(`${apiUrl}/intents/seal`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(input),
+  });
+
+  const result = (await response.json()) as
+    | SealedIntent
+    | {
+        message?: string | string[];
+      };
+
+  if (!response.ok) {
+    const message =
+      "message" in result && Array.isArray(result.message)
+        ? result.message.join(" ")
+        : "message" in result && typeof result.message === "string"
+          ? result.message
+          : "Unable to seal private intent.";
+
+    throw new Error(message);
+  }
+
+  return result as SealedIntent;
+}
+
+export async function getSealedIntents(): Promise<SealedIntent[]> {
+  const response = await fetch(`${apiUrl}/intents`, {
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error("Unable to load private intents.");
+  }
+
+  return (await response.json()) as SealedIntent[];
 }

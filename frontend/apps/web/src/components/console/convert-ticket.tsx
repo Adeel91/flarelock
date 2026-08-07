@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { SealIntentButton } from "@/components/intent/seal-intent-button";
 import { type ConvertAsset, type ConvertQuote, type ConvertSide, getConvertQuote } from "@/lib/api";
 
 const assetOptions: ConvertAsset[] = ["FXRP", "C2FLR", "FLR", "FBTC", "FDOGE"];
@@ -61,7 +62,7 @@ export function ConvertTicket({ disabled }: ConvertTicketProps) {
 
       setQuote(nextQuote);
     } catch {
-      setErrorMessage("Convert API is not running.");
+      setErrorMessage("Execution quote service is not running.");
       setQuote(null);
     } finally {
       setIsLoading(false);
@@ -86,7 +87,9 @@ export function ConvertTicket({ disabled }: ConvertTicketProps) {
     <section className="clean-card rounded-[2rem] p-7">
       <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-400">Swap</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-400">
+            Execution intent
+          </p>
           <h2 className="mt-2 text-4xl font-normal tracking-[-0.04em] text-[#0a0b0d]">
             FXRP to C2FLR
           </h2>
@@ -217,13 +220,7 @@ export function ConvertTicket({ disabled }: ConvertTicketProps) {
             </p>
           </div>
 
-          <button
-            className="mt-5 w-full rounded-2xl border border-slate-200 bg-slate-100 px-5 py-4 text-base font-semibold text-slate-500"
-            disabled
-            type="button"
-          >
-            Seal private intent next
-          </button>
+          <SealIntentButton quote={quote} />
         </div>
       )}
     </section>

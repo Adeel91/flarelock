@@ -1,12 +1,5 @@
-import type { Metadata } from "next";
-import { RiskConsole } from "@/components/console/risk-console";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Private FAsset Swap | FlareLock",
-  description:
-    "Swap FXRP and C2FLR privately with quote preview, risk checks, sealed intent flow, and order book liquidity on Flare.",
-};
-
-export default function SwapPage() {
-  return <RiskConsole />;
+export default function SwapRedirectPage() {
+  redirect("/markets/fxrp-c2flr");
 }

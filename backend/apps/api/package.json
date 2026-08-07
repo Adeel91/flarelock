@@ -16,7 +16,8 @@
     "@nestjs/core": "latest",
     "@nestjs/platform-fastify": "latest",
     "reflect-metadata": "latest",
-    "rxjs": "latest"
+    "rxjs": "latest",
+    "viem": "^2.55.11"
   },
   "devDependencies": {
     "@types/node": "latest",

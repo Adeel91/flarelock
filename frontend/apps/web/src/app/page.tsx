@@ -18,7 +18,7 @@ export default function HomePage() {
       <section className="mx-auto grid min-h-[calc(100vh-77px)] max-w-[1440px] gap-12 px-8 py-14 lg:grid-cols-[1fr_520px] lg:items-center">
         <div>
           <h1 className="max-w-4xl text-[4.8rem] font-normal leading-[1.02] tracking-[-0.055em] text-[#0a0b0d] sm:text-[5.8rem]">
-            The private swap app for Flare FAssets
+            Private execution for Flare FAssets
           </h1>
 
           <p className="mt-7 max-w-2xl text-[1.35rem] font-normal leading-8 text-[#111827]">
@@ -29,9 +29,9 @@ export default function HomePage() {
           <div className="mt-9 flex flex-wrap gap-4">
             <Link
               className="clean-button rounded-full bg-[#0052ff] px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-blue-600/20 hover:bg-[#0042cc]"
-              href="/swap"
+              href="/markets/fxrp-c2flr"
             >
-              Open app
+              Open market
             </Link>
 
             <a
@@ -116,8 +116,8 @@ export default function HomePage() {
             Private order flow, simple user experience
           </h2>
           <p className="mt-4 text-xl leading-8 text-slate-600">
-            FlareLock feels like a simple swap page, but the backend flow supports private intent,
-            matching, and settlement.
+            FlareLock gives traders a simple market interface while private intents, matching,
+            attestations, and settlement run underneath.
           </p>
         </div>
 

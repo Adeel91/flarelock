@@ -4,11 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ConnectWallet } from "@/components/connect-wallet";
 
-const appUrl = "/swap";
+const appUrl = "/markets/fxrp-c2flr";
 
 export function SiteHeader() {
   const pathname = usePathname();
-  const isApp = pathname?.startsWith("/swap");
+  const isApp = pathname?.startsWith("/markets");
 
   return (
     <header className="border-b border-slate-200 bg-white">
@@ -20,7 +20,7 @@ export function SiteHeader() {
 
           <div>
             <p className="text-xl font-semibold tracking-[-0.02em] text-[#0a0b0d]">FlareLock</p>
-            <p className="text-xs font-medium text-slate-500">Private FAsset swaps</p>
+            <p className="text-xs font-medium text-slate-500">Private FAsset execution</p>
           </div>
         </Link>
 
@@ -28,9 +28,11 @@ export function SiteHeader() {
           <Link className="text-[15px] font-medium text-[#0a0b0d]" href="/">
             Home
           </Link>
+
           <Link className="text-[15px] font-medium text-[#0a0b0d]" href={appUrl}>
-            Swap
+            Market
           </Link>
+
           <a className="text-[15px] font-medium text-[#0a0b0d]" href="/#how">
             How it works
           </a>
@@ -42,7 +44,7 @@ export function SiteHeader() {
               className="clean-button hidden rounded-full bg-[#0052ff] px-6 py-3 text-[15px] font-semibold text-white shadow-lg shadow-blue-600/15 hover:bg-[#0042cc] sm:block"
               href={appUrl}
             >
-              Open app
+              Open market
             </Link>
           )}
 
