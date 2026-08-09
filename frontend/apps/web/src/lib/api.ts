@@ -178,6 +178,7 @@ export type SealedIntent = {
   privacy: "encrypted";
   status: "sealed" | "matched" | "expired";
   matchStatus: "searching" | "partially_matched" | "matched" | "expired";
+  stopStatus: "not_applicable" | "waiting" | "triggered";
   settlementStatus: "not_started";
   createdAt: string;
   expiresAt: string;
@@ -309,4 +310,73 @@ export async function getPrivateOrderBook(): Promise<PrivateOrderBook> {
   }
 
   return (await response.json()) as PrivateOrderBook;
+}
+
+export type StopTrigger = {
+  triggerId: string;
+  triggerCommitment: `0x${string}`;
+  intentHash: `0x${string}`;
+  privacy: "encrypted";
+  status: "triggered";
+  feedTimestamp: string;
+  triggeredAt: string;
+};
+
+export type StopEngineStatus = {
+  service: "stop-trigger-engine";
+  network: "Coston2";
+  market: "FXRP-C2FLR";
+  source: "Flare FTSOv2";
+  liveReferencePrice: number;
+  feedTimestamp: string;
+  waitingStops: number;
+  triggeredStops: number;
+  expiredStops: number;
+  checkedAt: string;
+};
+
+export type StopRunResult = {
+  scannedStops: number;
+  waitingBeforeRun: number;
+  triggeredThisRun: number;
+  expiredThisRun: number;
+  liveReferencePrice: number;
+  feedTimestamp: string;
+  triggers: StopTrigger[];
+};
+
+export async function getStopEngineStatus(): Promise<StopEngineStatus> {
+  const response = await fetch(`${apiUrl}/stops/status`, {
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error("Stop trigger engine is unavailable.");
+  }
+
+  return (await response.json()) as StopEngineStatus;
+}
+
+export async function runStopEngine(): Promise<StopRunResult> {
+  const response = await fetch(`${apiUrl}/stops/run`, {
+    method: "POST",
+  });
+
+  if (!response.ok) {
+    throw new Error("Unable to evaluate private stop intents.");
+  }
+
+  return (await response.json()) as StopRunResult;
+}
+
+export async function getStopTriggers(): Promise<StopTrigger[]> {
+  const response = await fetch(`${apiUrl}/stops`, {
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error("Unable to load stop trigger records.");
+  }
+
+  return (await response.json()) as StopTrigger[];
 }

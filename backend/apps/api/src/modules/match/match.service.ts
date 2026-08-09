@@ -39,6 +39,7 @@ type StoredIntent = {
   encryptedPayload: EncryptedPayload;
   status: "sealed" | "matched" | "expired";
   matchStatus: "searching" | "partially_matched" | "matched" | "expired";
+  stopStatus?: "not_applicable" | "waiting" | "triggered";
   settlementStatus: "not_started";
   createdAt: string;
   expiresAt: string;
@@ -88,6 +89,7 @@ export type PublicMatch = {
 type MatchingCandidate = {
   stored: StoredIntent;
   privatePayload: PrivateIntentPayload;
+  effectiveOrderType: "market" | "limit";
   direction: "buy" | "sell";
   baseAmount: number;
   referencePrice: number;
@@ -205,7 +207,7 @@ export class MatchService {
       if (
         intent.status !== "sealed" ||
         intent.matchStatus === "expired" ||
-        intent.orderType === "stop"
+        (intent.orderType === "stop" && intent.stopStatus !== "triggered")
       ) {
         continue;
       }
@@ -229,12 +231,10 @@ export class MatchService {
       .filter((candidate) => candidate.direction === "buy")
       .sort((left, right) => {
         const leftPriority =
-          left.privatePayload.orderType === "market"
-            ? Number.POSITIVE_INFINITY
-            : (left.limitPrice ?? 0);
+          left.effectiveOrderType === "market" ? Number.POSITIVE_INFINITY : (left.limitPrice ?? 0);
 
         const rightPriority =
-          right.privatePayload.orderType === "market"
+          right.effectiveOrderType === "market"
             ? Number.POSITIVE_INFINITY
             : (right.limitPrice ?? 0);
 
@@ -249,12 +249,12 @@ export class MatchService {
       .filter((candidate) => candidate.direction === "sell")
       .sort((left, right) => {
         const leftPriority =
-          left.privatePayload.orderType === "market"
+          left.effectiveOrderType === "market"
             ? Number.NEGATIVE_INFINITY
             : (left.limitPrice ?? Number.POSITIVE_INFINITY);
 
         const rightPriority =
-          right.privatePayload.orderType === "market"
+          right.effectiveOrderType === "market"
             ? Number.NEGATIVE_INFINITY
             : (right.limitPrice ?? Number.POSITIVE_INFINITY);
 
@@ -382,6 +382,9 @@ export class MatchService {
 
     const toAsset = privatePayload.toAsset.toUpperCase();
 
+    const effectiveOrderType =
+      privatePayload.orderType === "stop" ? "market" : privatePayload.orderType;
+
     if (privatePayload.side === "sell" && fromAsset === "FXRP" && toAsset === "C2FLR") {
       const baseAmount = privatePayload.inputAmount;
 
@@ -390,10 +393,11 @@ export class MatchService {
       return {
         stored,
         privatePayload,
+        effectiveOrderType,
         direction: "sell",
         baseAmount,
         referencePrice,
-        limitPrice: privatePayload.orderType === "limit" ? privatePayload.limitPrice : undefined,
+        limitPrice: effectiveOrderType === "limit" ? privatePayload.limitPrice : undefined,
         remainingBaseAmount: round(baseAmount - alreadyFilledBaseAmount),
       };
     }
@@ -406,10 +410,11 @@ export class MatchService {
       return {
         stored,
         privatePayload,
+        effectiveOrderType,
         direction: "buy",
         baseAmount,
         referencePrice,
-        limitPrice: privatePayload.orderType === "limit" ? privatePayload.limitPrice : undefined,
+        limitPrice: effectiveOrderType === "limit" ? privatePayload.limitPrice : undefined,
         remainingBaseAmount: round(baseAmount - alreadyFilledBaseAmount),
       };
     }
@@ -419,9 +424,9 @@ export class MatchService {
 
   private pricesCross(buy: MatchingCandidate, sell: MatchingCandidate) {
     const buyMaximumPrice =
-      buy.privatePayload.orderType === "market" ? Number.POSITIVE_INFINITY : buy.limitPrice;
+      buy.effectiveOrderType === "market" ? Number.POSITIVE_INFINITY : buy.limitPrice;
 
-    const sellMinimumPrice = sell.privatePayload.orderType === "market" ? 0 : sell.limitPrice;
+    const sellMinimumPrice = sell.effectiveOrderType === "market" ? 0 : sell.limitPrice;
 
     if (buyMaximumPrice === undefined || sellMinimumPrice === undefined) {
       return false;
@@ -431,9 +436,9 @@ export class MatchService {
   }
 
   private determineExecutionPrice(buy: MatchingCandidate, sell: MatchingCandidate) {
-    const buyIsMarket = buy.privatePayload.orderType === "market";
+    const buyIsMarket = buy.effectiveOrderType === "market";
 
-    const sellIsMarket = sell.privatePayload.orderType === "market";
+    const sellIsMarket = sell.effectiveOrderType === "market";
 
     if (!buyIsMarket && !sellIsMarket) {
       const buyIsOlder = Date.parse(buy.stored.createdAt) <= Date.parse(sell.stored.createdAt);

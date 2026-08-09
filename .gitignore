@@ -26,3 +26,8 @@ backend/apps/api/data/.intent-key
 backend/apps/api/data/matches.json
 backend/apps/api/data/matches.tmp.json
 backend/apps/api/data/sealed-intents.matching.tmp.json
+
+# Local stop trigger runtime data
+backend/apps/api/data/stop-triggers.json
+backend/apps/api/data/stop-triggers.tmp.json
+backend/apps/api/data/sealed-intents.stop.tmp.json

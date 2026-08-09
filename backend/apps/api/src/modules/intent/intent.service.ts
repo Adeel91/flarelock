@@ -54,6 +54,7 @@ type EncryptedPayload = {
 
 type IntentStatus = "sealed" | "matched" | "expired";
 type MatchStatus = "searching" | "partially_matched" | "matched" | "expired";
+type StopStatus = "not_applicable" | "waiting" | "triggered";
 
 type StoredIntent = {
   version: 3;
@@ -67,6 +68,7 @@ type StoredIntent = {
   encryptedPayload: EncryptedPayload;
   status: IntentStatus;
   matchStatus: MatchStatus;
+  stopStatus?: StopStatus;
   settlementStatus: "not_started";
   createdAt: string;
   expiresAt: string;
@@ -99,6 +101,7 @@ export type PublicSealedIntent = {
   privacy: "encrypted";
   status: IntentStatus;
   matchStatus: MatchStatus;
+  stopStatus: StopStatus;
   settlementStatus: "not_started";
   createdAt: string;
   expiresAt: string;
@@ -240,6 +243,7 @@ export class IntentService {
       encryptedPayload: await this.encryptPayload(privatePayload),
       status: "sealed",
       matchStatus: "searching",
+      stopStatus: request.order.type === "stop" ? "waiting" : "not_applicable",
       settlementStatus: "not_started",
       createdAt,
       expiresAt: request.order.validUntil,
@@ -320,6 +324,7 @@ export class IntentService {
       privacy: "encrypted",
       status: intent.status,
       matchStatus: intent.matchStatus,
+      stopStatus: intent.orderType === "stop" ? (intent.stopStatus ?? "waiting") : "not_applicable",
       settlementStatus: intent.settlementStatus,
       createdAt: intent.createdAt,
       expiresAt: intent.expiresAt,
@@ -413,6 +418,7 @@ export class IntentService {
       encryptedPayload: await this.encryptPayload(migratedPayload),
       status: Date.parse(intent.expiresAt) <= Date.now() ? "expired" : "sealed",
       matchStatus: Date.parse(intent.expiresAt) <= Date.now() ? "expired" : "searching",
+      stopStatus: "not_applicable",
       settlementStatus: intent.settlementStatus,
       createdAt: intent.createdAt,
       expiresAt: intent.expiresAt,
