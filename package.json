@@ -19,7 +19,11 @@
     "prepare": "husky",
     "release": "semantic-release",
     "release:dry": "semantic-release --dry-run",
-    "dev:stack": "concurrently -n api,web -c cyan,magenta \"yarn workspace @flarelock/api dev\" \"yarn workspace @flarelock/web dev\""
+    "dev:stack": "concurrently -n api,web -c cyan,magenta \"yarn workspace @flarelock/api dev\" \"yarn workspace @flarelock/web dev\"",
+    "contracts:fmt": "cd contracts && forge fmt",
+    "contracts:build": "cd contracts && forge build",
+    "contracts:test": "cd contracts && forge test -vv",
+    "contracts:deploy:coston2": "cd contracts && forge script script/DeployFlareLockEscrow.s.sol:DeployFlareLockEscrow --rpc-url coston2 --broadcast"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,jsonc,css,md}": [

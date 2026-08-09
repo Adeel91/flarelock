@@ -31,3 +31,11 @@ backend/apps/api/data/sealed-intents.matching.tmp.json
 backend/apps/api/data/stop-triggers.json
 backend/apps/api/data/stop-triggers.tmp.json
 backend/apps/api/data/sealed-intents.stop.tmp.json
+
+# Foundry build and broadcast data
+contracts/cache/
+contracts/out/
+contracts/broadcast/
+
+# Foundry dependencies
+contracts/lib/
