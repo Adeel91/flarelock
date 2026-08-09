@@ -14,7 +14,10 @@ type EthereumProvider = {
   isMetaMask?: boolean;
   isTronLink?: boolean;
   providers?: EthereumProvider[];
-  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+  request: (args: {
+    method: string;
+    params?: unknown[] | Record<string, unknown>;
+  }) => Promise<unknown>;
 };
 
 type EthereumWindow = Window & {
@@ -34,6 +37,11 @@ type WalletContextValue = {
   refreshWallet: () => Promise<void>;
   signMessage: (message: string) => Promise<`0x${string}`>;
   switchToCoston2: () => Promise<void>;
+  watchAsset: (asset: {
+    address: `0x${string}`;
+    symbol: string;
+    decimals: number;
+  }) => Promise<boolean>;
 };
 
 const WalletContext = createContext<WalletContextValue | null>(null);
@@ -192,6 +200,36 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     [address, getProvider],
   );
 
+  const watchAsset = useCallback(
+    async (asset: {
+      address: `0x${string}`;
+      symbol: string;
+      decimals: number;
+    }): Promise<boolean> => {
+      if (!address) {
+        throw new Error("Connect your wallet before adding FXRP.");
+      }
+
+      const provider = getProvider();
+
+      const accepted = await provider.request({
+        method: "wallet_watchAsset",
+        params: {
+          type: "ERC20",
+          options: {
+            address: asset.address,
+            symbol: asset.symbol,
+            decimals: asset.decimals,
+            chainId: 114,
+          },
+        },
+      });
+
+      return accepted === true;
+    },
+    [address, getProvider],
+  );
+
   const switchToCoston2 = useCallback(async () => {
     const provider = getProvider();
 
@@ -247,6 +285,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       refreshWallet,
       signMessage,
       switchToCoston2,
+      watchAsset,
     }),
     [
       address,
@@ -258,6 +297,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       signMessage,
       status,
       switchToCoston2,
+      watchAsset,
     ],
   );
 

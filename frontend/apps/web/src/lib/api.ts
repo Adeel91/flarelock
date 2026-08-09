@@ -380,3 +380,122 @@ export async function getStopTriggers(): Promise<StopTrigger[]> {
 
   return (await response.json()) as StopTrigger[];
 }
+
+export type FxrpTokenStatus = {
+  network: {
+    name: "Coston2";
+    chainId: 114;
+    rpc: string;
+  };
+  registry: {
+    address: `0x${string}`;
+    lookupName: "AssetManagerFXRP";
+    resolution: "dynamic";
+    hasCode: true;
+  };
+  assetManager: {
+    address: `0x${string}`;
+    hasCode: boolean;
+    resolution: "Flare Contract Registry";
+  };
+  token: {
+    address: `0x${string}`;
+    hasCode: boolean;
+    name: string;
+    symbol: string;
+    decimals: number;
+    totalSupplyRaw: string;
+    totalSupplyFormatted: string;
+    standard: "ERC-20";
+    resolution: "AssetManagerFXRP.fAsset()";
+  };
+  ready: boolean;
+  blockNumber: string;
+  checkedAt: string;
+};
+
+export type FxrpWalletBalance = {
+  network: {
+    name: "Coston2";
+    chainId: 114;
+  };
+  owner: `0x${string}`;
+  token: {
+    address: `0x${string}`;
+    name: string;
+    symbol: string;
+    decimals: number;
+  };
+  balance: {
+    raw: string;
+    formatted: string;
+  };
+  allowance: {
+    spender: `0x${string}`;
+    raw: string;
+    formatted: string;
+  } | null;
+  blockNumber: string;
+  checkedAt: string;
+};
+
+export async function getFxrpTokenStatus(): Promise<FxrpTokenStatus> {
+  const response = await fetch(`${apiUrl}/fassets/fxrp`, {
+    cache: "no-store",
+  });
+
+  const result = (await response.json()) as
+    | FxrpTokenStatus
+    | {
+        message?: string | string[];
+      };
+
+  if (!response.ok) {
+    const message =
+      "message" in result && Array.isArray(result.message)
+        ? result.message.join(" ")
+        : "message" in result && typeof result.message === "string"
+          ? result.message
+          : "Unable to resolve FXRP on Coston2.";
+
+    throw new Error(message);
+  }
+
+  return result as FxrpTokenStatus;
+}
+
+export async function getFxrpWalletBalance(
+  owner: `0x${string}`,
+  spender?: `0x${string}`,
+): Promise<FxrpWalletBalance> {
+  const search = new URLSearchParams();
+
+  if (spender) {
+    search.set("spender", spender);
+  }
+
+  const suffix = search.size > 0 ? `?${search.toString()}` : "";
+
+  const response = await fetch(`${apiUrl}/fassets/fxrp/wallet/${owner}${suffix}`, {
+    cache: "no-store",
+  });
+
+  const result = (await response.json()) as
+    | FxrpWalletBalance
+    | {
+        message?: string | string[];
+      };
+
+  if (!response.ok) {
+    const message =
+      "message" in result && Array.isArray(result.message)
+        ? result.message.join(" ")
+        : "message" in result && typeof result.message === "string"
+          ? result.message
+          : "Unable to read the FXRP wallet balance.";
+
+    throw new Error(message);
+  }
+
+  return result as FxrpWalletBalance;
+}
