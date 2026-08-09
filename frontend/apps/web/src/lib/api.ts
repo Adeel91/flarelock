@@ -263,3 +263,50 @@ export async function getSealedIntents(): Promise<SealedIntent[]> {
 
   return (await response.json()) as SealedIntent[];
 }
+
+export type OrderBookLevel = {
+  price: number;
+  baseLiquidity: number;
+  quoteLiquidity: number;
+  orderCount: number;
+};
+
+export type PrivateOrderBook = {
+  market: "FXRP-C2FLR";
+  baseAsset: "FXRP";
+  quoteAsset: "C2FLR";
+  source: "decrypted_private_intents";
+  privacy: {
+    mode: "threshold_aggregated";
+    minimumOrdersPerLevel: 2;
+    message: string;
+  };
+  bids: OrderBookLevel[];
+  asks: OrderBookLevel[];
+  bestBid: number | null;
+  bestAsk: number | null;
+  midpoint: number | null;
+  spread: number | null;
+  spreadPercent: number | null;
+  activeBuyIntents: number;
+  activeSellIntents: number;
+  publishedBuyIntents: number;
+  publishedSellIntents: number;
+  withheldBuyIntents: number;
+  withheldSellIntents: number;
+  publishedBidLiquidity: number;
+  publishedAskLiquidity: number;
+  updatedAt: string;
+};
+
+export async function getPrivateOrderBook(): Promise<PrivateOrderBook> {
+  const response = await fetch(`${apiUrl}/order-book/FXRP-C2FLR`, {
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error("Private order book is unavailable.");
+  }
+
+  return (await response.json()) as PrivateOrderBook;
+}

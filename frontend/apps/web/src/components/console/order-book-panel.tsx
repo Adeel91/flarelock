@@ -1,169 +1,185 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { getSealedIntents, type SealedIntent } from "@/lib/api";
+import { getPrivateOrderBook, type OrderBookLevel } from "@/lib/api";
 
-function shortenAddress(address: string) {
-  return `${address.slice(0, 6)}...${address.slice(-4)}`;
-}
+const priceFormatter = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 8,
+});
 
-function shortenHash(hash: string) {
-  return `${hash.slice(0, 12)}...${hash.slice(-10)}`;
-}
+const amountFormatter = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 8,
+});
 
-function formatRemainingTime(expiresAt: string) {
-  const remaining = Date.parse(expiresAt) - Date.now();
-
-  if (remaining <= 0) {
-    return "Expiring";
-  }
-
-  const seconds = Math.ceil(remaining / 1_000);
-
-  if (seconds < 60) {
-    return `${seconds}s remaining`;
-  }
-
-  const minutes = Math.ceil(seconds / 60);
-
-  if (minutes < 60) {
-    return `${minutes}m remaining`;
-  }
-
-  return `${Math.ceil(minutes / 60)}h remaining`;
-}
-
-function formatOrderType(orderType: SealedIntent["orderType"]) {
-  return orderType === "stop" ? "Stop loss" : orderType;
-}
-
-function IntentRow({ intent }: { intent: SealedIntent }) {
-  return (
-    <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-3 border-t border-slate-100 py-5">
-      <div className="min-w-0 overflow-hidden">
-        <div className="flex min-w-0 flex-wrap items-center gap-2">
-          <p className="truncate text-sm font-semibold capitalize text-slate-950">
-            {formatOrderType(intent.orderType)} intent
-          </p>
-
-          <span className="shrink-0 rounded-full bg-violet-50 px-2.5 py-1 text-[11px] font-semibold text-violet-700">
-            Private
-          </span>
-        </div>
-
-        <p className="mt-1 truncate text-xs text-slate-500">
-          {shortenAddress(intent.owner)} · {intent.market}
-        </p>
-
-        <p className="mono mt-2 truncate text-xs text-slate-400" title={intent.intentHash}>
-          {shortenHash(intent.intentHash)}
-        </p>
-
-        <p className="mt-2 text-xs font-medium text-slate-400">
-          {formatRemainingTime(intent.expiresAt)}
+function LevelRows({ levels, side }: { levels: OrderBookLevel[]; side: "bid" | "ask" }) {
+  if (levels.length === 0) {
+    return (
+      <div className="rounded-2xl bg-slate-50 px-4 py-5 text-center">
+        <p className="text-sm font-medium text-slate-700">No public {side} levels</p>
+        <p className="mt-1 text-xs leading-5 text-slate-500">
+          A level appears after at least two private intents share the same price.
         </p>
       </div>
+    );
+  }
 
-      <span className="shrink-0 justify-self-end whitespace-nowrap rounded-full bg-rose-50 px-3 py-1.5 text-xs font-semibold capitalize text-[#c91549]">
-        {intent.matchStatus}
-      </span>
+  return (
+    <div className="grid gap-1">
+      {levels.slice(0, 8).map((level) => (
+        <div
+          className="grid grid-cols-[1fr_1fr_auto] items-center gap-3 rounded-xl px-3 py-2 text-sm hover:bg-slate-50"
+          key={`${side}-${level.price}`}
+        >
+          <span
+            className={
+              side === "bid" ? "font-semibold text-emerald-700" : "font-semibold text-rose-700"
+            }
+          >
+            {priceFormatter.format(level.price)}
+          </span>
+
+          <span className="text-right font-medium text-slate-800">
+            {amountFormatter.format(level.baseLiquidity)}
+          </span>
+
+          <span className="min-w-8 rounded-full bg-slate-100 px-2 py-1 text-center text-xs font-semibold text-slate-500">
+            {level.orderCount}
+          </span>
+        </div>
+      ))}
     </div>
   );
 }
 
 export function OrderBookPanel() {
-  const intents = useQuery({
-    queryKey: ["sealed-intents"],
-    queryFn: getSealedIntents,
+  const orderBook = useQuery({
+    queryKey: ["private-order-book", "FXRP-C2FLR"],
+    queryFn: getPrivateOrderBook,
     refetchInterval: 5_000,
+    refetchIntervalInBackground: true,
   });
 
-  const rows = intents.data ?? [];
+  const data = orderBook.data;
 
   return (
-    <aside className="clean-card self-start overflow-hidden rounded-[28px] p-7">
-      <div className="flex min-w-0 items-start justify-between gap-4">
-        <div className="min-w-0">
+    <aside className="clean-card h-fit rounded-[28px] p-7">
+      <div className="flex items-start justify-between gap-4">
+        <div>
           <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-400">
-            Private intent pool
+            Private order book
           </p>
-
-          <h2 className="mt-2 truncate text-4xl font-normal tracking-[-0.04em] text-[#0a0b0d]">
+          <h2 className="mt-2 text-3xl font-medium tracking-[-0.035em] text-[#0a0b0d]">
             FXRP/C2FLR
           </h2>
         </div>
 
-        <span className="shrink-0 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
-          Encrypted
+        <span className="rounded-full bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">
+          Aggregated
         </span>
       </div>
 
-      <div className="mt-7">
-        {intents.isLoading && (
-          <div className="rounded-2xl bg-slate-50 p-5">
-            <p className="text-sm text-slate-600">Loading active encrypted intents…</p>
-          </div>
-        )}
-
-        {intents.isError && (
-          <div className="rounded-2xl border border-red-200 bg-red-50 p-5">
-            <p className="text-sm font-medium text-red-700">
-              Private intent service is unavailable.
-            </p>
-          </div>
-        )}
-
-        {!intents.isLoading && !intents.isError && rows.length === 0 && (
-          <div className="rounded-2xl bg-slate-50 p-6">
-            <p className="text-base font-semibold text-slate-950">No active private intents</p>
-
-            <p className="mt-2 text-sm leading-6 text-slate-600">
-              Signed intents appear here while waiting for private matching. Unmatched market IOC
-              intents expire automatically.
-            </p>
-          </div>
-        )}
-
-        {rows.length > 0 && (
-          <div className="min-w-0">
-            <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 pb-3 text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">
-              <p>Intent</p>
-              <p className="text-right">Status</p>
+      {orderBook.isLoading ? (
+        <div className="mt-6 rounded-2xl bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">
+          Loading private liquidity…
+        </div>
+      ) : orderBook.isError || !data ? (
+        <div className="mt-6 rounded-2xl bg-rose-50 px-4 py-5">
+          <p className="font-semibold text-rose-700">Order book unavailable</p>
+          <p className="mt-1 text-sm leading-6 text-rose-600">
+            The backend could not aggregate private intents.
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="mt-6 grid grid-cols-2 gap-3">
+            <div className="rounded-2xl bg-slate-50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+                Best bid
+              </p>
+              <p className="mt-2 text-lg font-semibold text-emerald-700">
+                {data.bestBid === null ? "Withheld" : priceFormatter.format(data.bestBid)}
+              </p>
             </div>
 
-            {rows.map((intent) => (
-              <IntentRow intent={intent} key={intent.intentId} />
-            ))}
+            <div className="rounded-2xl bg-slate-50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+                Best ask
+              </p>
+              <p className="mt-2 text-lg font-semibold text-rose-700">
+                {data.bestAsk === null ? "Withheld" : priceFormatter.format(data.bestAsk)}
+              </p>
+            </div>
           </div>
-        )}
-      </div>
 
-      <div className="mt-6 rounded-2xl border border-slate-200/90 bg-slate-50 p-5">
-        <p className="text-base font-semibold text-slate-950">Trade details hidden</p>
+          <div className="mt-5 border-t border-slate-100 pt-5">
+            <div className="mb-3 grid grid-cols-[1fr_1fr_auto] gap-3 px-3 text-[11px] font-semibold uppercase tracking-[0.13em] text-slate-400">
+              <span>Ask price</span>
+              <span className="text-right">FXRP</span>
+              <span>Orders</span>
+            </div>
 
-        <p className="mt-2 text-sm leading-6 text-slate-600">
-          Side, amount, trigger price, expected output, and wallet signature are encrypted and are
-          not returned by the public API.
-        </p>
-      </div>
+            <LevelRows levels={data.asks} side="ask" />
+          </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <div className="rounded-2xl bg-slate-50 p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">Active</p>
+          <div className="my-5 rounded-2xl border border-slate-100 px-4 py-3">
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-sm text-slate-500">Midpoint</span>
+              <span className="font-semibold text-[#0a0b0d]">
+                {data.midpoint === null
+                  ? "Not public"
+                  : `${priceFormatter.format(data.midpoint)} C2FLR`}
+              </span>
+            </div>
 
-          <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-slate-950">
-            {rows.length}
-          </p>
-        </div>
+            <div className="mt-2 flex items-center justify-between gap-4">
+              <span className="text-sm text-slate-500">Spread</span>
+              <span className="text-sm font-medium text-slate-700">
+                {data.spread === null || data.spreadPercent === null
+                  ? "Not public"
+                  : `${priceFormatter.format(data.spread)} · ${data.spreadPercent}%`}
+              </span>
+            </div>
+          </div>
 
-        <div className="rounded-2xl bg-slate-50 p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">
-            Matching
-          </p>
+          <div>
+            <div className="mb-3 grid grid-cols-[1fr_1fr_auto] gap-3 px-3 text-[11px] font-semibold uppercase tracking-[0.13em] text-slate-400">
+              <span>Bid price</span>
+              <span className="text-right">FXRP</span>
+              <span>Orders</span>
+            </div>
 
-          <p className="mt-2 text-sm font-semibold text-slate-950">Not connected</p>
-        </div>
-      </div>
+            <LevelRows levels={data.bids} side="bid" />
+          </div>
+
+          <div className="mt-6 grid grid-cols-2 gap-3">
+            <div className="rounded-2xl bg-slate-50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+                Private buys
+              </p>
+              <p className="mt-2 text-xl font-semibold text-[#0a0b0d]">{data.activeBuyIntents}</p>
+              <p className="mt-1 text-xs text-slate-500">{data.withheldBuyIntents} withheld</p>
+            </div>
+
+            <div className="rounded-2xl bg-slate-50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+                Private sells
+              </p>
+              <p className="mt-2 text-xl font-semibold text-[#0a0b0d]">{data.activeSellIntents}</p>
+              <p className="mt-1 text-xs text-slate-500">{data.withheldSellIntents} withheld</p>
+            </div>
+          </div>
+
+          <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4">
+            <p className="text-sm font-semibold text-amber-800">Privacy threshold active</p>
+            <p className="mt-1 text-xs leading-5 text-amber-700">
+              {data.privacy.message} Wallets, signatures, intent IDs, and individual amounts are
+              never returned.
+            </p>
+          </div>
+        </>
+      )}
     </aside>
   );
 }
