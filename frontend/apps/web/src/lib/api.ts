@@ -176,8 +176,8 @@ export type SealedIntent = {
   market: string;
   orderType: OrderType;
   privacy: "encrypted";
-  status: "sealed" | "expired";
-  matchStatus: "searching" | "expired";
+  status: "sealed" | "matched" | "expired";
+  matchStatus: "searching" | "partially_matched" | "matched" | "expired";
   settlementStatus: "not_started";
   createdAt: string;
   expiresAt: string;

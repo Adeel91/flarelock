@@ -21,3 +21,8 @@ backend/apps/api/data/sealed-intents.tmp.json
 
 # Local private intent encryption key
 backend/apps/api/data/.intent-key
+
+# Local private matching runtime data
+backend/apps/api/data/matches.json
+backend/apps/api/data/matches.tmp.json
+backend/apps/api/data/sealed-intents.matching.tmp.json

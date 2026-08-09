@@ -52,8 +52,8 @@ type EncryptedPayload = {
   ciphertext: string;
 };
 
-type IntentStatus = "sealed" | "expired";
-type MatchStatus = "searching" | "expired";
+type IntentStatus = "sealed" | "matched" | "expired";
+type MatchStatus = "searching" | "partially_matched" | "matched" | "expired";
 
 type StoredIntent = {
   version: 3;
