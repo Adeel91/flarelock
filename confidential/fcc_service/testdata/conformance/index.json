@@ -1,0 +1,12 @@
+{
+  "fixtures": [
+    "01-missing-ciphertext",
+    "02-unknown-op-type",
+    "03-unknown-op-command",
+    "04-invalid-action-json",
+    "05-message-not-datafixed",
+    "06-get-action-not-allowed",
+    "07-unknown-path",
+    "08-get-state"
+  ]
+}

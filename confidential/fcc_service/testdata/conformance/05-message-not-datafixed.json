@@ -1,0 +1,18 @@
+{
+  "name": "05-message-not-datafixed",
+  "request": {
+    "method": "POST",
+    "path": "/action",
+    "body": {
+      "data": {
+        "id": "0x1111111111111111111111111111111111111111111111111111111111111111",
+        "type": "instruction",
+        "submissionTag": "submit",
+        "message": "0x6e6f74206a736f6e"
+      }
+    }
+  },
+  "expect": {
+    "status": 400
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "07-unknown-path",
+  "request": {
+    "method": "GET",
+    "path": "/does-not-exist"
+  },
+  "expect": {
+    "status": 404
+  }
+}

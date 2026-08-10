@@ -1,0 +1,17 @@
+{
+  "name": "08-get-state",
+  "request": {
+    "method": "GET",
+    "path": "/state"
+  },
+  "expect": {
+    "status": 200,
+    "json": {
+      "stateVersion": "0x302e322e30000000000000000000000000000000000000000000000000000000",
+      "state": {
+        "matchesProcessed": 0,
+        "lastCommitment": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    }
+  }
+}
