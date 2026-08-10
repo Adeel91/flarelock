@@ -1,9 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
+	"math/big"
 	"strings"
 	"time"
 
@@ -13,6 +13,7 @@ import (
 	instrutils "extension-scaffold/tools/pkg/utils"
 
 	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/flare-foundation/go-flare-common/pkg/logger"
@@ -55,7 +56,8 @@ type privateMatchRequest struct {
 }
 
 type matchResult struct {
-	Version uint8 `json:"version"`
+	Version uint8  `json:"version"`
+	Domain  string `json:"domain"`
 
 	MatchCommitment string `json:"matchCommitment"`
 
@@ -397,13 +399,90 @@ func verifyResult(
 
 	var match matchResult
 
-	if err := json.Unmarshal(
-		result.Data,
-		&match,
-	); err != nil {
+	uint8Type, err := abi.NewType("uint8", "", nil)
+	if err != nil {
 		return errors.Errorf(
-			"decoding match result: %s",
+			"building uint8 ABI type: %s",
 			err,
+		)
+	}
+
+	bytes32Type, err := abi.NewType("bytes32", "", nil)
+	if err != nil {
+		return errors.Errorf(
+			"building bytes32 ABI type: %s",
+			err,
+		)
+	}
+
+	uint256Type, err := abi.NewType("uint256", "", nil)
+	if err != nil {
+		return errors.Errorf(
+			"building uint256 ABI type: %s",
+			err,
+		)
+	}
+
+	arguments := abi.Arguments{
+		{Type: uint8Type},
+		{Type: bytes32Type},
+		{Type: bytes32Type},
+		{Type: bytes32Type},
+		{Type: bytes32Type},
+		{Type: bytes32Type},
+		{Type: bytes32Type},
+		{Type: uint256Type},
+		{Type: uint256Type},
+		{Type: uint256Type},
+	}
+
+	values, err := arguments.Unpack(result.Data)
+	if err != nil {
+		return errors.Errorf(
+			"decoding ABI settlement result: %s",
+			err,
+		)
+	}
+
+	if len(values) != 10 {
+		return errors.Errorf(
+			"unexpected settlement field count: %d",
+			len(values),
+		)
+	}
+
+	domain := values[1].([32]byte)
+
+	match = matchResult{
+		Version: values[0].(uint8),
+		Domain: string(
+			domain[:len("FLARELOCK_SETTLEMENT")],
+		),
+		MatchCommitment: common.Hash(
+			values[2].([32]byte),
+		).Hex(),
+		BuyIntentHash: common.Hash(
+			values[3].([32]byte),
+		).Hex(),
+		SellIntentHash: common.Hash(
+			values[4].([32]byte),
+		).Hex(),
+		BuyDepositID: common.Hash(
+			values[5].([32]byte),
+		).Hex(),
+		SellDepositID: common.Hash(
+			values[6].([32]byte),
+		).Hex(),
+		BaseAmountRaw:     values[7].(*big.Int).String(),
+		QuoteAmountRaw:    values[8].(*big.Int).String(),
+		ExecutionPriceE18: values[9].(*big.Int).String(),
+		Market:            "C2FLR/FXRP",
+	}
+
+	if match.Domain != "FLARELOCK_SETTLEMENT" {
+		return errors.Errorf(
+			"unexpected settlement domain: %s",
+			match.Domain,
 		)
 	}
 

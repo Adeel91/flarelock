@@ -23,6 +23,10 @@ contract DeployFlareLockEscrow is Script {
 
         address operator = vm.envOr("ESCROW_OPERATOR", deployer);
 
+        address trustedTee = vm.envOr("TRUSTED_TEE", address(0));
+
+        require(trustedTee != address(0), "TRUSTED_TEE is required");
+
         address assetManager =
             IFlareContractRegistry(FLARE_CONTRACT_REGISTRY).getContractAddressByName("AssetManagerFXRP");
 
@@ -34,7 +38,7 @@ contract DeployFlareLockEscrow is Script {
 
         vm.startBroadcast(privateKey);
 
-        escrow = new FlareLockEscrow(fxrpToken, operator);
+        escrow = new FlareLockEscrow(fxrpToken, operator, trustedTee);
 
         vm.stopBroadcast();
 
@@ -43,6 +47,8 @@ contract DeployFlareLockEscrow is Script {
         console2.log("Deployer:", deployer);
 
         console2.log("Operator:", operator);
+
+        console2.log("Trusted FCC TEE:", trustedTee);
 
         console2.log("AssetManagerFXRP:", assetManager);
 

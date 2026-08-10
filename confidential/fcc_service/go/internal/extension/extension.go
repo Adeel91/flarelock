@@ -221,7 +221,16 @@ func (e *Extension) processVerifyAndMatch(
 		)
 	}
 
-	data, err := json.Marshal(match)
+	data, err := encodeSettlementResult(
+		match.MatchCommitment,
+		match.BuyIntentHash,
+		match.SellIntentHash,
+		match.BuyDepositID,
+		match.SellDepositID,
+		match.BaseAmountRaw,
+		match.QuoteAmountRaw,
+		match.ExecutionPriceE18,
+	)
 	if err != nil {
 		return buildResult(
 			action,
@@ -229,7 +238,7 @@ func (e *Extension) processVerifyAndMatch(
 			nil,
 			0,
 			fmt.Errorf(
-				"encoding match result: %w",
+				"encoding settlement result: %w",
 				err,
 			),
 		)

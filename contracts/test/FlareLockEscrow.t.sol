@@ -11,6 +11,8 @@ contract FlareLockEscrowTest is Test {
 
     address private owner = makeAddr("owner");
     address private operator = makeAddr("operator");
+    uint256 private trustedTeePrivateKey = 0xA11CE;
+    address private trustedTee;
     address private alice = makeAddr("alice");
     address private bob = makeAddr("bob");
 
@@ -19,11 +21,13 @@ contract FlareLockEscrowTest is Test {
     bytes32 private matchCommitment = keccak256("match-a");
 
     function setUp() public {
+        trustedTee = vm.addr(trustedTeePrivateKey);
+
         token = new MockERC20();
 
         vm.prank(owner);
 
-        escrow = new FlareLockEscrow(address(token), operator);
+        escrow = new FlareLockEscrow(address(token), operator, trustedTee);
 
         token.mint(alice, 10_000_000);
 
@@ -239,6 +243,157 @@ contract FlareLockEscrowTest is Test {
         vm.stopPrank();
 
         assertNotEq(firstDepositId, secondDepositId);
+    }
+
+    function test_SignedFCCMatchSettlesAtomically() public {
+        (
+            bytes32 buyDepositId,
+            bytes32 sellDepositId,
+            bytes32 commitment,
+            bytes32 instructionId,
+            bytes memory settlementData,
+            bytes memory signature
+        ) = _createSignedSettlement();
+
+        uint256 sellerNativeBefore = alice.balance;
+        uint256 buyerFxrpBefore = token.balanceOf(bob);
+
+        escrow.settleSignedMatch(instructionId, "end", 1, settlementData, signature);
+
+        assertEq(token.balanceOf(bob), buyerFxrpBefore + 1_000_000);
+
+        assertEq(alice.balance, sellerNativeBefore + 175 ether);
+
+        assertEq(address(escrow).balance, 0);
+        assertEq(token.balanceOf(address(escrow)), 0);
+
+        (,, uint256 buyAmount,,,, FlareLockEscrow.DepositState buyState) = escrow.deposits(buyDepositId);
+
+        (,, uint256 sellAmount,,,, FlareLockEscrow.DepositState sellState) = escrow.deposits(sellDepositId);
+
+        assertEq(buyAmount, 0);
+        assertEq(sellAmount, 0);
+
+        assertEq(uint256(buyState), uint256(FlareLockEscrow.DepositState.Settled));
+
+        assertEq(uint256(sellState), uint256(FlareLockEscrow.DepositState.Settled));
+
+        assertTrue(escrow.consumedMatchCommitments(commitment));
+    }
+
+    function test_SignedFCCMatchCannotReplay() public {
+        (,,, bytes32 instructionId, bytes memory settlementData, bytes memory signature) = _createSignedSettlement();
+
+        escrow.settleSignedMatch(instructionId, "end", 1, settlementData, signature);
+
+        vm.expectRevert(FlareLockEscrow.SettlementAlreadyConsumed.selector);
+
+        escrow.settleSignedMatch(instructionId, "end", 1, settlementData, signature);
+    }
+
+    function test_TamperedFCCSettlementIsRejected() public {
+        (,,, bytes32 instructionId, bytes memory settlementData, bytes memory signature) = _createSignedSettlement();
+
+        // uint8 version occupies the final byte of the first ABI word.
+        settlementData[31] = bytes1(uint8(2));
+
+        vm.expectRevert(FlareLockEscrow.InvalidTEE.selector);
+
+        escrow.settleSignedMatch(instructionId, "end", 1, settlementData, signature);
+    }
+
+    function test_ResultSignedByWrongTEEIsRejected() public {
+        (,,, bytes32 instructionId, bytes memory settlementData,) = _createSignedSettlement();
+
+        bytes memory wrongSignature = _signActionResult(0xB0B, instructionId, "end", 1, settlementData);
+
+        vm.expectRevert(FlareLockEscrow.InvalidTEE.selector);
+
+        escrow.settleSignedMatch(instructionId, "end", 1, settlementData, wrongSignature);
+    }
+
+    function _createSignedSettlement()
+        private
+        returns (
+            bytes32 buyDepositId,
+            bytes32 sellDepositId,
+            bytes32 commitment,
+            bytes32 instructionId,
+            bytes memory settlementData,
+            bytes memory signature
+        )
+    {
+        bytes32 buyIntentHash = keccak256("fcc-buy-intent");
+
+        bytes32 sellIntentHash = keccak256("fcc-sell-intent");
+
+        commitment = keccak256("fcc-match-commitment");
+
+        instructionId = keccak256("fcc-instruction");
+
+        uint64 expiry = uint64(block.timestamp + 1 hours);
+
+        vm.deal(bob, 200 ether);
+
+        vm.prank(bob);
+
+        buyDepositId = escrow.depositNative{value: 175 ether}(buyIntentHash, expiry);
+
+        vm.startPrank(alice);
+
+        token.approve(address(escrow), 1_000_000);
+
+        sellDepositId = escrow.depositFXRP(1_000_000, sellIntentHash, expiry);
+
+        vm.stopPrank();
+
+        vm.startPrank(operator);
+
+        escrow.lockDeposit(buyDepositId, commitment);
+
+        escrow.lockDeposit(sellDepositId, commitment);
+
+        vm.stopPrank();
+
+        settlementData = abi.encode(
+            uint8(1),
+            bytes32("FLARELOCK_SETTLEMENT"),
+            commitment,
+            buyIntentHash,
+            sellIntentHash,
+            buyDepositId,
+            sellDepositId,
+            uint256(1_000_000),
+            uint256(175 ether),
+            uint256(175 ether)
+        );
+
+        signature = _signActionResult(trustedTeePrivateKey, instructionId, "end", 1, settlementData);
+    }
+
+    function _signActionResult(
+        uint256 privateKey,
+        bytes32 instructionId,
+        string memory submissionTag,
+        uint8 status,
+        bytes memory settlementData
+    ) private returns (bytes memory signature) {
+        bytes32 actionResultHash = keccak256(
+            abi.encodePacked(keccak256(settlementData), instructionId, keccak256(bytes(submissionTag)), bytes1(status))
+        );
+
+        bytes32 payloadHash = keccak256(abi.encode(bytes32("TEE_ACTION_RESULT"), uint256(114), actionResultHash));
+
+        bytes32 ethSignedHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", payloadHash));
+
+        (uint8 v, bytes32 r, bytes32 sigS) = vm.sign(privateKey, ethSignedHash);
+
+        // go-ethereum crypto.Sign emits V as 0/1.
+        // Foundry vm.sign emits 27/28, so normalize it to the
+        // exact FCC signature representation.
+        uint8 normalizedV = v - 27;
+
+        signature = abi.encodePacked(r, sigS, normalizedV);
     }
 
     function _depositNative() private returns (bytes32 depositId) {

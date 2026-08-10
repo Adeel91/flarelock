@@ -469,34 +469,43 @@ func TestRealTeeNodeDecryptsAndMatchesEncryptedPayload(
 		)
 	}
 
-	var match appTypes.MatchResult
-
-	if err := json.Unmarshal(
-		result.Data,
-		&match,
-	); err != nil {
+	settlement, err := decodeSettlementResult(result.Data)
+	if err != nil {
 		t.Fatal(err)
 	}
 
-	if match.MatchCommitment ==
-		(common.Hash{}) {
+	if settlement.Version != 1 {
+		t.Fatalf(
+			"unexpected settlement version: %d",
+			settlement.Version,
+		)
+	}
+
+	var expectedDomain [32]byte
+	copy(expectedDomain[:], []byte(settlementDomain))
+
+	if settlement.Domain != expectedDomain {
+		t.Fatal("unexpected settlement domain")
+	}
+
+	if settlement.MatchCommitment == (common.Hash{}) {
 		t.Fatal(
 			"expected non-zero execution commitment",
 		)
 	}
 
-	if match.BaseAmountRaw != "1000000" {
+	if settlement.BaseAmountRaw.String() != "1000000" {
 		t.Fatalf(
 			"unexpected fill amount: %s",
-			match.BaseAmountRaw,
+			settlement.BaseAmountRaw.String(),
 		)
 	}
 
-	if match.ExecutionPriceE18 !=
+	if settlement.ExecutionPriceE18.String() !=
 		"175000000000000000000" {
 		t.Fatalf(
 			"unexpected execution price: %s",
-			match.ExecutionPriceE18,
+			settlement.ExecutionPriceE18.String(),
 		)
 	}
 
@@ -512,6 +521,6 @@ func TestRealTeeNodeDecryptsAndMatchesEncryptedPayload(
 
 	t.Logf(
 		"match commitment: %s",
-		match.MatchCommitment.Hex(),
+		settlement.MatchCommitment.Hex(),
 	)
 }
