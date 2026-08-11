@@ -3,30 +3,55 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
+import { useState } from "react";
 
+import { FlareLockLogo } from "@/components/brand/asset-icons";
 import { ConnectWallet } from "@/components/connect-wallet";
+import { QuickTradeRail } from "@/components/console/quick-trade-rail";
+import { useFlareWallet } from "@/components/wallet/wallet-provider";
 
 type ProductShellProps = {
   children: ReactNode;
-  title?: string;
+  title: string;
+  rightRail?: ReactNode;
+  hideRightRail?: boolean;
 };
 
 const navigation = [
   {
-    label: "Market",
-    href: "/markets/fxrp-c2flr",
+    label: "Home",
+    href: "/overview",
     icon: (
-      <svg fill="none" height="18" viewBox="0 0 24 24" width="18">
-        <title>Market</title>
+      <svg aria-hidden="true" className="h-[18px] w-[18px]" viewBox="0 0 24 24">
         <path
-          d="M4 17l5-5 4 3 7-8"
+          d="M4 10.5 12 4l8 6.5V20H5a1 1 0 0 1-1-1v-8.5Z"
+          fill="none"
+          stroke="currentColor"
+          strokeLinejoin="round"
+          strokeWidth="1.7"
+        />
+
+        <path d="M9 20v-6h6v6" fill="none" stroke="currentColor" strokeWidth="1.7" />
+      </svg>
+    ),
+  },
+  {
+    label: "Markets",
+    href: "/markets",
+    icon: (
+      <svg aria-hidden="true" className="h-[18px] w-[18px]" viewBox="0 0 24 24">
+        <path
+          d="m4 17 5-5 4 3 7-8"
+          fill="none"
           stroke="currentColor"
           strokeLinecap="round"
           strokeLinejoin="round"
           strokeWidth="1.8"
         />
+
         <path
           d="M16 7h4v4"
+          fill="none"
           stroke="currentColor"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -36,28 +61,39 @@ const navigation = [
     ),
   },
   {
-    label: "Yield",
-    href: "/yield",
+    label: "Assets",
+    href: "/assets",
     icon: (
-      <svg fill="none" height="18" viewBox="0 0 24 24" width="18">
-        <title>Yield</title>
+      <svg aria-hidden="true" className="h-[18px] w-[18px]" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" fill="none" r="8" stroke="currentColor" strokeWidth="1.7" />
+
+        <circle cx="12" cy="12" fill="currentColor" r="2.4" />
+      </svg>
+    ),
+  },
+  {
+    label: "Earn",
+    href: "/earn",
+    icon: (
+      <svg aria-hidden="true" className="h-[18px] w-[18px]" viewBox="0 0 24 24">
         <path
-          d="M12 3v18M17 7.5c0-1.7-2.2-3-5-3s-5 1.3-5 3 2.2 3 5 3 5 1.3 5 3-2.2 3-5 3-5-1.3-5-3"
+          d="M12 3v18M16.5 7c0-1.6-2-2.8-4.5-2.8S7.5 5.4 7.5 7 9.5 9.8 12 9.8s4.5 1.2 4.5 2.8-2 2.8-4.5 2.8S7.5 14.2 7.5 12.6"
+          fill="none"
           stroke="currentColor"
           strokeLinecap="round"
-          strokeWidth="1.8"
+          strokeWidth="1.7"
         />
       </svg>
     ),
   },
   {
     label: "Redeem",
-    href: "/redeem",
+    href: "/withdraw",
     icon: (
-      <svg fill="none" height="18" viewBox="0 0 24 24" width="18">
-        <title>Redeem</title>
+      <svg aria-hidden="true" className="h-[18px] w-[18px]" viewBox="0 0 24 24">
         <path
-          d="M7 7h11l-3-3M17 17H6l3 3"
+          d="M5 12h13M14 7l5 5-5 5"
+          fill="none"
           stroke="currentColor"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -68,112 +104,158 @@ const navigation = [
   },
 ];
 
-export function ProductShell({ children, title }: ProductShellProps) {
+export function ProductShell({
+  children,
+  title,
+  rightRail,
+  hideRightRail = false,
+}: ProductShellProps) {
   const pathname = usePathname();
 
+  const { connect, isConnected, status } = useFlareWallet();
+
+  const [connectError, setConnectError] = useState<string | null>(null);
+
+  async function connectWallet() {
+    setConnectError(null);
+
+    try {
+      await connect();
+    } catch (error) {
+      setConnectError(error instanceof Error ? error.message : "Unable to connect MetaMask.");
+    }
+  }
+
   return (
-    <main className="page-canvas">
-      <div className="product-topbar">
-        <div className="product-topbar-inner">
-          <div className="flex items-center gap-5">
-            <Link className="flex items-center gap-3" href="/">
-              <div className="grid h-9 w-9 place-items-center rounded-full bg-[#e62058] text-sm font-bold text-white">
-                F
-              </div>
+    <main className="min-h-screen bg-white text-[#101217]">
+      <header className="sticky top-0 z-[70] flex h-[66px] items-center border-b border-slate-200 bg-white/95 px-[18px] backdrop-blur-xl">
+        <Link href="/">
+          <FlareLockLogo />
+        </Link>
 
-              <span className="hidden text-[18px] font-bold tracking-[-0.035em] sm:block">
-                FlareLock
-              </span>
-            </Link>
+        <div className="ml-4 hidden items-center gap-4 sm:flex">
+          <span className="h-5 w-px bg-slate-200" />
 
-            {title && (
-              <>
-                <span className="hidden h-5 w-px bg-slate-200 sm:block" />
-                <span className="hidden text-sm font-semibold text-slate-500 sm:block">
-                  {title}
-                </span>
-              </>
-            )}
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="live-pulse hidden rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 md:block">
-              Coston2 live
-            </div>
-
-            <ConnectWallet />
-          </div>
+          <span className="text-[13px] font-medium text-slate-500">{title}</span>
         </div>
-      </div>
 
-      <div className="flex">
-        <aside className="product-sidebar">
-          <div className="sidebar-nav">
+        <div className="ml-auto flex items-center gap-3">
+          {isConnected && (
+            <div className="hidden h-9 items-center gap-2 rounded-[10px] border border-slate-200 bg-white px-3 text-[12px] font-medium text-slate-600 md:flex">
+              <span className="h-[7px] w-[7px] rounded-full bg-emerald-500" />
+              Coston2
+            </div>
+          )}
+
+          <ConnectWallet />
+        </div>
+      </header>
+
+      <div
+        className={
+          hideRightRail
+            ? "grid min-h-[calc(100vh-66px)] grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)]"
+            : "grid min-h-[calc(100vh-66px)] grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)_560px]"
+        }
+      >
+        <aside className="sticky top-[66px] hidden h-[calc(100vh-66px)] flex-col border-r border-slate-200 bg-white px-4 py-5 lg:flex">
+          <nav className="grid gap-1">
             {navigation.map((item) => {
-              const active = pathname?.startsWith(item.href);
+              const active =
+                pathname === item.href ||
+                (item.href !== "/overview" && pathname?.startsWith(`${item.href}/`));
 
               return (
                 <Link
-                  className={`sidebar-link ${active ? "sidebar-link-active" : ""}`}
+                  className={
+                    active
+                      ? "flex h-[48px] items-center gap-3 rounded-[10px] bg-[#eff1f4] px-4 text-[15px] font-semibold text-[#101217]"
+                      : "flex h-[48px] items-center gap-3 rounded-[10px] px-4 text-[15px] font-medium text-slate-600 transition hover:bg-[#f5f6f8] hover:text-[#101217]"
+                  }
                   href={item.href}
                   key={item.href}
                 >
-                  <span className="sidebar-icon">{item.icon}</span>
+                  <span className="grid w-7 place-items-center [&>svg]:h-5 [&>svg]:w-5">
+                    {item.icon}
+                  </span>
+
                   {item.label}
                 </Link>
               );
             })}
-          </div>
+          </nav>
 
-          <div className="mt-8 border-t border-slate-200 pt-7">
-            <p className="px-4 text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">
-              Protocol
+          <div className="mt-auto border-t border-slate-200 px-3 pt-5">
+            <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
+              Network
             </p>
 
-            <div className="mt-3 grid gap-1">
-              <a className="sidebar-link" href="/#technology">
-                <span className="sidebar-icon">
-                  <svg fill="none" height="18" viewBox="0 0 24 24" width="18">
-                    <title>Privacy</title>
-                    <path
-                      d="M12 3l8 4.5V12c0 4.5-3 7.6-8 9-5-1.4-8-4.5-8-9V7.5L12 3z"
-                      stroke="currentColor"
-                      strokeLinejoin="round"
-                      strokeWidth="1.8"
-                    />
-                  </svg>
-                </span>
-                Privacy
-              </a>
+            <div className="mt-3 flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" />
 
-              <Link className="sidebar-link" href="/">
-                <span className="sidebar-icon">
-                  <svg fill="none" height="18" viewBox="0 0 24 24" width="18">
-                    <title>Overview</title>
-                    <path
-                      d="M5 12h14M12 5l7 7-7 7"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="1.8"
-                    />
-                  </svg>
-                </span>
-                Overview
-              </Link>
+              <div>
+                <p className="text-[11px] font-semibold">Flare Testnet</p>
+
+                <p className="mt-0.5 text-[10px] text-slate-400">Coston2</p>
+              </div>
             </div>
-          </div>
-
-          <div className="mt-8 rounded-2xl bg-[#f4f5f7] p-4">
-            <p className="text-xs font-bold text-[#111318]">Private by default</p>
-            <p className="mt-2 text-xs leading-5 text-slate-500">
-              Sensitive execution details stay encrypted before confidential matching.
-            </p>
           </div>
         </aside>
 
-        <div className="product-main">{children}</div>
+        <section className="min-w-0 border-r border-slate-200 bg-white">{children}</section>
+
+        {!hideRightRail && (
+          <aside className="sticky top-[66px] hidden h-[calc(100vh-66px)] overflow-y-auto bg-white lg:block">
+            {rightRail ?? <QuickTradeRail />}
+          </aside>
+        )}
       </div>
+
+      {!isConnected && (
+        <div className="fixed inset-x-0 bottom-0 top-[66px] z-[60] grid place-items-center lg:left-[280px]">
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-[#111318]/20 backdrop-blur-[3px]"
+          />
+
+          <div className="relative z-10 w-[min(430px,calc(100vw-32px))] rounded-[20px] border border-slate-200 bg-white p-8 shadow-[0_30px_90px_rgba(17,19,24,0.18)]">
+            <FlareLockLogo />
+
+            <p className="mt-8 text-[10px] font-bold uppercase tracking-[0.16em] text-[#e62058]">
+              Wallet required
+            </p>
+
+            <h2 className="mt-3 text-[31px] font-semibold leading-[1.05] tracking-[-0.055em]">
+              Connect MetaMask to continue.
+            </h2>
+
+            <p className="mt-4 text-sm leading-7 text-slate-600">
+              FlareLock needs your connected Coston2 wallet to load balances, Firelight positions
+              and private execution state.
+            </p>
+
+            <button
+              className="mt-7 flex h-11 w-full items-center justify-center rounded-[10px] bg-[#e62058] px-5 text-[13px] font-semibold text-white shadow-[0_6px_18px_rgba(230,32,88,0.18)] transition hover:bg-[#ce174d] disabled:opacity-50"
+              disabled={status === "connecting"}
+              onClick={() => void connectWallet()}
+              type="button"
+            >
+              {status === "connecting" ? "Connecting MetaMask" : "Connect MetaMask"}
+            </button>
+
+            {connectError && (
+              <p className="mt-4 text-sm font-medium text-red-600">{connectError}</p>
+            )}
+
+            <Link
+              className="mt-5 block text-center text-[12px] font-medium text-slate-500 hover:text-black"
+              href="/"
+            >
+              Back to website
+            </Link>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

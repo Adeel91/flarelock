@@ -175,7 +175,7 @@ export function FxrpRedemptionPanel() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-400">
-              FAsset redemption
+              Withdrawal request
             </p>
 
             <h2 className="mt-2 text-4xl font-normal tracking-[-0.04em] text-slate-950">

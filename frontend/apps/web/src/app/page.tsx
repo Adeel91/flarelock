@@ -2,19 +2,10 @@ import Link from "next/link";
 
 import { SiteHeader } from "@/components/site-header";
 
-const capabilities = [
-  {
-    title: "Trade privately",
-    text: "Create market, limit, and stop intents without exposing your strategy before execution.",
-  },
-  {
-    title: "Earn with FXRP",
-    text: "Move FTestXRP into the live Firelight vault and manage the full onchain position lifecycle.",
-  },
-  {
-    title: "Return to XRPL",
-    text: "Redeem FTestXRP through AssetManagerFXRP and complete the route back to XRP Ledger.",
-  },
+const rows = [
+  ["FXRP / C2FLR", "166.18", "Private"],
+  ["FBTC / C2FLR", "Coming soon", "FAsset"],
+  ["FDOGE / C2FLR", "Coming soon", "FAsset"],
 ];
 
 export default function HomePage() {
@@ -22,377 +13,232 @@ export default function HomePage() {
     <main className="bg-white">
       <SiteHeader />
 
-      <section className="hero-grid">
-        <div className="hero-noise" />
-
-        <div className="marketing-shell hero-content">
+      <section className="landing-hero">
+        <div className="landing-grid marketing-shell">
           <div className="reveal">
-            <div className="live-pulse inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 shadow-sm">
-              Built on live Flare infrastructure
+            <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 shadow-sm">
+              <span className="landing-live-dot" />
+              Private FAsset execution on Flare
             </div>
 
-            <h1 className="hero-title mt-7">Private execution for interoperable XRP.</h1>
+            <h1 className="landing-title">Trade XRP on Flare without exposing your strategy.</h1>
 
-            <p className="hero-copy">
-              Trade FAssets privately, settle on Flare, earn through Firelight, and return to XRP
-              Ledger when you are done.
+            <p className="landing-copy">
+              FlareLock combines private execution, live Flare pricing, Firelight yield and FAsset
+              withdrawals in one interface.
             </p>
 
             <div className="mt-9 flex flex-wrap gap-3">
-              <Link
-                className="primary-button inline-flex min-h-14 items-center justify-center rounded-full px-8 text-[15px] font-bold"
-                href="/markets/fxrp-c2flr"
-              >
-                Start private trading
+              <Link className="app-primary-button px-7" href="/overview">
+                Open FlareLock
               </Link>
 
-              <Link
-                className="secondary-button inline-flex min-h-14 items-center justify-center rounded-full px-8 text-[15px] font-bold"
-                href="/yield"
-              >
-                Explore FXRP yield
+              <Link className="app-secondary-button px-7" href="/markets">
+                Explore markets
               </Link>
             </div>
 
-            <div className="mt-12 flex flex-wrap gap-8 text-sm">
+            <div className="mt-12 grid max-w-xl grid-cols-3 border-t border-slate-200 pt-6">
               <div>
-                <p className="font-bold text-[#111318]">Encrypted</p>
-                <p className="mt-1 text-slate-500">Execution intents</p>
+                <p className="text-lg font-semibold">Private</p>
+                <p className="mt-1 text-xs text-slate-500">Execution intents</p>
               </div>
 
               <div>
-                <p className="font-bold text-[#111318]">Confidential</p>
-                <p className="mt-1 text-slate-500">FCC matching</p>
+                <p className="text-lg font-semibold">Live</p>
+                <p className="mt-1 text-xs text-slate-500">FTSOv2 pricing</p>
               </div>
 
               <div>
-                <p className="font-bold text-[#111318]">Interoperable</p>
-                <p className="mt-1 text-slate-500">Flare to XRPL</p>
+                <p className="text-lg font-semibold">Native</p>
+                <p className="mt-1 text-xs text-slate-500">FAsset lifecycle</p>
               </div>
             </div>
           </div>
 
-          <div className="hero-visual reveal reveal-delay-1">
-            <div className="terminal-window">
-              <div className="terminal-top">
+          <div className="landing-product-wrap reveal reveal-delay-1">
+            <div className="landing-product">
+              <div className="landing-product-topbar">
                 <div className="flex items-center gap-3">
-                  <div className="asset-stack scale-75 origin-left">
-                    <span>X</span>
-                    <span>F</span>
+                  <div className="grid h-8 w-8 place-items-center rounded-full bg-[#e62058] text-xs font-bold text-white">
+                    F
                   </div>
 
                   <div>
-                    <p className="text-sm font-bold">FXRP / C2FLR</p>
-                    <p className="text-[11px] font-semibold text-slate-400">Private market</p>
+                    <p className="text-xs font-semibold">FlareLock</p>
+                    <p className="text-[9px] text-slate-400">Private markets</p>
                   </div>
                 </div>
 
-                <span className="live-pulse rounded-full bg-[#eaf8f3] px-3 py-1.5 text-[11px] font-bold text-[#08734f]">
-                  Live
-                </span>
+                <div className="rounded-full bg-emerald-50 px-3 py-1.5 text-[9px] font-semibold text-emerald-700">
+                  Coston2 live
+                </div>
               </div>
 
-              <div className="terminal-body">
-                <div className="terminal-chart">
-                  <div className="absolute left-6 top-6">
-                    <p className="text-xs font-semibold text-slate-400">Private midpoint</p>
-                    <p className="mt-1 text-[36px] font-semibold tracking-[-0.06em]">142.35</p>
-                    <p className="mt-1 text-xs font-bold text-[#0b8f62]">+2.18%</p>
+              <div className="landing-app">
+                <aside className="landing-mini-nav">
+                  {["Home", "Markets", "Assets", "Earn", "Withdraw"].map((item, index) => (
+                    <div
+                      className={index === 1 ? "landing-mini-nav-active" : "landing-mini-nav-item"}
+                      key={item}
+                    >
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </aside>
+
+                <div className="landing-market-list">
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                    Markets
+                  </p>
+
+                  <div className="mt-3 grid gap-1">
+                    {rows.map(([pair, price, type], index) => (
+                      <div
+                        className={`landing-market-row ${
+                          index === 0 ? "landing-market-row-live" : ""
+                        }`}
+                        key={pair}
+                      >
+                        <div>
+                          <p className="text-[10px] font-semibold">{pair}</p>
+                          <p className="mt-0.5 text-[8px] text-slate-400">{type}</p>
+                        </div>
+
+                        <p className="text-[9px] font-semibold">{price}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="landing-market-main">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[9px] font-medium text-slate-400">FXRP / C2FLR</p>
+
+                      <p className="mt-1 text-[24px] font-semibold tracking-[-0.055em]">166.18</p>
+                    </div>
+
+                    <span className="text-[9px] font-semibold text-emerald-700">FTSOv2</span>
                   </div>
 
-                  <div className="chart-line">
-                    <svg aria-hidden="true" preserveAspectRatio="none" viewBox="0 0 700 280">
-                      <defs>
-                        <linearGradient id="homeChartFill" x1="0" x2="0" y1="0" y2="1">
-                          <stop offset="0%" stopColor="rgba(230,32,88,0.18)" />
-                          <stop offset="100%" stopColor="rgba(230,32,88,0)" />
-                        </linearGradient>
-                      </defs>
-
+                  <div className="landing-chart">
+                    <svg aria-hidden="true" preserveAspectRatio="none" viewBox="0 0 600 180">
                       <path
-                        d="M0 225 C55 205 85 228 130 195 C175 163 198 180 242 146 C280 117 325 152 365 126 C410 98 443 115 484 79 C527 42 565 93 607 57 C640 31 670 50 700 28 L700 280 L0 280 Z"
-                        fill="url(#homeChartFill)"
+                        className="landing-chart-fill"
+                        d="M0 152 C50 145 82 126 125 134 C175 144 199 103 244 110 C290 116 310 82 356 91 C400 100 431 66 475 74 C520 83 555 43 600 51 L600 180 L0 180 Z"
                       />
 
                       <path
-                        d="M0 225 C55 205 85 228 130 195 C175 163 198 180 242 146 C280 117 325 152 365 126 C410 98 443 115 484 79 C527 42 565 93 607 57 C640 31 670 50 700 28"
-                        fill="none"
-                        stroke="#e62058"
-                        strokeLinecap="round"
-                        strokeWidth="3"
+                        className="landing-chart-path"
+                        d="M0 152 C50 145 82 126 125 134 C175 144 199 103 244 110 C290 116 310 82 356 91 C400 100 431 66 475 74 C520 83 555 43 600 51"
                       />
                     </svg>
                   </div>
-
-                  <div className="absolute bottom-5 left-6 right-6 flex items-center justify-between text-[10px] font-semibold text-slate-400">
-                    <span>09:00</span>
-                    <span>11:00</span>
-                    <span>13:00</span>
-                    <span>15:00</span>
-                  </div>
                 </div>
 
-                <div className="terminal-ticket">
-                  <div className="grid grid-cols-2 rounded-full bg-[#f1f2f4] p-1">
-                    <div className="rounded-full bg-white px-3 py-2 text-center text-xs font-bold shadow-sm">
-                      Sell
-                    </div>
-                    <div className="px-3 py-2 text-center text-xs font-bold text-slate-400">
-                      Buy
-                    </div>
+                <aside className="landing-order-ticket">
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-slate-400">
+                    Execution intent
+                  </p>
+
+                  <p className="mt-2 text-sm font-semibold">FXRP to C2FLR</p>
+
+                  <div className="mt-4 rounded-xl bg-[#f5f6f8] p-3">
+                    <p className="text-[8px] text-slate-400">You pay</p>
+                    <p className="mt-2 text-lg font-semibold">1.00</p>
+                    <p className="text-[8px] font-semibold">FXRP</p>
                   </div>
 
-                  <div className="ticket-field">
-                    <p className="text-[11px] font-semibold text-slate-400">You send</p>
-                    <div className="mt-3 flex items-end justify-between">
-                      <p className="text-[28px] font-semibold tracking-[-0.05em]">1.00</p>
-                      <p className="text-xs font-bold">FXRP</p>
-                    </div>
+                  <div className="mt-3 rounded-xl bg-[#fff0f4] p-3">
+                    <p className="text-[8px] text-[#e62058]">Private receive</p>
+
+                    <p className="mt-2 text-lg font-semibold">166.18</p>
+                    <p className="text-[8px] font-semibold">C2FLR</p>
                   </div>
 
-                  <div className="ticket-field">
-                    <p className="text-[11px] font-semibold text-slate-400">Private receive</p>
-                    <div className="mt-3 flex items-end justify-between">
-                      <p className="text-[28px] font-semibold tracking-[-0.05em]">142.35</p>
-                      <p className="text-xs font-bold">C2FLR</p>
-                    </div>
+                  <div className="mt-4 rounded-xl bg-[#e62058] py-2.5 text-center text-[9px] font-semibold text-white">
+                    Seal private intent
                   </div>
-
-                  <div className="mt-4 rounded-2xl bg-[#fff0f4] p-4">
-                    <p className="text-[11px] font-bold text-[#e62058]">Encrypted intent</p>
-                    <div className="mt-3 flex gap-1">
-                      {Array.from({ length: 8 }).map((_, index) => (
-                        <span className="h-1 flex-1 rounded-full bg-[#e62058]/40" key={index} />
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="mt-4 rounded-2xl bg-[#e62058] py-3 text-center text-xs font-bold text-white">
-                    Seal private order
-                  </div>
-                </div>
+                </aside>
               </div>
             </div>
 
-            <div className="float-one absolute -bottom-2 -left-3 hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-xl md:block">
-              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                Settlement
-              </p>
-              <p className="mt-1 text-sm font-bold">FCC verified</p>
+            <div className="landing-floating-card landing-floating-one">
+              <span className="landing-live-dot" />
+              Live FTSOv2
             </div>
 
-            <div className="float-two absolute right-6 top-0 hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-xl md:block">
-              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                FAsset
-              </p>
-              <p className="mt-1 text-sm font-bold">FTestXRP live</p>
+            <div className="landing-floating-card landing-floating-two">Encrypted intent</div>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-y border-slate-200 bg-[#f7f8fa]">
+        <div className="marketing-shell py-24">
+          <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr]">
+            <div>
+              <p className="product-eyebrow">One product</p>
+
+              <h2 className="mt-4 text-[54px] font-semibold leading-[0.98] tracking-[-0.065em]">
+                The full XRP lifecycle on Flare.
+              </h2>
+            </div>
+
+            <div className="grid gap-px overflow-hidden rounded-[28px] border border-slate-200 bg-slate-200 sm:grid-cols-2">
+              {[
+                ["Trade", "Create private FXRP market, limit and stop execution intents."],
+                ["Assets", "Track available FAssets and capital deployed into protocols."],
+                ["Earn", "Deposit FXRP into Firelight and manage withdrawal periods."],
+                ["Withdraw", "Redeem FXRP and return toward the underlying XRP Ledger."],
+              ].map(([title, body]) => (
+                <div className="bg-white p-8" key={title}>
+                  <p className="text-2xl font-semibold tracking-[-0.04em]">{title}</p>
+
+                  <p className="mt-4 text-sm leading-7 text-slate-600">{body}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      <section className="marketing-shell protocol-section">
-        <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
-          <div>
-            <p className="product-eyebrow">One XRP lifecycle</p>
-            <h2 className="editorial-heading mt-4">Enter Flare. Use XRP. Leave when you want.</h2>
-          </div>
+      <section className="marketing-shell py-24">
+        <p className="product-eyebrow">Infrastructure</p>
 
-          <p className="editorial-copy lg:pb-2">
-            FlareLock turns FAssets into a complete product journey rather than a one way bridge.
-            Trade privately, deploy capital into Firelight, then redeem back toward XRP Ledger.
-          </p>
-        </div>
+        <h2 className="mt-4 max-w-4xl text-[52px] font-semibold leading-[0.99] tracking-[-0.065em]">
+          Built around real Flare infrastructure.
+        </h2>
 
-        <div className="mt-16 grid gap-4 lg:grid-cols-3">
-          {capabilities.map((item, index) => (
-            <div className="group border-t border-slate-200 pt-7" key={item.title}>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#e62058]">0{index + 1}</span>
+        <div className="mt-14 grid gap-4 md:grid-cols-4">
+          {[
+            ["FTSOv2", "Live market reference pricing"],
+            ["FAssets", "Interoperable XRP representation"],
+            ["Firelight", "FXRP vault integration"],
+            ["FCC", "Confidential execution and proofs"],
+          ].map(([title, description]) => (
+            <div className="landing-tech-card" key={title}>
+              <div className="landing-tech-orbit" />
 
-                <span className="text-xl text-slate-300 transition group-hover:translate-x-1 group-hover:text-[#e62058]">
-                  →
-                </span>
-              </div>
+              <p className="relative text-xl font-semibold">{title}</p>
 
-              <h3 className="mt-8 text-[27px] font-semibold tracking-[-0.045em]">{item.title}</h3>
-
-              <p className="mt-3 max-w-sm text-[15px] leading-7 text-slate-600">{item.text}</p>
+              <p className="relative mt-3 text-sm leading-6 text-slate-500">{description}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="bg-[#f6f7f8] py-24" id="technology">
-        <div className="marketing-shell">
-          <p className="product-eyebrow">Product architecture</p>
-
-          <h2 className="editorial-heading mt-4 max-w-[950px]">
-            Privacy where it matters. Proof where it counts.
-          </h2>
-
-          <div className="feature-grid mt-14">
-            <div className="feature-panel feature-panel-7 feature-panel-dark">
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-rose-300">
-                Confidential execution
-              </p>
-
-              <h3 className="mt-5 max-w-xl text-[38px] font-medium leading-[1.04] tracking-[-0.055em]">
-                Intent details stay private before matching.
-              </h3>
-
-              <p className="mt-5 max-w-lg text-[15px] leading-7 text-slate-300">
-                Market side, size, limits and execution conditions are sealed before they enter the
-                matching workflow.
-              </p>
-
-              <div className="flow-line flow-line-one" />
-              <div className="flow-line flow-line-two" />
-
-              <div className="absolute bottom-8 left-8 right-8 flex justify-between">
-                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                  <p className="text-[10px] uppercase tracking-[0.12em] text-slate-400">Input</p>
-                  <p className="mt-1 text-sm font-bold">Encrypted intent</p>
-                </div>
-
-                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                  <p className="text-[10px] uppercase tracking-[0.12em] text-slate-400">Output</p>
-                  <p className="mt-1 text-sm font-bold">Signed result</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="feature-panel feature-panel-5">
-              <p className="product-eyebrow">Firelight</p>
-
-              <h3 className="mt-5 text-[34px] font-semibold leading-[1.04] tracking-[-0.055em]">
-                Keep interoperable XRP productive.
-              </h3>
-
-              <p className="mt-5 text-[15px] leading-7 text-slate-600">
-                Deposit FTestXRP into the live vault, receive shares, request exits and claim the
-                underlying asset when processing completes.
-              </p>
-
-              <Link
-                className="absolute bottom-8 left-8 rounded-full bg-[#111318] px-5 py-3 text-sm font-bold text-white"
-                href="/yield"
-              >
-                Open yield
-              </Link>
-            </div>
-
-            <div className="feature-panel feature-panel-4">
-              <p className="product-eyebrow">FAssets</p>
-
-              <div className="mt-7 grid gap-3">
-                <div className="metric-card">
-                  <p className="text-xs text-slate-500">Asset</p>
-                  <p className="mt-2 text-2xl font-bold tracking-[-0.04em]">FTestXRP</p>
-                </div>
-
-                <div className="metric-card">
-                  <p className="text-xs text-slate-500">Network</p>
-                  <p className="mt-2 text-2xl font-bold tracking-[-0.04em]">Coston2</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="feature-panel feature-panel-8 p-0">
-              <div className="route-visual h-full rounded-[30px]">
-                <div className="route-orbit" />
-
-                <div className="route-core">
-                  <div className="text-center">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.13em] text-white/60">
-                      FlareLock
-                    </p>
-                    <p className="mt-1 text-xl font-bold">Private XRP</p>
-                  </div>
-                </div>
-
-                <div className="route-node route-node-one">
-                  <p className="text-[10px] text-white/50">Origin</p>
-                  <p className="mt-1 text-sm font-bold">XRPL</p>
-                </div>
-
-                <div className="route-node route-node-two">
-                  <p className="text-[10px] text-white/50">Asset</p>
-                  <p className="mt-1 text-sm font-bold">FTestXRP</p>
-                </div>
-
-                <div className="route-node route-node-three">
-                  <p className="text-[10px] text-white/50">Yield</p>
-                  <p className="mt-1 text-sm font-bold">Firelight</p>
-                </div>
-
-                <div className="route-node route-node-four">
-                  <p className="text-[10px] text-white/50">Exit</p>
-                  <p className="mt-1 text-sm font-bold">AssetManagerFXRP</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="marketing-shell py-28">
-        <div className="grid overflow-hidden rounded-[36px] bg-[#111318] lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="p-9 text-white sm:p-14 lg:p-16">
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-rose-300">
-              Live on Coston2
-            </p>
-
-            <h2 className="mt-5 max-w-2xl text-[48px] font-medium leading-[0.98] tracking-[-0.065em] sm:text-[62px]">
-              Put private XRP execution to work.
-            </h2>
-
-            <p className="mt-6 max-w-xl text-[17px] leading-8 text-slate-300">
-              Connect MetaMask, create a private execution intent, manage Firelight yield and redeem
-              back toward XRPL from one interface.
-            </p>
-
-            <Link
-              className="mt-9 inline-flex rounded-full bg-[#e62058] px-7 py-4 text-[15px] font-bold text-white transition hover:bg-[#ce174d]"
-              href="/markets/fxrp-c2flr"
-            >
-              Launch FlareLock
-            </Link>
-          </div>
-
-          <div className="relative min-h-[360px] overflow-hidden bg-[#171a20]">
-            <div className="absolute left-[15%] top-[20%] h-48 w-48 rounded-full border border-white/10" />
-            <div className="absolute left-[35%] top-[34%] h-48 w-48 rounded-full border border-white/10" />
-            <div className="absolute left-[55%] top-[48%] h-48 w-48 rounded-full border border-white/10" />
-
-            <div className="absolute left-1/2 top-1/2 grid h-28 w-28 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-[#e62058] text-3xl font-bold text-white shadow-[0_0_70px_rgba(230,32,88,0.38)]">
+      <footer className="border-t border-slate-200">
+        <div className="marketing-shell flex items-center justify-between py-9">
+          <div className="flex items-center gap-3">
+            <div className="grid h-8 w-8 place-items-center rounded-full bg-[#e62058] text-xs font-bold text-white">
               F
             </div>
-          </div>
-        </div>
-      </section>
 
-      <footer className="border-t border-slate-200 bg-white">
-        <div className="marketing-shell grid gap-8 py-10 sm:grid-cols-2 sm:items-end">
-          <div>
-            <div className="flex items-center gap-3">
-              <div className="grid h-8 w-8 place-items-center rounded-full bg-[#e62058] text-sm font-bold text-white">
-                F
-              </div>
-              <p className="text-lg font-bold tracking-[-0.03em]">FlareLock</p>
-            </div>
-
-            <p className="mt-4 max-w-sm text-sm leading-6 text-slate-500">
-              Private FAsset execution, confidential matching and interoperable XRP products on
-              Flare.
-            </p>
+            <span className="font-semibold">FlareLock</span>
           </div>
 
-          <div className="flex flex-wrap gap-6 text-sm font-semibold text-slate-500 sm:justify-end">
-            <Link href="/markets/fxrp-c2flr">Market</Link>
-            <Link href="/yield">Yield</Link>
-            <Link href="/redeem">Redeem</Link>
-          </div>
+          <p className="text-xs text-slate-400">Private FAsset execution on Flare</p>
         </div>
       </footer>
     </main>
