@@ -48,6 +48,13 @@ export function SiteHeader() {
             Yield
           </Link>
 
+          <Link
+            className="text-[14px] font-medium text-slate-600 transition hover:text-[#111318]"
+            href="/redeem"
+          >
+            Redeem
+          </Link>
+
           <a
             className="text-[14px] font-medium text-slate-600 transition hover:text-[#111318]"
             href="/#how"

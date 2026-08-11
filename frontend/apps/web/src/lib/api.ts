@@ -653,3 +653,128 @@ export async function getFirelightWithdrawals(owner: `0x${string}`): Promise<Fir
 
   return result as FirelightWithdrawals;
 }
+
+export type FxrpRedemptionStatus = {
+  network: {
+    name: "Coston2";
+    chainId: 114;
+  };
+  owner: `0x${string}`;
+  registry: {
+    address: `0x${string}`;
+    lookupName: "AssetManagerFXRP";
+  };
+  assetManager: {
+    address: `0x${string}`;
+    resolution: "Flare Contract Registry";
+  };
+  token: {
+    address: `0x${string}`;
+    symbol: string;
+    decimals: number;
+    resolution: "AssetManagerFXRP.fAsset()";
+  };
+  balance: {
+    raw: string;
+    formatted: string;
+  };
+  minimumRedeemAmount: {
+    raw: string;
+    formatted: string;
+    unit: string;
+  };
+  eligible: boolean;
+  blockNumber: string;
+  checkedAt: string;
+};
+
+export type FxrpRedemptionRequest = {
+  agentVault: `0x${string}`;
+  redeemer: `0x${string}`;
+  requestId: string;
+  paymentAddress: string;
+  valueUBA: string;
+  valueFormatted: string;
+  feeUBA: string;
+  feeFormatted: string;
+  firstUnderlyingBlock: string;
+  lastUnderlyingBlock: string;
+  lastUnderlyingTimestamp: string;
+  deadline: string;
+  paymentReference: `0x${string}`;
+  executor: `0x${string}`;
+  executorFeeNatWei: string;
+};
+
+export type FxrpRedemptionTransaction = {
+  network: {
+    name: "Coston2";
+    chainId: 114;
+  };
+  transactionHash: `0x${string}`;
+  transactionStatus: "success" | "reverted";
+  blockNumber: string;
+  assetManager: {
+    address: `0x${string}`;
+  };
+  token: {
+    address: `0x${string}`;
+    symbol: string;
+    decimals: number;
+  };
+  redemptionRequests: FxrpRedemptionRequest[];
+  incompleteAmounts: Array<{
+    redeemer: `0x${string}`;
+    remainingAmountUBA: string;
+    remainingAmountFormatted: string;
+  }>;
+  requestCount: number;
+  explorerUrl: string;
+  checkedAt: string;
+};
+
+async function readApiError(response: Response, fallback: string) {
+  try {
+    const result = (await response.json()) as {
+      message?: string | string[];
+    };
+
+    if (Array.isArray(result.message)) {
+      return result.message.join(" ");
+    }
+
+    if (typeof result.message === "string") {
+      return result.message;
+    }
+  } catch {
+    // Use the fallback below.
+  }
+
+  return fallback;
+}
+
+export async function getFxrpRedemptionStatus(owner: `0x${string}`): Promise<FxrpRedemptionStatus> {
+  const response = await fetch(`${apiUrl}/fassets/fxrp/redemption/${owner}`, {
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response, "FXRP redemption status is unavailable."));
+  }
+
+  return (await response.json()) as FxrpRedemptionStatus;
+}
+
+export async function getFxrpRedemptionTransaction(
+  hash: `0x${string}`,
+): Promise<FxrpRedemptionTransaction> {
+  const response = await fetch(`${apiUrl}/fassets/fxrp/redemption/tx/${hash}`, {
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response, "FXRP redemption evidence is unavailable."));
+  }
+
+  return (await response.json()) as FxrpRedemptionTransaction;
+}
