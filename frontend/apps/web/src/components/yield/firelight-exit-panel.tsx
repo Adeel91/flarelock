@@ -224,11 +224,11 @@ export function FirelightExitPanel() {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-400">
-            Exit and yield
+            Vault exit
           </p>
 
           <h2 className="mt-2 text-4xl font-normal tracking-[-0.04em] text-slate-950">
-            Manage your Firelight position
+            Withdraw from Firelight
           </h2>
 
           <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600">

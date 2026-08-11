@@ -179,7 +179,7 @@ export function FxrpRedemptionPanel() {
             </p>
 
             <h2 className="mt-2 text-4xl font-normal tracking-[-0.04em] text-slate-950">
-              Return FTestXRP to XRPL
+              Create redemption
             </h2>
 
             <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600">

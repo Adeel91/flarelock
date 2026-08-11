@@ -1,32 +1,53 @@
 import type { Metadata } from "next";
 
 import { FxrpRedemptionPanel } from "@/components/fasset/fxrp-redemption-panel";
+import { ProductShell } from "@/components/product-shell";
 
 export const metadata: Metadata = {
   title: "Redeem FTestXRP | FlareLock",
-  description:
-    "Redeem Coston2 FTestXRP through the live Flare FAssets Asset Manager to an XRPL Testnet address.",
+  description: "Redeem Coston2 FTestXRP through the Flare FAssets Asset Manager toward XRP Ledger.",
 };
 
 export default function RedeemPage() {
   return (
-    <main className="site-shell py-12 sm:py-16">
-      <div className="mb-8 max-w-3xl">
-        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#d9154f]">
-          Interoperable exit
-        </p>
+    <ProductShell title="Redeem">
+      <section className="product-content">
+        <div className="market-toolbar">
+          <div>
+            <p className="product-eyebrow">Interoperable exit</p>
 
-        <h1 className="mt-3 text-5xl font-normal tracking-[-0.055em] text-slate-950">
-          FTestXRP back to XRP
-        </h1>
+            <h1 className="product-heading">Return to XRP Ledger.</h1>
 
-        <p className="mt-4 text-lg leading-8 text-slate-600">
-          Complete the FAsset lifecycle by requesting underlying Test XRP on XRPL through Flare
-          AssetManagerFXRP.
-        </p>
-      </div>
+            <p className="product-description">
+              Redeem your FTestXRP through the live Flare FAssets Asset Manager. FlareLock creates
+              the onchain redemption request and exposes the evidence needed to track the XRP side
+              of the payment.
+            </p>
+          </div>
+        </div>
 
-      <FxrpRedemptionPanel />
-    </main>
+        <div className="mb-6 overflow-hidden rounded-[28px] bg-[#111318] p-6 text-white sm:p-8">
+          <div className="flex flex-wrap items-center justify-between gap-6">
+            {[
+              ["01", "FTestXRP", "Coston2 asset"],
+              ["02", "AssetManagerFXRP", "Redemption"],
+              ["03", "XRPL", "Underlying XRP"],
+            ].map(([number, title, subtitle], index) => (
+              <div className="flex items-center gap-5" key={number}>
+                <div>
+                  <p className="text-[10px] font-bold text-rose-300">{number}</p>
+                  <p className="mt-1 text-lg font-bold">{title}</p>
+                  <p className="text-xs text-slate-400">{subtitle}</p>
+                </div>
+
+                {index < 2 && <span className="hidden text-2xl text-white/25 md:block">→</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <FxrpRedemptionPanel />
+      </section>
+    </ProductShell>
   );
 }

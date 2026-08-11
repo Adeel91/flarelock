@@ -1,32 +1,100 @@
 "use client";
 
 import { coston2 } from "@flarelock/web3/chains";
+
 import { ConvertTicket } from "@/components/console/convert-ticket";
 import { LiveChainBaseline } from "@/components/console/live-chain-baseline";
+import { MarketChartPanel } from "@/components/console/market-chart-panel";
 import { OrderBookPanel } from "@/components/console/order-book-panel";
-import { SiteHeader } from "@/components/site-header";
+import { ProductShell } from "@/components/product-shell";
 import { useFlareWallet } from "@/components/wallet/wallet-provider";
 
-function LockedConvert() {
+function MarketHeader({ isCoston2 }: { isCoston2: boolean }) {
   return (
-    <main className="min-h-screen bg-white">
-      <SiteHeader />
+    <div className="market-toolbar">
+      <div className="market-pair">
+        <div className="asset-stack">
+          <span>X</span>
+          <span>F</span>
+        </div>
 
-      <section className="mx-auto grid min-h-[calc(100vh-77px)] max-w-[1440px] gap-12 px-8 py-14 lg:grid-cols-[1fr_480px] lg:items-center">
         <div>
-          <h1 className="max-w-4xl text-[4.5rem] font-normal leading-[1.02] tracking-[-0.055em] text-[#0a0b0d]">
-            Connect wallet to open the private market
-          </h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-[30px] font-semibold tracking-[-0.045em]">FXRP / C2FLR</h1>
 
-          <p className="mt-7 max-w-2xl text-[1.25rem] leading-8 text-slate-600">
-            Use your Coston2 wallet to preview quotes, order book liquidity, risk checks, and sealed
-            intent flow.
+            <span className="rounded-full bg-[#fff0f4] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-[#e62058]">
+              Private
+            </span>
+          </div>
+
+          <p className="mt-1 text-sm text-slate-500">Confidential FAsset execution</p>
+        </div>
+      </div>
+
+      <div className="market-stat-strip">
+        <div>
+          <p className="market-stat-label">Network</p>
+          <p
+            className={
+              isCoston2 ? "market-stat-value text-[#0b8f62]" : "market-stat-value text-amber-600"
+            }
+          >
+            {isCoston2 ? "Coston2 live" : "Switch network"}
           </p>
         </div>
 
-        <OrderBookPanel />
+        <div>
+          <p className="market-stat-label">Price source</p>
+          <p className="market-stat-value">FTSOv2</p>
+        </div>
+
+        <div>
+          <p className="market-stat-label">Matching</p>
+          <p className="market-stat-value">Confidential</p>
+        </div>
+
+        <div>
+          <p className="market-stat-label">Settlement</p>
+          <p className="market-stat-value">Onchain</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LockedConvert() {
+  return (
+    <ProductShell title="Market">
+      <section className="product-content">
+        <MarketHeader isCoston2={false} />
+
+        <div className="grid min-h-[600px] gap-5 xl:grid-cols-[minmax(0,1fr)_400px]">
+          <div className="relative overflow-hidden rounded-[30px] border border-slate-200 bg-white p-8 sm:p-12">
+            <div className="max-w-2xl">
+              <p className="product-eyebrow">Private market</p>
+
+              <h2 className="mt-4 text-[46px] font-medium leading-[0.98] tracking-[-0.06em] sm:text-[64px]">
+                Connect your wallet to trade privately.
+              </h2>
+
+              <p className="mt-6 max-w-xl text-lg leading-8 text-slate-600">
+                Connect MetaMask on Coston2 to access live FTSOv2 pricing, private liquidity, sealed
+                execution intents and settlement evidence.
+              </p>
+            </div>
+
+            <div className="absolute bottom-0 right-0 hidden h-[310px] w-[52%] overflow-hidden rounded-tl-[40px] bg-[#111318] lg:block">
+              <div className="route-orbit scale-75" />
+              <div className="route-core scale-75">
+                <span className="text-xl font-bold">F</span>
+              </div>
+            </div>
+          </div>
+
+          <OrderBookPanel />
+        </div>
       </section>
-    </main>
+    </ProductShell>
   );
 }
 
@@ -35,81 +103,61 @@ export function RiskConsole() {
 
   const isCoston2 = chainId === coston2.id;
   const isWalletReady = isConnected && Boolean(address);
+
   if (!isWalletReady || !address) {
     return <LockedConvert />;
   }
 
   return (
-    <main className="min-h-screen bg-[#f8f9fb]">
-      <SiteHeader />
+    <ProductShell title="Market">
+      <section className="product-content pt-0">
+        <MarketHeader isCoston2={isCoston2} />
 
-      <section className="mx-auto max-w-[1440px] px-8 py-8">
-        <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <h1 className="text-6xl font-normal leading-none tracking-[-0.055em] text-[#0a0b0d]">
-              Private execution
-            </h1>
-
-            <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-600">
-              Create an FXRP/C2FLR execution intent, review the live reference price, and seal it
-              for confidential matching.
-            </p>
+        <div className="market-page-grid">
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_390px]">
+            <MarketChartPanel />
+            <OrderBookPanel />
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            <span className="rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700">
-              Wallet live
-            </span>
-            <span
-              className={
-                isCoston2
-                  ? "rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700"
-                  : "rounded-full bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700"
-              }
-            >
-              {isCoston2 ? "Coston2" : "Wrong network"}
-            </span>
-            <span className="rounded-full bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700">
-              Risk not assessed
-            </span>
-          </div>
-        </div>
-
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
-          <div className="grid gap-6">
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_390px]">
             <ConvertTicket disabled={!isCoston2} />
 
-            <div className="grid gap-6 lg:grid-cols-2">
-              <div className="clean-card rounded-[28px] p-7">
-                <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-400">
-                  Execution path
-                </p>
-
-                <div className="mt-5 grid gap-4">
-                  {[
-                    ["Intent", "Prepare the FXRP/C2FLR execution request and protocol fee."],
-                    [
-                      "Risk",
-                      "Risk scoring is not implemented yet. The current value is a live Flare FTSOv2 reference price.",
-                    ],
-                    ["Seal", "Sign and submit the private execution intent."],
-                    ["Settle", "Matched intents progress to attested Flare settlement."],
-                  ].map(([title, body]) => (
-                    <div className="border-t border-slate-100 pt-4" key={title}>
-                      <p className="text-lg font-medium text-[#0a0b0d]">{title}</p>
-                      <p className="mt-1 text-base leading-7 text-slate-600">{body}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <LiveChainBaseline />
-            </div>
+            <LiveChainBaseline />
           </div>
 
-          <OrderBookPanel />
+          <div className="clean-card rounded-[26px] bg-white p-7">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+              <div className="max-w-xl">
+                <p className="product-eyebrow">Execution lifecycle</p>
+
+                <h2 className="mt-3 text-[30px] font-semibold tracking-[-0.045em]">
+                  Private first. Verifiable after.
+                </h2>
+
+                <p className="mt-3 text-sm leading-7 text-slate-600">
+                  Your execution conditions stay hidden while matching happens. Settlement evidence
+                  is exposed only after the confidential result is ready for verification.
+                </p>
+              </div>
+
+              <div className="grid flex-1 gap-3 sm:grid-cols-4">
+                {[
+                  ["01", "Price", "FTSOv2 reference"],
+                  ["02", "Seal", "Encrypted intent"],
+                  ["03", "Match", "FCC execution"],
+                  ["04", "Settle", "Onchain proof"],
+                ].map(([number, title, text]) => (
+                  <div className="rounded-2xl bg-[#f5f6f8] p-4" key={number}>
+                    <p className="text-[10px] font-bold text-[#e62058]">{number}</p>
+                    <p className="mt-3 text-sm font-bold">{title}</p>
+                    <p className="mt-1 text-xs leading-5 text-slate-500">{text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
-    </main>
+    </ProductShell>
   );
 }
