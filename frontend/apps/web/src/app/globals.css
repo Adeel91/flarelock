@@ -1388,3 +1388,160 @@ a {
     display: none;
   }
 }
+
+@keyframes landingPulse {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(1.01);
+  }
+}
+
+@keyframes landingShimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  50%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes landingFloatA {
+  0%,
+  100% {
+    transform: translate(-50%, 0);
+  }
+
+  50% {
+    transform: translate(-50%, -8px);
+  }
+}
+
+@keyframes landingFloatB {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(8px);
+  }
+}
+
+@keyframes landingFloatC {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes executionLine {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  80% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(300%);
+    opacity: 0;
+  }
+}
+
+@keyframes heroOrbit {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes heroOrbitReverse {
+  from {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+
+  to {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+}
+
+@keyframes heroRingSpin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes heroCenterPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 30px 90px rgba(15, 23, 42, 0.12),
+      0 0 0 0 rgba(230, 32, 88, 0);
+  }
+
+  50% {
+    box-shadow:
+      0 34px 100px rgba(15, 23, 42, 0.15),
+      0 0 0 10px rgba(230, 32, 88, 0.035);
+  }
+}
+
+@keyframes flowLine {
+  0% {
+    transform: translateX(-120%);
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  80% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(360%);
+    opacity: 0;
+  }
+}
+
+@keyframes intentPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 8px 22px rgba(230, 32, 88, 0.18),
+      0 0 0 0 rgba(230, 32, 88, 0);
+  }
+
+  50% {
+    box-shadow:
+      0 8px 24px rgba(230, 32, 88, 0.24),
+      0 0 0 8px rgba(230, 32, 88, 0.08);
+  }
+}
