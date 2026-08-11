@@ -258,7 +258,7 @@ contract FlareLockEscrowTest is Test {
         uint256 sellerNativeBefore = alice.balance;
         uint256 buyerFxrpBefore = token.balanceOf(bob);
 
-        escrow.settleSignedMatch(instructionId, "end", 1, settlementData, signature);
+        escrow.settleSignedMatch(instructionId, "threshold", 1, settlementData, signature);
 
         assertEq(token.balanceOf(bob), buyerFxrpBefore + 1_000_000);
 
@@ -284,11 +284,11 @@ contract FlareLockEscrowTest is Test {
     function test_SignedFCCMatchCannotReplay() public {
         (,,, bytes32 instructionId, bytes memory settlementData, bytes memory signature) = _createSignedSettlement();
 
-        escrow.settleSignedMatch(instructionId, "end", 1, settlementData, signature);
+        escrow.settleSignedMatch(instructionId, "threshold", 1, settlementData, signature);
 
         vm.expectRevert(FlareLockEscrow.SettlementAlreadyConsumed.selector);
 
-        escrow.settleSignedMatch(instructionId, "end", 1, settlementData, signature);
+        escrow.settleSignedMatch(instructionId, "threshold", 1, settlementData, signature);
     }
 
     function test_TamperedFCCSettlementIsRejected() public {
@@ -299,17 +299,17 @@ contract FlareLockEscrowTest is Test {
 
         vm.expectRevert(FlareLockEscrow.InvalidTEE.selector);
 
-        escrow.settleSignedMatch(instructionId, "end", 1, settlementData, signature);
+        escrow.settleSignedMatch(instructionId, "threshold", 1, settlementData, signature);
     }
 
     function test_ResultSignedByWrongTEEIsRejected() public {
         (,,, bytes32 instructionId, bytes memory settlementData,) = _createSignedSettlement();
 
-        bytes memory wrongSignature = _signActionResult(0xB0B, instructionId, "end", 1, settlementData);
+        bytes memory wrongSignature = _signActionResult(0xB0B, instructionId, "threshold", 1, settlementData);
 
         vm.expectRevert(FlareLockEscrow.InvalidTEE.selector);
 
-        escrow.settleSignedMatch(instructionId, "end", 1, settlementData, wrongSignature);
+        escrow.settleSignedMatch(instructionId, "threshold", 1, settlementData, wrongSignature);
     }
 
     function _createSignedSettlement()
@@ -368,7 +368,7 @@ contract FlareLockEscrowTest is Test {
             uint256(175 ether)
         );
 
-        signature = _signActionResult(trustedTeePrivateKey, instructionId, "end", 1, settlementData);
+        signature = _signActionResult(trustedTeePrivateKey, instructionId, "threshold", 1, settlementData);
     }
 
     function _signActionResult(

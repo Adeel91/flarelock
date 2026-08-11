@@ -382,7 +382,9 @@ contract FlareLockEscrow {
             revert InvalidSettlementStatus();
         }
 
-        if (keccak256(bytes(submissionTag)) != keccak256(bytes("end"))) {
+        bytes32 submissionTagHash = keccak256(bytes(submissionTag));
+
+        if (submissionTagHash != keccak256(bytes("threshold")) && submissionTagHash != keccak256(bytes("end"))) {
             revert InvalidSubmissionTag();
         }
 
