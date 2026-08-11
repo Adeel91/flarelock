@@ -189,15 +189,15 @@ export function StakeYieldPanel() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-400">
-              Stake yield
+              Deposit
             </p>
 
             <h2 className="mt-2 text-4xl font-normal tracking-[-0.04em] text-[#0a0b0d]">
-              Put FTestXRP to work
+              Deposit FTestXRP
             </h2>
 
             <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600">
-              Deposit the Coston2 FAsset into Firelight and receive vault shares onchain.
+              Choose an amount, approve the vault once, then deposit into Firelight.
             </p>
           </div>
 

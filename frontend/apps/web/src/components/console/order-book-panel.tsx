@@ -29,7 +29,7 @@ function LevelRows({ levels, side }: { levels: OrderBookLevel[]; side: "bid" | "
     <div className="grid gap-1">
       {levels.slice(0, 8).map((level) => (
         <div
-          className="grid grid-cols-[1fr_1fr_auto] items-center gap-3 rounded-xl px-3 py-2 text-sm hover:bg-slate-50"
+          className="grid grid-cols-[1fr_1fr_auto] items-center gap-3 rounded-xl px-3 py-2 text-[15px] hover:bg-slate-50"
           key={`${side}-${level.price}`}
         >
           <span
@@ -67,10 +67,10 @@ export function OrderBookPanel() {
     <aside className="clean-card h-fit rounded-[28px] p-7">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-400">
+          <p className="text-[15px] font-semibold uppercase tracking-[0.16em] text-slate-400">
             Private order book
           </p>
-          <h2 className="mt-2 text-3xl font-medium tracking-[-0.035em] text-[#0a0b0d]">
+          <h2 className="mt-2 text-[34px] font-medium tracking-[-0.035em] text-[#0a0b0d]">
             FXRP/C2FLR
           </h2>
         </div>
@@ -81,7 +81,7 @@ export function OrderBookPanel() {
       </div>
 
       {orderBook.isLoading ? (
-        <div className="mt-6 rounded-2xl bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">
+        <div className="mt-6 rounded-2xl bg-slate-50 px-4 py-8 text-center text-[14px] text-slate-500">
           Loading private liquidity…
         </div>
       ) : orderBook.isError || !data ? (
@@ -98,7 +98,7 @@ export function OrderBookPanel() {
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
                 Best bid
               </p>
-              <p className="mt-2 text-lg font-semibold text-emerald-700">
+              <p className="mt-2 text-[21px] font-semibold text-emerald-700">
                 {data.bestBid === null ? "Withheld" : priceFormatter.format(data.bestBid)}
               </p>
             </div>
@@ -107,14 +107,14 @@ export function OrderBookPanel() {
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
                 Best ask
               </p>
-              <p className="mt-2 text-lg font-semibold text-rose-700">
+              <p className="mt-2 text-[21px] font-semibold text-rose-700">
                 {data.bestAsk === null ? "Withheld" : priceFormatter.format(data.bestAsk)}
               </p>
             </div>
           </div>
 
           <div className="mt-5 border-t border-slate-100 pt-5">
-            <div className="mb-3 grid grid-cols-[1fr_1fr_auto] gap-3 px-3 text-[11px] font-semibold uppercase tracking-[0.13em] text-slate-400">
+            <div className="mb-3 grid grid-cols-[1fr_1fr_auto] gap-3 px-3 text-[12px] font-semibold uppercase tracking-[0.13em] text-slate-400">
               <span>Ask price</span>
               <span className="text-right">FXRP</span>
               <span>Orders</span>
@@ -125,7 +125,7 @@ export function OrderBookPanel() {
 
           <div className="my-5 rounded-2xl border border-slate-100 px-4 py-3">
             <div className="flex items-center justify-between gap-4">
-              <span className="text-sm text-slate-500">Midpoint</span>
+              <span className="text-[14px] text-slate-500">Midpoint</span>
               <span className="font-semibold text-[#0a0b0d]">
                 {data.midpoint === null
                   ? "Not public"
@@ -134,7 +134,7 @@ export function OrderBookPanel() {
             </div>
 
             <div className="mt-2 flex items-center justify-between gap-4">
-              <span className="text-sm text-slate-500">Spread</span>
+              <span className="text-[14px] text-slate-500">Spread</span>
               <span className="text-sm font-medium text-slate-700">
                 {data.spread === null || data.spreadPercent === null
                   ? "Not public"
@@ -144,7 +144,7 @@ export function OrderBookPanel() {
           </div>
 
           <div>
-            <div className="mb-3 grid grid-cols-[1fr_1fr_auto] gap-3 px-3 text-[11px] font-semibold uppercase tracking-[0.13em] text-slate-400">
+            <div className="mb-3 grid grid-cols-[1fr_1fr_auto] gap-3 px-3 text-[12px] font-semibold uppercase tracking-[0.13em] text-slate-400">
               <span>Bid price</span>
               <span className="text-right">FXRP</span>
               <span>Orders</span>
@@ -158,7 +158,9 @@ export function OrderBookPanel() {
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
                 Private buys
               </p>
-              <p className="mt-2 text-xl font-semibold text-[#0a0b0d]">{data.activeBuyIntents}</p>
+              <p className="mt-2 text-[24px] font-semibold text-[#0a0b0d]">
+                {data.activeBuyIntents}
+              </p>
               <p className="mt-1 text-xs text-slate-500">{data.withheldBuyIntents} withheld</p>
             </div>
 
@@ -166,7 +168,9 @@ export function OrderBookPanel() {
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
                 Private sells
               </p>
-              <p className="mt-2 text-xl font-semibold text-[#0a0b0d]">{data.activeSellIntents}</p>
+              <p className="mt-2 text-[24px] font-semibold text-[#0a0b0d]">
+                {data.activeSellIntents}
+              </p>
               <p className="mt-1 text-xs text-slate-500">{data.withheldSellIntents} withheld</p>
             </div>
           </div>

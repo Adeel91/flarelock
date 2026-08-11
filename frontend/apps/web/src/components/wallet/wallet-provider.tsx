@@ -5,6 +5,7 @@ import {
   type ReactNode,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -18,6 +19,8 @@ type EthereumProvider = {
     method: string;
     params?: unknown[] | Record<string, unknown>;
   }) => Promise<unknown>;
+  on?: (event: string, handler: (...args: unknown[]) => void) => void;
+  removeListener?: (event: string, handler: (...args: unknown[]) => void) => void;
 };
 
 type EthereumWindow = Window & {
@@ -116,6 +119,67 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
     return provider;
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function restoreWallet() {
+      try {
+        const provider = getProvider();
+
+        const [accounts, currentChain] = await Promise.all([
+          provider.request({ method: "eth_accounts" }),
+          provider.request({ method: "eth_chainId" }),
+        ]);
+
+        if (cancelled) {
+          return;
+        }
+
+        const nextAddress = parseAddress(accounts);
+
+        setAddress(nextAddress);
+        setChainId(parseChainId(currentChain));
+        setStatus(nextAddress ? "connected" : "idle");
+        setErrorMessage(null);
+      } catch {
+        if (!cancelled) {
+          setStatus("idle");
+        }
+      }
+    }
+
+    const provider = (() => {
+      try {
+        return getProvider();
+      } catch {
+        return null;
+      }
+    })();
+
+    const handleAccountsChanged = (...args: unknown[]) => {
+      const nextAddress = parseAddress(args[0]);
+
+      setAddress(nextAddress);
+      setStatus(nextAddress ? "connected" : "idle");
+      setErrorMessage(null);
+    };
+
+    const handleChainChanged = (...args: unknown[]) => {
+      setChainId(parseChainId(args[0]));
+    };
+
+    provider?.on?.("accountsChanged", handleAccountsChanged);
+    provider?.on?.("chainChanged", handleChainChanged);
+
+    void restoreWallet();
+
+    return () => {
+      cancelled = true;
+      provider?.removeListener?.("accountsChanged", handleAccountsChanged);
+      provider?.removeListener?.("chainChanged", handleChainChanged);
+    };
+  }, [getProvider]);
 
   const connect = useCallback(async () => {
     setStatus("connecting");

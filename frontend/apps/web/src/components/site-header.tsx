@@ -1,84 +1,46 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+
 import { ConnectWallet } from "@/components/connect-wallet";
 
-const marketUrl = "/markets/fxrp-c2flr";
-
 export function SiteHeader() {
-  const pathname = usePathname();
-  const isMarket = pathname?.startsWith("/markets");
-
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/88 backdrop-blur-xl">
-      <nav className="site-shell flex h-[76px] items-center justify-between">
-        <Link className="group flex items-center gap-3" href="/">
-          <div className="pulse-ring grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-[#ef3568] to-[#d9154f] text-[18px] font-semibold text-white shadow-lg shadow-rose-600/20 transition group-hover:scale-[1.03]">
+    <header className="sticky top-0 z-50 border-b border-[#e7e9ed] bg-white/95 backdrop-blur-xl">
+      <nav className="marketing-shell flex h-[70px] items-center justify-between">
+        <Link className="flex items-center gap-3" href="/">
+          <div className="grid h-9 w-9 place-items-center rounded-full bg-[#e62058] text-[15px] font-bold text-white">
             F
           </div>
 
-          <div>
-            <p className="text-[20px] font-semibold tracking-[-0.025em] text-[#111318]">
-              FlareLock
-            </p>
-            <p className="text-[12px] font-medium text-slate-500">Private FAsset execution</p>
-          </div>
+          <span className="text-[19px] font-bold tracking-[-0.035em]">FlareLock</span>
         </Link>
 
-        <div className="hidden items-center gap-9 md:flex">
-          <Link
-            className="text-[14px] font-medium text-slate-600 transition hover:text-[#111318]"
-            href="/"
-          >
-            Home
+        <div className="hidden items-center gap-8 md:flex">
+          <Link className="text-sm font-semibold text-slate-600 hover:text-black" href="/markets">
+            Markets
           </Link>
 
-          <Link
-            className="text-[14px] font-medium text-slate-600 transition hover:text-[#111318]"
-            href={marketUrl}
-          >
-            Market
+          <Link className="text-sm font-semibold text-slate-600 hover:text-black" href="/assets">
+            Assets
           </Link>
 
-          <Link
-            className="text-[14px] font-medium text-slate-600 transition hover:text-[#111318]"
-            href="/yield"
-          >
-            Yield
+          <Link className="text-sm font-semibold text-slate-600 hover:text-black" href="/earn">
+            Earn
           </Link>
 
-          <Link
-            className="text-[14px] font-medium text-slate-600 transition hover:text-[#111318]"
-            href="/redeem"
-          >
-            Redeem
+          <Link className="text-sm font-semibold text-slate-600 hover:text-black" href="/withdraw">
+            Withdraw
           </Link>
-
-          <a
-            className="text-[14px] font-medium text-slate-600 transition hover:text-[#111318]"
-            href="/#how"
-          >
-            How it works
-          </a>
-
-          <a
-            className="text-[14px] font-medium text-slate-600 transition hover:text-[#111318]"
-            href="/#technology"
-          >
-            Technology
-          </a>
         </div>
 
         <div className="flex items-center gap-3">
-          {!isMarket && (
-            <Link
-              className="primary-button hidden rounded-full px-6 py-3 text-[14px] font-semibold sm:block"
-              href={marketUrl}
-            >
-              Open market
-            </Link>
-          )}
+          <Link
+            className="hidden rounded-full bg-[#f1f2f4] px-5 py-2.5 text-[13px] font-bold sm:block"
+            href="/markets"
+          >
+            Launch app
+          </Link>
 
           <ConnectWallet />
         </div>
