@@ -6,16 +6,36 @@
   "flareContractRegistry": "0xaD67FE66660Fb8dFE9d6b1b4240d8650e30F6019",
   "assetManagerFXRP": "0xc1Ca88b937d0b528842F95d5731ffB586f4fbDFA",
   "fTestXRP": "0x0b6A3645c240605887a5532109323A3E12273dc7",
-  "flareLockEscrow": "0xe939Ce57848D35BB6b634573f2475553C0f8D132",
+  "flareLockEscrow": "0x71A27096640D3D24545D505B5F830ea3d94355d6",
   "owner": "0xAC4021842c7Cf0b19b51a2e96fCd405e4bCDbB73",
   "operator": "0xAC4021842c7Cf0b19b51a2e96fCd405e4bCDbB73",
-  "deploymentTransaction": "0xeec95a0d65ad62f363c8899daef0092f45a0afb13f8330a94a9377bc9f6cbd47",
-  "deploymentBlock": 33833973,
-  "nativeDepositTest": {
-    "depositTransaction": "0x4516f0a28ab066ba21467ed220e681ef21f22966a9442ee1015b2acc606781ff",
-    "withdrawalTransaction": "0xb91a6e2b82217befd633b638af06d6d056f5a49367ff6204e1943da55a5ba578",
-    "depositId": "0x5a9546c3fd891ec1477cc71ee095704d7484a9f2c0642d9c4276a4fd0645c610",
-    "amountWei": "100000000000000000",
+  "deploymentTransaction": "0x0591d197c17cabf5e3e4e4a47a160d0cc207d1c2e01d72896037a2410eea52d3",
+  "deploymentBlock": 33914200,
+  "trustedTee": "0xea5699F5FFEF2855873b962eCCa65ec5aE235dA0",
+  "liveSettlementProof": {
+    "fccInstructionId": "0xa55c839231d207d3b835c221a68d01b2238d154fc4c616cb00db7f92f1bce0e2",
+    "fccTransaction": "0x8567f724951f9a3cf049db26f0e735e432b17d062881687b0d34afdac43561c1",
+    "submissionTag": "threshold",
+    "status": 1,
+    "matchCommitment": "0x5b53b69a53ec85ad1fae12153a4435a1d7bf8a9e55f25c01532913bf8d4308ed",
+    "buyerDepositId": "0x8fcf9acd43ed03ed2776c6634ffb7ebaac8fe9d28c0a67cdbcc1b8fe3ed7ab25",
+    "sellerDepositId": "0x06f5481f8485d248c9bff9bf9659effe29cd82ddd4c276b10c28b257d9dfac91",
+    "baseAmountRaw": "100000",
+    "quoteAmountRaw": "17500000000000000000",
+    "executionPriceE18": "175000000000000000000",
+    "settlementTransaction": "0x989805af6f3653d350ad1d4d8a121a021cda0cce6bf88257accc9b63f8fc7457",
     "result": "passed"
+  },
+  "historicalEscrowProof": {
+    "escrow": "0xe939Ce57848D35BB6b634573f2475553C0f8D132",
+    "deploymentTransaction": "0xeec95a0d65ad62f363c8899daef0092f45a0afb13f8330a94a9377bc9f6cbd47",
+    "deploymentBlock": 33833973,
+    "nativeDepositTest": {
+      "depositTransaction": "0x4516f0a28ab066ba21467ed220e681ef21f22966a9442ee1015b2acc606781ff",
+      "withdrawalTransaction": "0xb91a6e2b82217befd633b638af06d6d056f5a49367ff6204e1943da55a5ba578",
+      "depositId": "0x5a9546c3fd891ec1477cc71ee095704d7484a9f2c0642d9c4276a4fd0645c610",
+      "amountWei": "100000000000000000",
+      "result": "passed"
+    }
   }
 }

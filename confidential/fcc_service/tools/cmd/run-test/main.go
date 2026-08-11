@@ -1,9 +1,11 @@
 package main
 
 import (
+	"crypto/ecdsa"
 	"flag"
 	"fmt"
 	"math/big"
+	"os"
 	"strings"
 	"time"
 
@@ -152,7 +154,26 @@ func main() {
 		target.TeeID.Hex(),
 	)
 
-	request := buildTestRequest()
+	request, err := buildTestRequest()
+	if err != nil {
+		fccutils.FatalWithCause(err)
+	}
+
+	logger.Infof("Buyer address: %s", request.Buy.Owner)
+	logger.Infof("Buyer intent hash: %s", request.Buy.IntentHash)
+	logger.Infof("Buyer deposit ID: %s", request.Buy.DepositID)
+
+	logger.Infof("Seller address: %s", request.Sell.Owner)
+	logger.Infof("Seller intent hash: %s", request.Sell.IntentHash)
+	logger.Infof("Seller deposit ID: %s", request.Sell.DepositID)
+
+	if strings.EqualFold(
+		strings.TrimSpace(os.Getenv("PREPARE_ONLY")),
+		"true",
+	) {
+		logger.Infof("PREPARE_ONLY complete; no FCC instruction sent.")
+		return
+	}
 
 	ciphertext, err :=
 		instrutils.EncryptForTEE(
@@ -205,56 +226,218 @@ func main() {
 	)
 }
 
-func buildTestRequest() privateMatchRequest {
-	now := time.Now().UTC()
+func buildTestRequest() (privateMatchRequest, error) {
+	buyerKey, err := privateKeyFromEnv(
+		"BUYER_PRIVATE_KEY",
+	)
+	if err != nil {
+		return privateMatchRequest{}, err
+	}
+
+	sellerKey, err := privateKeyFromEnv(
+		"SELLER_PRIVATE_KEY",
+	)
+	if err != nil {
+		return privateMatchRequest{}, err
+	}
+
+	buyerAddress :=
+		crypto.PubkeyToAddress(
+			buyerKey.PublicKey,
+		)
+
+	sellerAddress :=
+		crypto.PubkeyToAddress(
+			sellerKey.PublicKey,
+		)
+
+	if err := verifyExpectedAddress(
+		"EXPECTED_BUYER_ADDRESS",
+		buyerAddress,
+	); err != nil {
+		return privateMatchRequest{}, err
+	}
+
+	if err := verifyExpectedAddress(
+		"EXPECTED_SELLER_ADDRESS",
+		sellerAddress,
+	); err != nil {
+		return privateMatchRequest{}, err
+	}
+
+	if buyerAddress == sellerAddress {
+		return privateMatchRequest{}, errors.New(
+			"buyer and seller must be different wallets",
+		)
+	}
+
+	buyerCreatedAt :=
+		strings.TrimSpace(
+			os.Getenv("BUYER_CREATED_AT"),
+		)
+
+	sellerCreatedAt :=
+		strings.TrimSpace(
+			os.Getenv("SELLER_CREATED_AT"),
+		)
 
 	validUntil :=
-		now.
-			Add(time.Hour).
-			Format(time.RFC3339)
+		strings.TrimSpace(
+			os.Getenv("INTENT_VALID_UNTIL"),
+		)
+
+	if buyerCreatedAt == "" ||
+		sellerCreatedAt == "" ||
+		validUntil == "" {
+		return privateMatchRequest{}, errors.New(
+			"BUYER_CREATED_AT, SELLER_CREATED_AT and INTENT_VALID_UNTIL are required",
+		)
+	}
+
+	buyDepositID, err :=
+		depositIDFromEnv(
+			"BUYER_DEPOSIT_ID",
+		)
+	if err != nil {
+		return privateMatchRequest{}, err
+	}
+
+	sellDepositID, err :=
+		depositIDFromEnv(
+			"SELLER_DEPOSIT_ID",
+		)
+	if err != nil {
+		return privateMatchRequest{}, err
+	}
 
 	buy, err := buildSignedIntent(
+		buyerKey,
 		"buy",
 		"C2FLR",
 		"FXRP",
+		"17.5",
+		"0.1",
 		"175",
-		"1",
-		"175",
-		common.HexToHash(
-			"0x2000000000000000000000000000000000000000000000000000000000000001",
-		),
+		buyDepositID,
 		validUntil,
-		now.Format(time.RFC3339Nano),
+		buyerCreatedAt,
 	)
 	if err != nil {
-		fccutils.FatalWithCause(err)
+		return privateMatchRequest{}, err
 	}
 
 	sell, err := buildSignedIntent(
+		sellerKey,
 		"sell",
 		"FXRP",
 		"C2FLR",
-		"1",
+		"0.1",
+		"17",
 		"170",
-		"170",
-		common.HexToHash(
-			"0x2000000000000000000000000000000000000000000000000000000000000002",
-		),
+		sellDepositID,
 		validUntil,
-		now.Add(time.Second).Format(time.RFC3339Nano),
+		sellerCreatedAt,
 	)
 	if err != nil {
-		fccutils.FatalWithCause(err)
+		return privateMatchRequest{}, err
 	}
 
 	return privateMatchRequest{
 		Version: 1,
 		Buy:     buy,
 		Sell:    sell,
+	}, nil
+}
+
+func privateKeyFromEnv(
+	name string,
+) (*ecdsa.PrivateKey, error) {
+	value :=
+		strings.TrimPrefix(
+			strings.TrimSpace(
+				os.Getenv(name),
+			),
+			"0x",
+		)
+
+	if value == "" {
+		return nil, errors.Errorf(
+			"%s is required",
+			name,
+		)
 	}
+
+	key, err := crypto.HexToECDSA(value)
+	if err != nil {
+		return nil, errors.Errorf(
+			"parsing %s: %s",
+			name,
+			err,
+		)
+	}
+
+	return key, nil
+}
+
+func verifyExpectedAddress(
+	envName string,
+	actual common.Address,
+) error {
+	expected :=
+		strings.TrimSpace(
+			os.Getenv(envName),
+		)
+
+	if expected == "" {
+		return nil
+	}
+
+	if !common.IsHexAddress(expected) {
+		return errors.Errorf(
+			"%s is not a valid address",
+			envName,
+		)
+	}
+
+	if common.HexToAddress(expected) != actual {
+		return errors.Errorf(
+			"%s mismatch: derived %s",
+			envName,
+			actual.Hex(),
+		)
+	}
+
+	return nil
+}
+
+func depositIDFromEnv(
+	name string,
+) (common.Hash, error) {
+	value :=
+		strings.TrimSpace(
+			os.Getenv(name),
+		)
+
+	if value == "" {
+		// Deposit ID is deliberately excluded from the
+		// wallet-signed intent message and intent hash.
+		// PREPARE_ONLY therefore uses zero here safely.
+		return common.Hash{}, nil
+	}
+
+	if len(value) != 66 ||
+		!strings.HasPrefix(value, "0x") {
+		return common.Hash{}, errors.Errorf(
+			"%s must be a 32-byte 0x-prefixed hash",
+			name,
+		)
+	}
+
+	return common.HexToHash(value), nil
 }
 
 func buildSignedIntent(
+	privateKey *ecdsa.PrivateKey,
 	side string,
 	fromAsset string,
 	toAsset string,
@@ -265,14 +448,6 @@ func buildSignedIntent(
 	validUntil string,
 	createdAt string,
 ) (privateIntent, error) {
-	privateKey, err := crypto.GenerateKey()
-	if err != nil {
-		return privateIntent{}, errors.Errorf(
-			"generating ephemeral intent key: %s",
-			err,
-		)
-	}
-
 	owner := crypto.PubkeyToAddress(
 		privateKey.PublicKey,
 	)
@@ -314,7 +489,7 @@ func buildSignedIntent(
 	)
 	if err != nil {
 		return privateIntent{}, errors.Errorf(
-			"signing ephemeral intent: %s",
+			"signing wallet intent: %s",
 			err,
 		)
 	}
@@ -377,6 +552,40 @@ func verifyResult(
 	}
 
 	result := actionResponse.Result
+
+	logger.Infof(
+		"FCC Instruction ID: %s",
+		result.ID.Hex(),
+	)
+
+	logger.Infof(
+		"FCC Submission Tag: %s",
+		result.SubmissionTag,
+	)
+
+	logger.Infof(
+		"FCC Result Status: %d",
+		result.Status,
+	)
+
+	logger.Infof(
+		"FCC Settlement Data: 0x%s",
+		common.Bytes2Hex(result.Data),
+	)
+
+	logger.Infof(
+		"FCC TEE Signature: 0x%s",
+		common.Bytes2Hex(
+			actionResponse.Signature,
+		),
+	)
+
+	logger.Infof(
+		"FCC Proxy Signature: 0x%s",
+		common.Bytes2Hex(
+			actionResponse.ProxySignature,
+		),
+	)
 
 	if result.Status == 0 {
 		return errors.Errorf(
