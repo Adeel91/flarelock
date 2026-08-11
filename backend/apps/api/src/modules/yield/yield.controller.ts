@@ -27,4 +27,14 @@ export class YieldController {
       );
     }
   }
+  @Get("firelight/withdrawals/:owner")
+  async getFirelightWithdrawals(@Param("owner") owner: string) {
+    try {
+      return await this.yieldService.getFirelightWithdrawals(owner);
+    } catch (error) {
+      throw new BadRequestException(
+        error instanceof Error ? error.message : "Unable to read Firelight withdrawals.",
+      );
+    }
+  }
 }

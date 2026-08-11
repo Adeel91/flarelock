@@ -602,3 +602,54 @@ export async function getFirelightWallet(owner: `0x${string}`): Promise<Fireligh
 
   return result as FirelightWallet;
 }
+
+export type FirelightWithdrawalRequest = {
+  period: string;
+  requestedAssetsRaw: string;
+  requestedAssetsFormatted: string;
+  claimable: boolean;
+  claimableAssetsRaw: string;
+  claimableAssetsFormatted: string;
+};
+
+export type FirelightWithdrawals = {
+  network: {
+    name: "Coston2";
+    chainId: 114;
+  };
+  protocol: "Firelight";
+  owner: `0x${string}`;
+  vault: {
+    address: `0x${string}`;
+  };
+  asset: FirelightStatus["asset"];
+  currentPeriod: string;
+  currentPeriodEnd: string;
+  shares: {
+    raw: string;
+    formatted: string;
+    maxRedeemRaw: string;
+    maxRedeemFormatted: string;
+  };
+  requests: FirelightWithdrawalRequest[];
+  checkedAt: string;
+};
+
+export async function getFirelightWithdrawals(owner: `0x${string}`): Promise<FirelightWithdrawals> {
+  const response = await fetch(`${apiUrl}/yield/firelight/withdrawals/${owner}`, {
+    cache: "no-store",
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    const message =
+      typeof result?.message === "string"
+        ? result.message
+        : "Firelight withdrawal status is unavailable.";
+
+    throw new Error(message);
+  }
+
+  return result as FirelightWithdrawals;
+}

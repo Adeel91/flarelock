@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { SiteHeader } from "@/components/site-header";
+import { FirelightExitPanel } from "@/components/yield/firelight-exit-panel";
 import { StakeYieldPanel } from "@/components/yield/stake-yield-panel";
 
 export const metadata: Metadata = {
@@ -30,6 +31,7 @@ export default function YieldPage() {
         </div>
 
         <StakeYieldPanel />
+        <FirelightExitPanel />
       </section>
     </main>
   );

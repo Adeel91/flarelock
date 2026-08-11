@@ -33,6 +33,9 @@ const vaultAbi = parseAbi([
   "function maxDeposit(address receiver) view returns (uint256)",
   "function currentPeriod() view returns (uint256)",
   "function currentPeriodEnd() view returns (uint256)",
+  "function maxRedeem(address owner) view returns (uint256)",
+  "function withdrawalsOf(uint256 period, address owner) view returns (uint256)",
+  "function claimWithdraw(uint256 period) returns (uint256)",
 ]);
 
 const erc20Abi = parseAbi([
@@ -257,6 +260,128 @@ export class YieldService {
         maxDepositRaw: maxDeposit.toString(),
         maxDepositFormatted: formatUnits(maxDeposit, decimals),
       },
+      checkedAt: new Date().toISOString(),
+    };
+  }
+  async getFirelightWithdrawals(ownerInput: string) {
+    const owner = requireAddress(ownerInput, "Wallet address");
+
+    const status = await this.getFirelightStatus();
+
+    const vaultAddress = status.vault.address;
+
+    const currentPeriod = BigInt(status.vault.currentPeriod);
+
+    const decimals = status.asset.decimals;
+
+    const [shareBalance, maxRedeem] = await Promise.all([
+      client.readContract({
+        address: vaultAddress,
+        abi: vaultAbi,
+        functionName: "balanceOf",
+        args: [owner],
+      }),
+
+      client.readContract({
+        address: vaultAddress,
+        abi: vaultAbi,
+        functionName: "maxRedeem",
+        args: [owner],
+      }),
+    ]);
+
+    const firstPeriod = currentPeriod > 32n ? currentPeriod - 32n : 0n;
+
+    const periods: bigint[] = [];
+
+    for (let period = firstPeriod; period <= currentPeriod + 1n; period += 1n) {
+      periods.push(period);
+    }
+
+    const withdrawalValues = await Promise.all(
+      periods.map(async (period) => {
+        const amount = await client.readContract({
+          address: vaultAddress,
+          abi: vaultAbi,
+          functionName: "withdrawalsOf",
+          args: [period, owner],
+        });
+
+        return {
+          period,
+          amount,
+        };
+      }),
+    );
+
+    const pending = withdrawalValues.filter(({ amount }) => amount > 0n);
+
+    const requests = await Promise.all(
+      pending.map(async ({ period, amount }) => {
+        let claimable = false;
+        let claimableAssets = 0n;
+
+        if (period < currentPeriod) {
+          try {
+            const simulation = await client.simulateContract({
+              account: owner,
+              address: vaultAddress,
+              abi: vaultAbi,
+              functionName: "claimWithdraw",
+              args: [period],
+            });
+
+            claimable = true;
+
+            claimableAssets = simulation.result;
+          } catch {
+            claimable = false;
+          }
+        }
+
+        return {
+          period: period.toString(),
+
+          requestedAssetsRaw: amount.toString(),
+
+          requestedAssetsFormatted: formatUnits(amount, decimals),
+
+          claimable,
+
+          claimableAssetsRaw: claimableAssets.toString(),
+
+          claimableAssetsFormatted: formatUnits(claimableAssets, decimals),
+        };
+      }),
+    );
+
+    return {
+      network: status.network,
+      protocol: status.protocol,
+      owner,
+
+      vault: {
+        address: vaultAddress,
+      },
+
+      asset: status.asset,
+
+      currentPeriod: currentPeriod.toString(),
+
+      currentPeriodEnd: status.vault.currentPeriodEnd,
+
+      shares: {
+        raw: shareBalance.toString(),
+
+        formatted: formatUnits(shareBalance, decimals),
+
+        maxRedeemRaw: maxRedeem.toString(),
+
+        maxRedeemFormatted: formatUnits(maxRedeem, decimals),
+      },
+
+      requests,
+
       checkedAt: new Date().toISOString(),
     };
   }
