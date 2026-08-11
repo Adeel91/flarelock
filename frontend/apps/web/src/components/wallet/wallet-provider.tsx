@@ -36,6 +36,12 @@ type WalletContextValue = {
   disconnect: () => void;
   refreshWallet: () => Promise<void>;
   signMessage: (message: string) => Promise<`0x${string}`>;
+  sendTransaction: (transaction: {
+    to: `0x${string}`;
+    data: `0x${string}`;
+    value?: `0x${string}`;
+  }) => Promise<`0x${string}`>;
+  waitForTransactionReceipt: (hash: `0x${string}`) => Promise<void>;
   switchToCoston2: () => Promise<void>;
   watchAsset: (asset: {
     address: `0x${string}`;
@@ -200,6 +206,73 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     [address, getProvider],
   );
 
+  const sendTransaction = useCallback(
+    async (transaction: {
+      to: `0x${string}`;
+      data: `0x${string}`;
+      value?: `0x${string}`;
+    }): Promise<`0x${string}`> => {
+      if (!address) {
+        throw new Error("Connect your wallet before sending a transaction.");
+      }
+
+      const provider = getProvider();
+
+      const result = await provider.request({
+        method: "eth_sendTransaction",
+        params: [
+          {
+            from: address,
+            to: transaction.to,
+            data: transaction.data,
+            ...(transaction.value ? { value: transaction.value } : {}),
+          },
+        ],
+      });
+
+      if (typeof result !== "string" || !/^0x[a-fA-F0-9]{64}$/.test(result)) {
+        throw new Error("MetaMask returned an invalid transaction hash.");
+      }
+
+      return result as `0x${string}`;
+    },
+    [address, getProvider],
+  );
+
+  const waitForTransactionReceipt = useCallback(
+    async (hash: `0x${string}`): Promise<void> => {
+      const provider = getProvider();
+
+      const startedAt = Date.now();
+
+      while (Date.now() - startedAt < 120_000) {
+        const receipt = await provider.request({
+          method: "eth_getTransactionReceipt",
+          params: [hash],
+        });
+
+        if (receipt && typeof receipt === "object") {
+          const statusValue = (
+            receipt as {
+              status?: unknown;
+            }
+          ).status;
+
+          if (statusValue === "0x0") {
+            throw new Error("The transaction reverted on Coston2.");
+          }
+
+          return;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+      }
+
+      throw new Error("The transaction is still pending. Check it on the Coston2 explorer.");
+    },
+    [getProvider],
+  );
+
   const watchAsset = useCallback(
     async (asset: {
       address: `0x${string}`;
@@ -284,6 +357,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       disconnect,
       refreshWallet,
       signMessage,
+      sendTransaction,
+      waitForTransactionReceipt,
       switchToCoston2,
       watchAsset,
     }),
@@ -295,8 +370,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       errorMessage,
       refreshWallet,
       signMessage,
+      sendTransaction,
       status,
       switchToCoston2,
+      waitForTransactionReceipt,
       watchAsset,
     ],
   );

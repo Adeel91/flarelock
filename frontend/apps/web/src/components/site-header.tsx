@@ -41,6 +41,13 @@ export function SiteHeader() {
             Market
           </Link>
 
+          <Link
+            className="text-[14px] font-medium text-slate-600 transition hover:text-[#111318]"
+            href="/yield"
+          >
+            Yield
+          </Link>
+
           <a
             className="text-[14px] font-medium text-slate-600 transition hover:text-[#111318]"
             href="/#how"

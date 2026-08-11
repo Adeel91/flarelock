@@ -8,6 +8,7 @@ import { MatchModule } from "./modules/match/match.module";
 import { OrderBookModule } from "./modules/order-book/order-book.module";
 import { RiskModule } from "./modules/risk/risk.module";
 import { StopModule } from "./modules/stop/stop.module";
+import { YieldModule } from "./modules/yield/yield.module";
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { StopModule } from "./modules/stop/stop.module";
     ChainModule,
     ConvertModule,
     IntentModule,
+    YieldModule,
   ],
   controllers: [AppController],
 })

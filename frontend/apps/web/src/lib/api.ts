@@ -499,3 +499,106 @@ export async function getFxrpWalletBalance(
 
   return result as FxrpWalletBalance;
 }
+
+export type FirelightStatus = {
+  service: "firelight-yield";
+  network: {
+    name: "Coston2";
+    chainId: 114;
+  };
+  protocol: "Firelight";
+  vault: {
+    address: `0x${string}`;
+    standard: "ERC-4626";
+    totalAssetsRaw: string;
+    totalAssetsFormatted: string;
+    totalSupplyRaw: string;
+    totalSupplyFormatted: string;
+    currentPeriod: string;
+    currentPeriodEnd: string;
+  };
+  asset: {
+    address: `0x${string}`;
+    symbol: string;
+    decimals: number;
+    verification: {
+      registry: `0x${string}`;
+      assetManager: `0x${string}`;
+      resolvedFasset: `0x${string}`;
+      matchesResolvedFasset: true;
+    };
+  };
+  ready: true;
+  blockNumber: string;
+  checkedAt: string;
+};
+
+export type FirelightWallet = {
+  network: {
+    name: "Coston2";
+    chainId: 114;
+  };
+  protocol: "Firelight";
+  owner: `0x${string}`;
+  vault: {
+    address: `0x${string}`;
+  };
+  asset: FirelightStatus["asset"];
+  balance: {
+    raw: string;
+    formatted: string;
+  };
+  allowance: {
+    raw: string;
+    formatted: string;
+  };
+  position: {
+    sharesRaw: string;
+    sharesFormatted: string;
+    assetsRaw: string;
+    assetsFormatted: string;
+  };
+  limits: {
+    maxDepositRaw: string;
+    maxDepositFormatted: string;
+  };
+  checkedAt: string;
+};
+
+export async function getFirelightStatus(): Promise<FirelightStatus> {
+  const response = await fetch(`${apiUrl}/yield/firelight`, {
+    cache: "no-store",
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    const message =
+      typeof result?.message === "string"
+        ? result.message
+        : "Firelight yield status is unavailable.";
+
+    throw new Error(message);
+  }
+
+  return result as FirelightStatus;
+}
+
+export async function getFirelightWallet(owner: `0x${string}`): Promise<FirelightWallet> {
+  const response = await fetch(`${apiUrl}/yield/firelight/wallet/${owner}`, {
+    cache: "no-store",
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    const message =
+      typeof result?.message === "string"
+        ? result.message
+        : "Firelight wallet position is unavailable.";
+
+    throw new Error(message);
+  }
+
+  return result as FirelightWallet;
+}
