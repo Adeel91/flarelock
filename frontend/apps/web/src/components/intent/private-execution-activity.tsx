@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { ConfidentialSettlementAction } from "@/components/intent/confidential-settlement-action";
 import { MatchEscrowFunding } from "@/components/intent/match-escrow-funding";
 import { useFlareWallet } from "@/components/wallet/wallet-provider";
 import {
@@ -19,10 +18,7 @@ const ACTIVE_EXECUTION_KEY = "flarelock:active-execution:C2FLR-FXRP";
 type ActivityTab = "orders" | "executions" | "transactions";
 
 function shorten(value: string, start = 10, end = 8) {
-  if (value.length <= start + end + 3) {
-    return value;
-  }
-
+  if (value.length <= start + end + 3) return value;
   return `${value.slice(0, start)}...${value.slice(-end)}`;
 }
 
@@ -35,136 +31,162 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
+function formatRawAmount(amountRaw: string, asset: "C2FLR" | "FXRP") {
+  const decimals = asset === "C2FLR" ? 18 : 6;
+  const raw = BigInt(amountRaw);
+  const divisor = 10n ** BigInt(decimals);
+  const whole = raw / divisor;
+  const fraction = (raw % divisor).toString().padStart(decimals, "0").replace(/0+$/, "");
+
+  return fraction ? `${whole}.${fraction}` : whole.toString();
+}
+
 function stageLabel(stage: MatchExecution["stage"]) {
-  if (stage === "partially_funded") {
-    return "Partially funded";
-  }
-
-  if (stage === "funded") {
-    return "Ready for FCC";
-  }
-
-  if (stage === "settled") {
-    return "Settled";
-  }
-
+  if (stage === "partially_funded") return "Funding";
+  if (stage === "funded") return "Ready for FCC";
+  if (stage === "settled") return "Settled";
   return "Matched";
 }
 
-function stageTextClass(stage: MatchExecution["stage"]) {
-  if (stage === "settled") {
-    return "text-emerald-700";
-  }
-
-  if (stage === "funded") {
-    return "text-[#e62058]";
-  }
-
-  if (stage === "partially_funded") {
-    return "text-amber-700";
-  }
-
-  return "text-slate-600";
+function stageClass(stage: MatchExecution["stage"]) {
+  if (stage === "settled") return "bg-emerald-100 text-emerald-700";
+  if (stage === "funded") return "bg-[#fff0f4] text-[#c8174b]";
+  if (stage === "partially_funded") return "bg-amber-100 text-amber-700";
+  return "bg-slate-100 text-slate-600";
 }
 
-function Status({ complete, label }: { complete: boolean; label: string }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span
-        className={
-          complete
-            ? "text-[12px] font-bold text-emerald-600"
-            : "text-[12px] font-bold text-slate-300"
-        }
-      >
-        {complete ? "✓" : "○"}
-      </span>
-
-      <span
-        className={
-          complete ? "text-[11px] font-medium text-slate-700" : "text-[11px] text-slate-400"
-        }
-      >
-        {label}
-      </span>
-    </div>
-  );
+function orderStatusClass(status: string) {
+  if (status === "matched") return "bg-emerald-100 text-emerald-700";
+  if (status === "expired") return "bg-slate-100 text-slate-500";
+  return "bg-amber-100 text-amber-700";
 }
 
 export function rememberActiveExecution(matchId: string) {
   window.localStorage.setItem(ACTIVE_EXECUTION_KEY, matchId);
-  window.dispatchEvent(new Event("flarelock:execution-changed"));
+
+  window.dispatchEvent(
+    new CustomEvent("flarelock:execution-changed", {
+      detail: { matchId },
+    }),
+  );
 }
 
 export function PrivateExecutionActivity() {
   const wallet = useFlareWallet();
 
   const [activity, setActivity] = useState<WalletPrivateActivity | null>(null);
+
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
+
   const [selectedExecution, setSelectedExecution] = useState<MatchExecution | null>(null);
+
   const [tab, setTab] = useState<ActivityTab>("executions");
-  const [loading, setLoading] = useState(false);
+
+  const [loadingActivity, setLoadingActivity] = useState(false);
+  const [refreshingExecution, setRefreshingExecution] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const updateExecution = useCallback((next: MatchExecution) => {
+    setSelectedExecution(next);
+
+    setActivity((current) => {
+      if (!current) return current;
+
+      const exists = current.executions.some((execution) => execution.matchId === next.matchId);
+
+      return {
+        ...current,
+        executions: exists
+          ? current.executions.map((execution) =>
+              execution.matchId === next.matchId ? next : execution,
+            )
+          : [next, ...current.executions],
+      };
+    });
+  }, []);
+
+  const refreshExecution = useCallback(
+    async (matchId: string, showLoading = false) => {
+      if (showLoading) {
+        setRefreshingExecution(true);
+      }
+
+      try {
+        const next = await getMatchExecution(matchId);
+
+        updateExecution(next);
+        setError(null);
+      } catch (cause) {
+        setError(cause instanceof Error ? cause.message : "Unable to refresh execution.");
+      } finally {
+        if (showLoading) {
+          setRefreshingExecution(false);
+        }
+      }
+    },
+    [updateExecution],
+  );
 
   useEffect(() => {
     setActivity(null);
-    setSelectedMatchId(null);
     setSelectedExecution(null);
     setError(null);
-  }, [wallet.address]);
+
+    const remembered = window.localStorage.getItem(ACTIVE_EXECUTION_KEY);
+
+    setSelectedMatchId(remembered);
+
+    if (remembered) {
+      void refreshExecution(remembered);
+    }
+  }, [wallet.address, refreshExecution]);
 
   useEffect(() => {
-    if (!selectedMatchId) {
-      setSelectedExecution(null);
-      return;
+    function handleExecutionEvent(event: Event) {
+      const custom = event as CustomEvent<{ matchId?: string }>;
+
+      const nextMatchId =
+        custom.detail?.matchId ??
+        window.localStorage.getItem(ACTIVE_EXECUTION_KEY) ??
+        selectedMatchId;
+
+      if (!nextMatchId) return;
+
+      setSelectedMatchId(nextMatchId);
+      void refreshExecution(nextMatchId);
     }
 
-    let cancelled = false;
+    function handleStorage() {
+      const next = window.localStorage.getItem(ACTIVE_EXECUTION_KEY);
 
-    async function refresh() {
-      try {
-        const next = await getMatchExecution(selectedMatchId);
+      if (!next) return;
 
-        if (!cancelled) {
-          setSelectedExecution(next);
-
-          setActivity((current) =>
-            current
-              ? {
-                  ...current,
-                  executions: current.executions.map((execution) =>
-                    execution.matchId === next.matchId ? next : execution,
-                  ),
-                }
-              : current,
-          );
-
-          setError(null);
-        }
-      } catch (cause) {
-        if (!cancelled) {
-          setError(cause instanceof Error ? cause.message : "Unable to refresh execution.");
-        }
-      }
+      setSelectedMatchId(next);
+      void refreshExecution(next);
     }
 
-    void refresh();
+    window.addEventListener("flarelock:execution-changed", handleExecutionEvent);
 
-    const timer = window.setInterval(() => void refresh(), 4_000);
+    window.addEventListener("flarelock:execution-updated", handleExecutionEvent);
+
+    window.addEventListener("storage", handleStorage);
 
     return () => {
-      cancelled = true;
-      window.clearInterval(timer);
+      window.removeEventListener("flarelock:execution-changed", handleExecutionEvent);
+
+      window.removeEventListener("flarelock:execution-updated", handleExecutionEvent);
+
+      window.removeEventListener("storage", handleStorage);
     };
-  }, [selectedMatchId]);
+  }, [refreshExecution, selectedMatchId]);
 
   async function loadActivity() {
     if (!wallet.address) {
-      setError("Connect your wallet to load private activity.");
+      setError("Connect your wallet to view private activity.");
       return;
     }
 
-    setLoading(true);
+    setLoadingActivity(true);
     setError(null);
 
     try {
@@ -173,7 +195,9 @@ export function PrivateExecutionActivity() {
       }
 
       const message = buildRecoverMatchMessage(wallet.address);
+
       const signature = await wallet.signMessage(message);
+
       const next = await getWalletPrivateActivity(wallet.address, signature);
 
       setActivity(next);
@@ -196,440 +220,384 @@ export function PrivateExecutionActivity() {
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Unable to load private activity.");
     } finally {
-      setLoading(false);
+      setLoadingActivity(false);
     }
   }
 
-  // Private activity is wallet-owned, so request authorization
-  // automatically instead of making the user find another button.
-  useEffect(() => {
-    if (!wallet.address || !wallet.isConnected) {
-      return;
-    }
+  const transactions = useMemo(() => {
+    if (!activity) return [];
 
-    // loadActivity intentionally runs once for each connected wallet.
-  }, [wallet.address, wallet.isConnected]);
-
-  const summary = useMemo(() => {
-    const intents = activity?.intents ?? [];
-    const executions = activity?.executions ?? [];
-
-    return {
-      orders: intents.length,
-      open: intents.filter((intent) => intent.status === "sealed").length,
-      executions: executions.length,
-      active: executions.filter((execution) => execution.stage !== "settled").length,
-      transactions: executions.reduce(
-        (total, execution) => total + execution.transactions.length,
-        0,
-      ),
-    };
+    return activity.executions.flatMap((execution, executionIndex) =>
+      execution.transactions.map((transaction) => ({
+        ...transaction,
+        matchId: execution.matchId,
+        executionNumber: activity.executions.length - executionIndex,
+        createdAt: execution.createdAt,
+      })),
+    );
   }, [activity]);
 
-  const allTransactions = useMemo(
-    () =>
-      (activity?.executions ?? []).flatMap((execution) =>
-        execution.transactions.map((transaction) => ({
-          ...transaction,
-          matchId: execution.matchId,
-          executionCreatedAt: execution.createdAt,
-        })),
-      ),
-    [activity],
-  );
-
-  const selectedIndex = activity?.executions.findIndex(
-    (execution) => execution.matchId === selectedMatchId,
-  );
+  const tabs: Array<{
+    id: ActivityTab;
+    label: string;
+    count: number;
+  }> = [
+    {
+      id: "orders",
+      label: "Orders",
+      count: activity?.intents.length ?? 0,
+    },
+    {
+      id: "executions",
+      label: "Executions",
+      count: activity?.executions.length ?? 0,
+    },
+    {
+      id: "transactions",
+      label: "Transactions",
+      count: transactions.length,
+    },
+  ];
 
   return (
-    <section className="border-t border-slate-200 bg-white">
-      <div className="mx-auto w-full max-w-none px-7 py-8 xl:px-9">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+    <section className="bg-[#f5f6f8] px-6 py-7 xl:px-8">
+      <div className="mx-auto max-w-[1500px] overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+        <div className="flex flex-col gap-5 border-b border-slate-200 px-6 py-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#e62058]">
-              Your private trading
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#e62058]">
+              My private activity
             </p>
 
-            <h2 className="mt-1 text-[27px] font-semibold tracking-[-0.04em] text-[#0a0b0d]">
-              Your orders & transactions
+            <h2 className="mt-2 text-[26px] font-semibold tracking-[-0.035em] text-[#0a0b0d]">
+              Orders, executions and transactions
             </h2>
 
-            <p className="mt-1 text-[11px] text-slate-500">
-              Everything you have submitted, matched or funded appears here.
+            <p className="mt-1 max-w-2xl text-[12px] leading-5 text-slate-500">
+              A simple private history for this wallet. Detailed cryptographic evidence stays behind
+              the execution and explorer links.
             </p>
           </div>
 
           <button
-            className="flex min-h-14 w-full items-center justify-center rounded-xl bg-[#e62058] px-8 py-4 text-[14px] font-semibold text-white shadow-[0_8px_24px_rgba(230,32,88,0.24)] transition hover:bg-[#cf184d] hover:shadow-[0_10px_28px_rgba(230,32,88,0.30)] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none sm:w-auto sm:min-w-[190px]"
-            disabled={!wallet.isConnected || loading}
+            className="h-11 rounded-xl bg-[#0a0b0d] px-5 text-[12px] font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50"
+            disabled={!wallet.isConnected || loadingActivity}
             onClick={() => void loadActivity()}
             type="button"
           >
-            {loading ? "Confirm in MetaMask…" : activity ? "Refresh activity" : "Load my activity"}
+            {loadingActivity
+              ? "Confirm in MetaMask…"
+              : activity
+                ? "Refresh activity"
+                : "Load activity"}
           </button>
         </div>
 
         {!activity ? (
-          <div className="mt-6 border-y border-slate-100 py-5">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-[12px] font-medium text-slate-700">
-                  {wallet.isConnected
-                    ? "Your private trading history is ready to unlock"
-                    : "Connect your wallet to view your activity"}
-                </p>
+          <div className="p-6">
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-[#fafbfc] px-5 py-8 text-center">
+              <p className="text-[14px] font-semibold text-slate-800">
+                {wallet.isConnected
+                  ? "Authorize your wallet to view private history"
+                  : "Connect wallet to view private history"}
+              </p>
 
-                <p className="mt-1 text-[10px] text-slate-400">
-                  {wallet.isConnected
-                    ? "One wallet signature securely loads your orders, executions and onchain transactions."
-                    : "Your private activity becomes available after connecting your wallet."}
-                </p>
-              </div>
-
-              {wallet.isConnected && (
-                <span className="text-[10px] font-medium text-slate-400">
-                  Private to this wallet
-                </span>
-              )}
+              <p className="mx-auto mt-2 max-w-xl text-[11px] leading-5 text-slate-500">
+                Your orders and executions are not exposed in the public aggregated order book.
+              </p>
             </div>
+
+            {activity && selectedExecution && (
+              <div className="mt-5 rounded-2xl border border-slate-200 p-5">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                      Current execution
+                    </p>
+                    <p className="mt-2 font-mono text-[10px] text-slate-700">
+                      {shorten(selectedExecution.matchId, 14, 10)}
+                    </p>
+                  </div>
+
+                  <span
+                    className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${stageClass(
+                      selectedExecution.stage,
+                    )}`}
+                  >
+                    {stageLabel(selectedExecution.stage)}
+                  </span>
+                </div>
+
+                <div className="mt-5">
+                  <MatchEscrowFunding matchId={selectedExecution.matchId} />
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <>
-            <div className="mt-7 flex flex-wrap items-center gap-7 border-b border-slate-200">
-              {[
-                ["orders", "Orders", summary.orders],
-                ["executions", "Executions", summary.executions],
-                ["transactions", "Transactions", summary.transactions],
-              ].map(([value, label, count]) => {
-                const active = tab === value;
-
-                return (
-                  <button
-                    className={
-                      active
-                        ? "border-b-2 border-[#e62058] pb-3 text-[12px] font-semibold text-[#0a0b0d]"
-                        : "border-b-2 border-transparent pb-3 text-[12px] font-medium text-slate-400 transition hover:text-slate-700"
-                    }
-                    key={value}
-                    onClick={() => setTab(value as ActivityTab)}
-                    type="button"
-                  >
-                    {label}
-                    <span className="ml-2 text-[10px] text-slate-400">{count}</span>
-                  </button>
-                );
-              })}
-
-              <div className="ml-auto hidden items-center gap-5 pb-3 text-[10px] text-slate-400 sm:flex">
-                <span>{summary.open} open</span>
-                <span>{summary.active} active</span>
-              </div>
+            <div className="flex overflow-x-auto border-b border-slate-200 px-4">
+              {tabs.map((item) => (
+                <button
+                  className={
+                    tab === item.id
+                      ? "border-b-2 border-[#e62058] px-4 py-4 text-[12px] font-semibold text-[#e62058]"
+                      : "border-b-2 border-transparent px-4 py-4 text-[12px] font-semibold text-slate-500 transition hover:text-slate-900"
+                  }
+                  key={item.id}
+                  onClick={() => setTab(item.id)}
+                  type="button"
+                >
+                  {item.label}
+                  <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-[9px] text-slate-500">
+                    {item.count}
+                  </span>
+                </button>
+              ))}
             </div>
 
             {tab === "orders" && (
-              <div>
+              <div className="p-5">
                 {activity.intents.length === 0 ? (
-                  <p className="py-12 text-center text-[11px] text-slate-400">
+                  <p className="rounded-2xl bg-slate-50 px-5 py-8 text-center text-[11px] text-slate-500">
                     No private orders for this wallet.
                   </p>
                 ) : (
-                  activity.intents.map((intent) => (
-                    <div
-                      className="grid gap-3 border-b border-slate-100 py-4 sm:grid-cols-[1.2fr_0.7fr_0.7fr_auto] sm:items-center"
-                      key={intent.intentId}
-                    >
-                      <div>
-                        <p className="font-mono text-[10px] font-medium text-slate-700">
-                          {shorten(intent.intentId, 14, 10)}
-                        </p>
-
-                        <p className="mt-1 text-[10px] text-slate-400">
-                          FXRP / C2FLR · {formatDate(intent.createdAt)}
-                        </p>
-                      </div>
-
-                      <div>
-                        <p className="text-[9px] uppercase tracking-[0.1em] text-slate-400">Type</p>
-                        <p className="mt-1 text-[11px] font-medium capitalize text-slate-700">
-                          {intent.orderType}
-                        </p>
-                      </div>
-
-                      <div>
-                        <p className="text-[9px] uppercase tracking-[0.1em] text-slate-400">
-                          Status
-                        </p>
-                        <p className="mt-1 text-[11px] font-medium capitalize text-slate-700">
-                          {intent.status}
-                        </p>
-                      </div>
-
-                      <span
+                  <div className="overflow-hidden rounded-2xl border border-slate-200">
+                    {activity.intents.map((intent, index) => (
+                      <div
                         className={
-                          intent.status === "matched"
-                            ? "text-[10px] font-semibold text-emerald-700"
-                            : intent.status === "expired"
-                              ? "text-[10px] font-semibold text-slate-400"
-                              : "text-[10px] font-semibold text-amber-700"
+                          index === activity.intents.length - 1
+                            ? "flex items-center justify-between gap-5 px-4 py-4"
+                            : "flex items-center justify-between gap-5 border-b border-slate-100 px-4 py-4"
                         }
+                        key={intent.intentId}
                       >
-                        {intent.status}
-                      </span>
-                    </div>
-                  ))
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="text-[12px] font-semibold capitalize text-slate-900">
+                              {intent.orderType} order
+                            </p>
+
+                            <span className="text-[10px] text-slate-400">{intent.market}</span>
+                          </div>
+
+                          <p
+                            className="mt-1 truncate font-mono text-[9px] text-slate-400"
+                            title={intent.intentId}
+                          >
+                            {shorten(intent.intentId, 12, 8)}
+                          </p>
+                        </div>
+
+                        <div className="shrink-0 text-right">
+                          <span
+                            className={`rounded-full px-2.5 py-1 text-[9px] font-semibold capitalize ${orderStatusClass(
+                              intent.status,
+                            )}`}
+                          >
+                            {intent.status}
+                          </span>
+
+                          <p className="mt-2 text-[9px] text-slate-400">
+                            {formatDate(intent.createdAt)}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             )}
 
             {tab === "executions" && (
-              <div className="grid lg:grid-cols-[0.62fr_1.38fr]">
-                <div className="border-b border-slate-200 py-2 lg:border-b-0 lg:border-r lg:pr-6">
+              <div className="grid xl:grid-cols-[0.72fr_1.28fr]">
+                <div className="border-b border-slate-200 p-4 xl:border-b-0 xl:border-r">
+                  <p className="px-1 pb-3 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                    Executions
+                  </p>
+
                   {activity.executions.length === 0 ? (
-                    <p className="py-12 text-center text-[11px] text-slate-400">
+                    <p className="rounded-xl bg-slate-50 px-4 py-7 text-center text-[11px] text-slate-500">
                       No matched executions yet.
                     </p>
                   ) : (
-                    activity.executions.map((execution, index) => {
-                      const active = execution.matchId === selectedMatchId;
+                    <div className="grid gap-2">
+                      {activity.executions.map((execution, index) => {
+                        const active = execution.matchId === selectedMatchId;
 
-                      return (
-                        <button
-                          className={
-                            active
-                              ? "w-full border-b border-slate-100 border-l-2 border-l-[#e62058] py-4 pl-4 pr-2 text-left"
-                              : "w-full border-b border-slate-100 border-l-2 border-l-transparent py-4 pl-4 pr-2 text-left transition hover:bg-slate-50"
-                          }
-                          key={execution.matchId}
-                          onClick={() => {
-                            rememberActiveExecution(execution.matchId);
-                            setSelectedMatchId(execution.matchId);
-                            setSelectedExecution(execution);
-                          }}
-                          type="button"
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                              <p className="text-[10px] font-semibold text-slate-800">
-                                Execution {activity.executions.length - index}
-                              </p>
+                        return (
+                          <button
+                            className={
+                              active
+                                ? "rounded-xl border border-[#e62058]/30 bg-[#fff6f8] p-4 text-left"
+                                : "rounded-xl border border-slate-200 bg-white p-4 text-left transition hover:bg-slate-50"
+                            }
+                            key={execution.matchId}
+                            onClick={() => {
+                              rememberActiveExecution(execution.matchId);
 
-                              <p className="mt-1 font-mono text-[9px] text-slate-400">
-                                {shorten(execution.matchId)}
-                              </p>
+                              setSelectedMatchId(execution.matchId);
+
+                              setSelectedExecution(execution);
+                            }}
+                            type="button"
+                          >
+                            <div className="flex items-center justify-between gap-3">
+                              <div>
+                                <p className="text-[11px] font-semibold text-slate-900">
+                                  Execution {activity.executions.length - index}
+                                </p>
+
+                                <p className="mt-1 text-[9px] text-slate-400">
+                                  {formatDate(execution.createdAt)}
+                                </p>
+                              </div>
+
+                              <span
+                                className={`rounded-full px-2.5 py-1 text-[9px] font-semibold ${stageClass(
+                                  execution.stage,
+                                )}`}
+                              >
+                                {stageLabel(execution.stage)}
+                              </span>
                             </div>
-
-                            <span
-                              className={`shrink-0 text-[10px] font-semibold ${stageTextClass(
-                                execution.stage,
-                              )}`}
-                            >
-                              {stageLabel(execution.stage)}
-                            </span>
-                          </div>
-
-                          <p className="mt-2 text-[10px] text-slate-400">
-                            {formatDate(execution.createdAt)}
-                          </p>
-                        </button>
-                      );
-                    })
+                          </button>
+                        );
+                      })}
+                    </div>
                   )}
                 </div>
 
-                <div className="py-5 lg:pl-8">
-                  {selectedExecution ? (
+                <div className="p-5">
+                  {!selectedExecution ? (
+                    <div className="rounded-2xl bg-slate-50 px-5 py-10 text-center text-[11px] text-slate-500">
+                      Select an execution.
+                    </div>
+                  ) : (
                     <>
-                      <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                         <div>
-                          <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#e62058]">
                             Selected execution
                           </p>
 
-                          <p className="mt-2 font-mono text-[11px] font-medium text-slate-700">
-                            {shorten(selectedExecution.matchId, 18, 12)}
-                          </p>
-
-                          <p className="mt-1 text-[10px] text-slate-400">
-                            {selectedIndex !== undefined && selectedIndex >= 0
-                              ? `Execution ${activity.executions.length - selectedIndex}`
-                              : "Private execution"}{" "}
-                            · {formatDate(selectedExecution.createdAt)}
+                          <p
+                            className="mt-2 font-mono text-[10px] text-slate-600"
+                            title={selectedExecution.matchId}
+                          >
+                            {shorten(selectedExecution.matchId, 16, 10)}
                           </p>
                         </div>
 
-                        <p
-                          className={`text-[12px] font-semibold ${stageTextClass(
-                            selectedExecution.stage,
-                          )}`}
-                        >
-                          {stageLabel(selectedExecution.stage)}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${stageClass(
+                              selectedExecution.stage,
+                            )}`}
+                          >
+                            {stageLabel(selectedExecution.stage)}
+                          </span>
+
+                          <button
+                            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+                            disabled={refreshingExecution}
+                            onClick={() => void refreshExecution(selectedExecution.matchId, true)}
+                            type="button"
+                          >
+                            {refreshingExecution ? "Refreshing…" : "Refresh"}
+                          </button>
+                        </div>
                       </div>
 
-                      <div className="grid gap-3 border-b border-slate-200 py-5 sm:grid-cols-2 xl:grid-cols-4">
-                        <Status complete label="Matched" />
-                        <Status complete={Boolean(selectedExecution.buyer)} label="Buyer funded" />
-                        <Status
-                          complete={Boolean(selectedExecution.seller)}
-                          label="Seller funded"
-                        />
-                        <Status
-                          complete={selectedExecution.stage === "settled"}
-                          label="FCC settled"
-                        />
-                      </div>
+                      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                        {(["buyer", "seller"] as const).map((role) => {
+                          const funding = selectedExecution[role];
 
-                      <div className="grid gap-8 border-b border-slate-200 py-5 md:grid-cols-2">
-                        <div>
-                          <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">
-                            Escrow
-                          </p>
-
-                          {(["buyer", "seller"] as const).map((role) => {
-                            const funding = selectedExecution[role];
-
-                            return (
-                              <div
-                                className="flex items-center justify-between border-b border-slate-100 py-3 last:border-b-0"
-                                key={role}
-                              >
-                                <span className="text-[11px] font-medium capitalize text-slate-700">
+                          return (
+                            <div
+                              className="rounded-2xl border border-slate-200 bg-[#fafbfc] p-4"
+                              key={role}
+                            >
+                              <div className="flex items-center justify-between gap-3">
+                                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
                                   {role}
-                                </span>
+                                </p>
 
                                 <span
                                   className={
                                     funding
                                       ? "text-[10px] font-semibold capitalize text-emerald-700"
-                                      : "text-[10px] text-slate-400"
+                                      : "text-[10px] font-medium text-slate-400"
                                   }
                                 >
-                                  {funding ? funding.state : "Not funded"}
+                                  {funding ? funding.state : "Waiting"}
                                 </span>
                               </div>
-                            );
-                          })}
-                        </div>
 
-                        <div>
-                          <div className="flex items-center justify-between">
-                            <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">
-                              Transactions
-                            </p>
-
-                            <span className="text-[9px] text-slate-400">
-                              {selectedExecution.transactions.length}
-                            </span>
-                          </div>
-
-                          {selectedExecution.transactions.length === 0 ? (
-                            <p className="py-5 text-[10px] text-slate-400">
-                              No onchain transactions recorded yet.
-                            </p>
-                          ) : (
-                            selectedExecution.transactions.map((transaction) => (
-                              <a
-                                className="flex items-center justify-between border-b border-slate-100 py-3 last:border-b-0"
-                                href={`${EXPLORER}${transaction.hash}`}
-                                key={`${transaction.kind}-${transaction.hash}`}
-                                rel="noreferrer"
-                                target="_blank"
-                              >
-                                <div className="min-w-0">
-                                  <p className="text-[10px] font-medium text-slate-700">
-                                    {transaction.label}
-                                  </p>
-
-                                  <p className="mt-1 font-mono text-[9px] text-slate-400">
-                                    {shorten(transaction.hash)}
-                                  </p>
-                                </div>
-
-                                <span className="text-[9px] font-semibold text-slate-400">
-                                  Explorer ↗
-                                </span>
-                              </a>
-                            ))
-                          )}
-                        </div>
+                              <p className="mt-3 text-[18px] font-semibold text-slate-900">
+                                {funding
+                                  ? `${formatRawAmount(
+                                      funding.amountRaw,
+                                      funding.asset,
+                                    )} ${funding.asset}`
+                                  : "Not funded"}
+                              </p>
+                            </div>
+                          );
+                        })}
                       </div>
 
-                      {selectedExecution.stage !== "settled" && (
-                        <div className="pt-5">
-                          <MatchEscrowFunding matchId={selectedExecution.matchId} />
-
-                          {selectedExecution ? (
-                            <ConfidentialSettlementAction
-                              execution={selectedExecution}
-                              onSettled={async () => {
-                                const refreshed = await getMatchExecution(
-                                  selectedExecution.matchId,
-                                );
-
-                                setSelectedExecution(refreshed);
-
-                                setActivity((current) => {
-                                  if (!current) {
-                                    return current;
-                                  }
-
-                                  return {
-                                    ...current,
-                                    executions: current.executions.map((execution) =>
-                                      execution.matchId === refreshed.matchId
-                                        ? refreshed
-                                        : execution,
-                                    ),
-                                  };
-                                });
-                              }}
-                            />
-                          ) : null}
-                        </div>
-                      )}
+                      <div className="mt-5">
+                        <MatchEscrowFunding matchId={selectedExecution.matchId} />
+                      </div>
                     </>
-                  ) : (
-                    <p className="py-14 text-center text-[11px] text-slate-400">
-                      Select an execution to inspect it.
-                    </p>
                   )}
                 </div>
               </div>
             )}
 
             {tab === "transactions" && (
-              <div>
-                {allTransactions.length === 0 ? (
-                  <p className="py-12 text-center text-[11px] text-slate-400">
+              <div className="p-5">
+                {transactions.length === 0 ? (
+                  <p className="rounded-2xl bg-slate-50 px-5 py-8 text-center text-[11px] text-slate-500">
                     No onchain transactions recorded yet.
                   </p>
                 ) : (
-                  allTransactions.map((transaction) => (
-                    <a
-                      className="grid gap-3 border-b border-slate-100 py-4 sm:grid-cols-[1fr_1fr_auto] sm:items-center"
-                      href={`${EXPLORER}${transaction.hash}`}
-                      key={`${transaction.matchId}-${transaction.kind}-${transaction.hash}`}
-                      rel="noreferrer"
-                      target="_blank"
-                    >
-                      <div>
-                        <p className="text-[11px] font-medium text-slate-800">
-                          {transaction.label}
-                        </p>
+                  <div className="overflow-hidden rounded-2xl border border-slate-200">
+                    {transactions.map((transaction, index) => (
+                      <a
+                        className={
+                          index === transactions.length - 1
+                            ? "flex items-center justify-between gap-5 px-4 py-4 transition hover:bg-slate-50"
+                            : "flex items-center justify-between gap-5 border-b border-slate-100 px-4 py-4 transition hover:bg-slate-50"
+                        }
+                        href={`${EXPLORER}${transaction.hash}`}
+                        key={`${transaction.matchId}-${transaction.kind}-${transaction.hash}`}
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-semibold text-slate-800">
+                            {transaction.label}
+                          </p>
 
-                        <p className="mt-1 text-[9px] text-slate-400">
-                          {formatDate(transaction.executionCreatedAt)}
-                        </p>
-                      </div>
+                          <p className="mt-1 text-[9px] text-slate-400">
+                            Execution {transaction.executionNumber}
+                            {" · "}
+                            {formatDate(transaction.createdAt)}
+                          </p>
 
-                      <p className="font-mono text-[9px] text-slate-500">
-                        {shorten(transaction.hash, 14, 10)}
-                      </p>
+                          <p className="mt-1 truncate font-mono text-[9px] text-slate-400">
+                            {shorten(transaction.hash, 12, 10)}
+                          </p>
+                        </div>
 
-                      <span className="text-[9px] font-semibold text-slate-400">Explorer ↗</span>
-                    </a>
-                  ))
+                        <span className="shrink-0 text-[10px] font-semibold text-slate-500">
+                          Explorer ↗
+                        </span>
+                      </a>
+                    ))}
+                  </div>
                 )}
               </div>
             )}
@@ -637,7 +605,7 @@ export function PrivateExecutionActivity() {
         )}
 
         {error && (
-          <p className="mt-5 border-l-2 border-red-400 pl-3 text-[11px] font-medium text-red-700">
+          <p className="mx-6 mb-6 rounded-xl border border-red-200 bg-red-50 p-3 text-[11px] font-medium text-red-700">
             {error}
           </p>
         )}

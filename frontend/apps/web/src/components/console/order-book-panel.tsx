@@ -60,8 +60,9 @@ export function OrderBookPanel() {
   const orderBook = useQuery({
     queryKey: ["private-order-book", "FXRP-C2FLR"],
     queryFn: getPrivateOrderBook,
-    refetchInterval: 5_000,
-    refetchIntervalInBackground: true,
+
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
   const data = orderBook.data;

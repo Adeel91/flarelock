@@ -53,6 +53,16 @@ export function MatchEscrowFunding({ matchId }: Props) {
   const wallet = useFlareWallet();
   const [stage, setStage] = useState<Stage>("idle");
   const [execution, setExecution] = useState<MatchExecution | null>(null);
+
+  useEffect(() => {
+    if (!execution) return;
+
+    window.dispatchEvent(
+      new CustomEvent("flarelock:execution-updated", {
+        detail: { matchId },
+      }),
+    );
+  }, [execution, matchId]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -68,11 +78,9 @@ export function MatchEscrowFunding({ matchId }: Props) {
     }
 
     void refresh();
-    const timer = window.setInterval(() => void refresh(), 4_000);
 
     return () => {
       cancelled = true;
-      window.clearInterval(timer);
     };
   }, [matchId]);
 

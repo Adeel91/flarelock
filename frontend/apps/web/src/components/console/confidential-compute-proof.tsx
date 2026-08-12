@@ -50,7 +50,9 @@ export function ConfidentialComputeProof() {
   const query = useQuery({
     queryKey: ["confidential-compute-status"],
     queryFn: getConfidentialComputeStatus,
-    refetchInterval: 20_000,
+
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
   if (query.isLoading) {
