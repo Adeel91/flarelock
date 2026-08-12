@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+
 import { getPrivateOrderBook, type OrderBookLevel } from "@/lib/api";
 
 const priceFormatter = new Intl.NumberFormat("en-US", {
@@ -16,20 +17,22 @@ const amountFormatter = new Intl.NumberFormat("en-US", {
 function LevelRows({ levels, side }: { levels: OrderBookLevel[]; side: "bid" | "ask" }) {
   if (levels.length === 0) {
     return (
-      <div className="rounded-2xl bg-slate-50 px-4 py-5 text-center">
-        <p className="text-sm font-medium text-slate-700">No public {side} levels</p>
-        <p className="mt-1 text-xs leading-5 text-slate-500">
-          A level appears after at least two private intents share the same price.
-        </p>
+      <div className="flex min-h-[92px] items-center justify-center border-y border-slate-100 bg-slate-50/40">
+        <div className="text-center">
+          <p className="text-[12px] font-medium text-slate-600">No public {side} levels</p>
+          <p className="mt-1 text-[10px] text-slate-400">
+            Two or more private intents must share a price before it is published.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="grid gap-1">
+    <div>
       {levels.slice(0, 8).map((level) => (
         <div
-          className="grid grid-cols-[1fr_1fr_auto] items-center gap-3 rounded-xl px-3 py-2 text-[15px] hover:bg-slate-50"
+          className="grid grid-cols-[1fr_1fr_80px] items-center border-t border-slate-100 px-2 py-3.5 text-[13px] transition first:border-t-0 hover:bg-slate-50/70"
           key={`${side}-${level.price}`}
         >
           <span
@@ -44,7 +47,7 @@ function LevelRows({ levels, side }: { levels: OrderBookLevel[]; side: "bid" | "
             {amountFormatter.format(level.baseLiquidity)}
           </span>
 
-          <span className="min-w-8 rounded-full bg-slate-100 px-2 py-1 text-center text-xs font-semibold text-slate-500">
+          <span className="text-right text-[11px] font-medium text-slate-500">
             {level.orderCount}
           </span>
         </div>
@@ -64,126 +67,145 @@ export function OrderBookPanel() {
   const data = orderBook.data;
 
   return (
-    <aside className="clean-card h-fit rounded-[28px] p-7">
-      <div className="flex items-start justify-between gap-4">
+    <section>
+      <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-[15px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-            Private order book
+          <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">
+            Private liquidity
           </p>
-          <h2 className="mt-2 text-[34px] font-medium tracking-[-0.035em] text-[#0a0b0d]">
-            FXRP/C2FLR
-          </h2>
+
+          <div className="mt-1 flex items-center gap-3">
+            <h2 className="text-[25px] font-semibold tracking-[-0.035em] text-[#0a0b0d]">
+              Available market depth
+            </h2>
+
+            <span className="text-[10px] font-semibold text-emerald-700">Privacy protected</span>
+          </div>
+
+          <p className="mt-1 text-[11px] text-slate-500">
+            This is not a public order book. Prices appear only when enough private orders exist at
+            the same level.
+          </p>
         </div>
 
-        <span className="rounded-full bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">
-          Aggregated
-        </span>
+        {data && (
+          <div className="flex gap-10 text-right">
+            <div>
+              <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                Private buys
+              </p>
+              <p className="mt-1 text-[20px] font-semibold tracking-[-0.02em] text-[#0a0b0d]">
+                {data.activeBuyIntents}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                Private sells
+              </p>
+              <p className="mt-1 text-[20px] font-semibold tracking-[-0.02em] text-[#0a0b0d]">
+                {data.activeSellIntents}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {orderBook.isLoading ? (
-        <div className="mt-6 rounded-2xl bg-slate-50 px-4 py-8 text-center text-[14px] text-slate-500">
+        <div className="py-14 text-center text-[12px] text-slate-500">
           Loading private liquidity…
         </div>
       ) : orderBook.isError || !data ? (
-        <div className="mt-6 rounded-2xl bg-rose-50 px-4 py-5">
-          <p className="font-semibold text-rose-700">Order book unavailable</p>
-          <p className="mt-1 text-sm leading-6 text-rose-600">
+        <div className="py-12">
+          <p className="text-[13px] font-semibold text-rose-700">Order book unavailable</p>
+          <p className="mt-1 text-[11px] text-rose-600">
             The backend could not aggregate private intents.
           </p>
         </div>
       ) : (
         <>
-          <div className="mt-6 grid grid-cols-2 gap-3">
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
-                Best bid
+          <div className="grid border-b border-slate-200 md:grid-cols-2">
+            <div className="border-b border-slate-200 py-6 md:border-b-0 md:border-r md:pr-10">
+              <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                Best protected bid
               </p>
-              <p className="mt-2 text-[21px] font-semibold text-emerald-700">
+
+              <p className="mt-2 text-[31px] font-semibold tracking-[-0.045em] text-emerald-700">
                 {data.bestBid === null ? "Withheld" : priceFormatter.format(data.bestBid)}
               </p>
+
+              <p className="mt-1 text-[10px] text-slate-400">
+                {data.withheldBuyIntents} private buy intent
+                {data.withheldBuyIntents === 1 ? "" : "s"} withheld
+              </p>
             </div>
 
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
-                Best ask
+            <div className="py-6 md:pl-10">
+              <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                Best visible ask
               </p>
-              <p className="mt-2 text-[21px] font-semibold text-rose-700">
+
+              <p className="mt-2 text-[31px] font-semibold tracking-[-0.045em] text-rose-700">
                 {data.bestAsk === null ? "Withheld" : priceFormatter.format(data.bestAsk)}
               </p>
-            </div>
-          </div>
 
-          <div className="mt-5 border-t border-slate-100 pt-5">
-            <div className="mb-3 grid grid-cols-[1fr_1fr_auto] gap-3 px-3 text-[12px] font-semibold uppercase tracking-[0.13em] text-slate-400">
-              <span>Ask price</span>
-              <span className="text-right">FXRP</span>
-              <span>Orders</span>
-            </div>
-
-            <LevelRows levels={data.asks} side="ask" />
-          </div>
-
-          <div className="my-5 rounded-2xl border border-slate-100 px-4 py-3">
-            <div className="flex items-center justify-between gap-4">
-              <span className="text-[14px] text-slate-500">Midpoint</span>
-              <span className="font-semibold text-[#0a0b0d]">
-                {data.midpoint === null
-                  ? "Not public"
-                  : `${priceFormatter.format(data.midpoint)} C2FLR`}
-              </span>
-            </div>
-
-            <div className="mt-2 flex items-center justify-between gap-4">
-              <span className="text-[14px] text-slate-500">Spread</span>
-              <span className="text-sm font-medium text-slate-700">
-                {data.spread === null || data.spreadPercent === null
-                  ? "Not public"
-                  : `${priceFormatter.format(data.spread)} · ${data.spreadPercent}%`}
-              </span>
-            </div>
-          </div>
-
-          <div>
-            <div className="mb-3 grid grid-cols-[1fr_1fr_auto] gap-3 px-3 text-[12px] font-semibold uppercase tracking-[0.13em] text-slate-400">
-              <span>Bid price</span>
-              <span className="text-right">FXRP</span>
-              <span>Orders</span>
-            </div>
-
-            <LevelRows levels={data.bids} side="bid" />
-          </div>
-
-          <div className="mt-6 grid grid-cols-2 gap-3">
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
-                Private buys
+              <p className="mt-1 text-[10px] text-slate-400">
+                {data.withheldSellIntents} private sell intent
+                {data.withheldSellIntents === 1 ? "" : "s"} withheld
               </p>
-              <p className="mt-2 text-[24px] font-semibold text-[#0a0b0d]">
-                {data.activeBuyIntents}
-              </p>
-              <p className="mt-1 text-xs text-slate-500">{data.withheldBuyIntents} withheld</p>
-            </div>
-
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
-                Private sells
-              </p>
-              <p className="mt-2 text-[24px] font-semibold text-[#0a0b0d]">
-                {data.activeSellIntents}
-              </p>
-              <p className="mt-1 text-xs text-slate-500">{data.withheldSellIntents} withheld</p>
             </div>
           </div>
 
-          <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4">
-            <p className="text-sm font-semibold text-amber-800">Privacy threshold active</p>
-            <p className="mt-1 text-xs leading-5 text-amber-700">
-              {data.privacy.message} Wallets, signatures, intent IDs, and individual amounts are
-              never returned.
+          <div className="grid gap-12 py-7 lg:grid-cols-2">
+            <div>
+              <div className="grid grid-cols-[1fr_1fr_80px] px-2 pb-2 text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                <span>Ask price</span>
+                <span className="text-right">FXRP</span>
+                <span className="text-right">Orders</span>
+              </div>
+
+              <LevelRows levels={data.asks} side="ask" />
+            </div>
+
+            <div>
+              <div className="grid grid-cols-[1fr_1fr_80px] px-2 pb-2 text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                <span>Bid price</span>
+                <span className="text-right">FXRP</span>
+                <span className="text-right">Orders</span>
+              </div>
+
+              <LevelRows levels={data.bids} side="bid" />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-4 border-t border-slate-200 py-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex gap-8">
+              <div>
+                <span className="text-[10px] text-slate-400">Midpoint</span>
+                <span className="ml-3 text-[11px] font-semibold text-slate-700">
+                  {data.midpoint === null
+                    ? "Not public"
+                    : `${priceFormatter.format(data.midpoint)} C2FLR`}
+                </span>
+              </div>
+
+              <div>
+                <span className="text-[10px] text-slate-400">Spread</span>
+                <span className="ml-3 text-[11px] font-semibold text-slate-700">
+                  {data.spread === null || data.spreadPercent === null
+                    ? "Not public"
+                    : `${priceFormatter.format(data.spread)} · ${data.spreadPercent}%`}
+                </span>
+              </div>
+            </div>
+
+            <p className="max-w-2xl text-[10px] leading-4 text-amber-700">
+              Some prices are intentionally hidden to protect individual orders ·{" "}
+              {data.privacy.message}
             </p>
           </div>
         </>
       )}
-    </aside>
+    </section>
   );
 }

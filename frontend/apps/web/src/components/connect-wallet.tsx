@@ -65,6 +65,32 @@ export function ConnectWallet() {
     }
   }
 
+  function handleDisconnect() {
+    // Remove every FlareLock-owned localStorage value so pending
+    // confidential execution references cannot leak into a new test.
+    for (const key of Object.keys(window.localStorage)) {
+      if (key.startsWith("flarelock:")) {
+        window.localStorage.removeItem(key);
+      }
+    }
+
+    // Keep this one marker after cleanup so WalletProvider does not
+    // immediately restore the MetaMask account on the reload below.
+    window.localStorage.setItem("flarelock:wallet:disconnected", "1");
+
+    // Clear FlareLock session values without touching unrelated apps
+    // sharing this browser profile.
+    for (const key of Object.keys(window.sessionStorage)) {
+      if (key.startsWith("flarelock:")) {
+        window.sessionStorage.removeItem(key);
+      }
+    }
+
+    wallet.disconnect();
+
+    window.location.reload();
+  }
+
   if (wallet.isConnected && wallet.address) {
     const isCoston2 = wallet.chainId === coston2.id;
 
@@ -83,7 +109,9 @@ export function ConnectWallet() {
 
         <button
           className="clean-button rounded-full border border-slate-200/90 bg-white px-5 py-3 text-[15px] font-semibold text-[#0a0b0d] hover:border-slate-300 hover:shadow-sm"
-          onClick={wallet.disconnect}
+          aria-label="Disconnect wallet and reset FlareLock session"
+          onClick={handleDisconnect}
+          title="Disconnect and reset session"
           type="button"
         >
           {shortenAddress(wallet.address)}

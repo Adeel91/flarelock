@@ -66,6 +66,93 @@ export async function getChainStatus(): Promise<ChainStatus> {
   return response.json();
 }
 
+export type ConfidentialComputeStatus = {
+  service: "flare-confidential-compute";
+  mode: "simulated_tee";
+  hardwareBacked: false;
+  network: {
+    name: "Coston2";
+    chainId: 114;
+    blockNumber: string;
+  };
+  extension: {
+    operationType: "FLARELOCK_MATCH";
+    operationCommand: "VERIFY_AND_MATCH";
+    processing: "encrypted_tee_payload";
+    result: "signed_abi_settlement";
+  };
+  contracts: {
+    instructionSender: {
+      address: `0x${string}`;
+      hasCode: boolean;
+    };
+    escrow: {
+      address: `0x${string}`;
+      hasCode: boolean;
+      trustedTee: `0x${string}`;
+      trustedTeeMatches: boolean;
+      fxrp: `0x${string}`;
+      fxrpMatches: boolean;
+    };
+  };
+  proof: {
+    instructionId: `0x${string}`;
+    fccTransaction: {
+      hash: `0x${string}`;
+      status: "success" | "reverted";
+      blockNumber: string;
+      targetsInstructionSender: boolean;
+    };
+    result: {
+      submissionTag: "threshold";
+      status: 1;
+      matchCommitment: `0x${string}`;
+    };
+    settlementTransaction: {
+      hash: `0x${string}`;
+      status: "success" | "reverted";
+      blockNumber: string;
+    };
+    onchainVerification: {
+      commitmentConsumed: boolean;
+      buyerDepositSettled: boolean;
+      sellerDepositSettled: boolean;
+    };
+  };
+  security: {
+    privatePayloadPubliclyExposed: false;
+    teeMode: "simulated";
+    statement: string;
+  };
+  verified: boolean;
+  checkedAt: string;
+};
+
+export async function getConfidentialComputeStatus(): Promise<ConfidentialComputeStatus> {
+  const response = await fetch(`${apiUrl}/chain/confidential`, {
+    cache: "no-store",
+  });
+
+  const result = (await response.json()) as
+    | ConfidentialComputeStatus
+    | {
+        message?: string | string[];
+      };
+
+  if (!response.ok) {
+    const message =
+      "message" in result && Array.isArray(result.message)
+        ? result.message.join(" ")
+        : "message" in result && typeof result.message === "string"
+          ? result.message
+          : "Unable to verify Flare Confidential Compute.";
+
+    throw new Error(message);
+  }
+
+  return result as ConfidentialComputeStatus;
+}
+
 export type ConvertAsset = "FXRP" | "C2FLR";
 export type ConvertSide = "buy" | "sell";
 export type OrderType = "market" | "limit" | "stop";
@@ -777,4 +864,285 @@ export async function getFxrpRedemptionTransaction(
   }
 
   return (await response.json()) as FxrpRedemptionTransaction;
+}
+
+export type MatchRunResult = {
+  scannedIntents: number;
+  eligibleBuyIntents: number;
+  eligibleSellIntents: number;
+  matchesCreated: number;
+  matches: Array<{
+    matchId: string;
+    matchCommitment: `0x${string}`;
+    buyIntentId: string;
+    sellIntentId: string;
+    buyIntentHash: `0x${string}`;
+    sellIntentHash: `0x${string}`;
+    market: "C2FLR/FXRP";
+    privacy: "encrypted";
+    status: "matched";
+    settlementStatus: "not_started";
+    createdAt: string;
+  }>;
+};
+
+export async function runPrivateMatching(
+  intentId?: string,
+  counterpartyIntentId?: string,
+): Promise<MatchRunResult> {
+  const response = await fetch(`${apiUrl}/matches/run`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      ...(intentId ? { intentId } : {}),
+      ...(counterpartyIntentId ? { counterpartyIntentId } : {}),
+    }),
+  });
+
+  const result = (await response.json()) as
+    | MatchRunResult
+    | {
+        message?: string | string[];
+      };
+
+  if (!response.ok) {
+    const message =
+      "message" in result && Array.isArray(result.message)
+        ? result.message.join(" ")
+        : "message" in result && typeof result.message === "string"
+          ? result.message
+          : "Unable to run private matching.";
+
+    throw new Error(message);
+  }
+
+  return result as MatchRunResult;
+}
+
+export type EscrowPlan = {
+  matchId: string;
+  matchCommitment: `0x${string}`;
+  role: "buyer" | "seller";
+  asset: "C2FLR" | "FXRP";
+  amount: number;
+  amountRaw: string;
+  intentId: string;
+  intentHash: `0x${string}`;
+  owner: `0x${string}`;
+  expiresAt: string;
+};
+
+export function buildEscrowPlanMessage(matchId: string, address: string) {
+  return [
+    "FlareLock Escrow Plan",
+    `Match ID: ${matchId}`,
+    `Wallet: ${address.toLowerCase()}`,
+    "Network: Coston2",
+    "Chain ID: 114",
+  ].join("\n");
+}
+
+export async function getEscrowPlan(
+  matchId: string,
+  address: `0x${string}`,
+  signature: `0x${string}`,
+): Promise<EscrowPlan> {
+  const response = await fetch(`${apiUrl}/matches/${matchId}/escrow-plan`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      address,
+      signature,
+    }),
+  });
+
+  const result = (await response.json()) as
+    | EscrowPlan
+    | {
+        message?: string | string[];
+      };
+
+  if (!response.ok) {
+    const message =
+      "message" in result && Array.isArray(result.message)
+        ? result.message.join(" ")
+        : "message" in result && typeof result.message === "string"
+          ? result.message
+          : "Unable to prepare escrow funding.";
+
+    throw new Error(message);
+  }
+
+  return result as EscrowPlan;
+}
+
+export type ExecutionFunding = {
+  role: "buyer" | "seller";
+  asset: "C2FLR" | "FXRP";
+  amountRaw: string;
+  depositId: `0x${string}`;
+  transactionHash: `0x${string}`;
+  approvalTransactionHash?: `0x${string}`;
+  intentHash: `0x${string}`;
+  expiresAt: string;
+  state: "available" | "locked" | "withdrawn" | "settled" | "unknown";
+};
+
+export type ExecutionTransaction = {
+  kind: "approval" | "deposit" | "fcc_instruction" | "lock" | "settlement";
+  role?: "buyer" | "seller";
+  hash: `0x${string}`;
+  label: string;
+};
+
+export type MatchExecution = {
+  matchId: string;
+  matchCommitment: `0x${string}`;
+  market: "C2FLR/FXRP";
+  stage: "matched" | "partially_funded" | "funded" | "settled";
+  buyer: ExecutionFunding | null;
+  seller: ExecutionFunding | null;
+  transactions: ExecutionTransaction[];
+  settlementStatus: string;
+  createdAt: string;
+};
+
+export async function getMatchExecution(matchId: string): Promise<MatchExecution> {
+  const response = await fetch(`${apiUrl}/matches/${matchId}/execution`, {
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response, "Unable to load private execution."));
+  }
+
+  return (await response.json()) as MatchExecution;
+}
+
+export async function registerEscrowFunding(
+  matchId: string,
+  address: `0x${string}`,
+  signature: `0x${string}`,
+  transactionHash: `0x${string}`,
+  approvalTransactionHash?: `0x${string}`,
+): Promise<MatchExecution> {
+  const response = await fetch(`${apiUrl}/matches/${matchId}/funding`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      address,
+      signature,
+      transactionHash,
+      ...(approvalTransactionHash ? { approvalTransactionHash } : {}),
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response, "Unable to register escrow funding."));
+  }
+
+  return (await response.json()) as MatchExecution;
+}
+
+export type RecoveredPrivateMatch = {
+  matchId: string;
+  matchCommitment: `0x${string}`;
+  role: "buyer" | "seller";
+  intentId: string;
+  intentHash: `0x${string}`;
+  market: "C2FLR/FXRP";
+  status: "matched";
+  settlementStatus: string;
+  createdAt: string;
+};
+
+export function buildRecoverMatchMessage(address: string) {
+  return [
+    "FlareLock Resume Private Execution",
+    `Wallet: ${address.toLowerCase()}`,
+    "Network: Coston2",
+    "Chain ID: 114",
+  ].join("\n");
+}
+
+export type WalletIntentActivity = {
+  intentId: string;
+  intentHash: `0x${string}`;
+  market: string;
+  orderType: "market" | "limit" | "stop";
+  status: "sealed" | "matched" | "expired";
+  matchStatus: "searching" | "partially_matched" | "matched" | "expired";
+  settlementStatus: string;
+  createdAt: string;
+  expiresAt: string;
+};
+
+export type WalletPrivateActivity = {
+  wallet: `0x${string}`;
+  intents: WalletIntentActivity[];
+  executions: MatchExecution[];
+};
+
+export async function getWalletPrivateActivity(
+  address: `0x${string}`,
+  signature: `0x${string}`,
+): Promise<WalletPrivateActivity> {
+  const response = await fetch(`${apiUrl}/matches/activity`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      address,
+      signature,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response, "Unable to load private activity."));
+  }
+
+  return (await response.json()) as WalletPrivateActivity;
+}
+
+export async function recoverLatestPrivateMatch(
+  address: `0x${string}`,
+  signature: `0x${string}`,
+): Promise<RecoveredPrivateMatch | null> {
+  const response = await fetch(`${apiUrl}/matches/recover`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      address,
+      signature,
+    }),
+  });
+
+  const result = (await response.json()) as
+    | RecoveredPrivateMatch
+    | null
+    | {
+        message?: string | string[];
+      };
+
+  if (!response.ok) {
+    const message =
+      result && "message" in result && Array.isArray(result.message)
+        ? result.message.join(" ")
+        : result && "message" in result && typeof result.message === "string"
+          ? result.message
+          : "Unable to recover private execution.";
+
+    throw new Error(message);
+  }
+
+  return result as RecoveredPrivateMatch | null;
 }

@@ -1,7 +1,17 @@
 import { createCipheriv, createDecipheriv, randomBytes, randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { type Hex, keccak256, toBytes } from "viem";
+import {
+  createPublicClient,
+  decodeEventLog,
+  getAddress,
+  type Hex,
+  http,
+  keccak256,
+  parseAbi,
+  toBytes,
+  verifyMessage,
+} from "viem";
 
 type OrderType = "market" | "limit" | "stop";
 type TimeInForce = "IOC" | "GTC";
@@ -57,6 +67,33 @@ type PrivateMatchPayload = {
   executionPrice: number;
 };
 
+type StoredFunding = {
+  role: "buyer" | "seller";
+  asset: "C2FLR" | "FXRP";
+  amountRaw: string;
+  depositId: Hex;
+  transactionHash: Hex;
+  approvalTransactionHash?: Hex;
+  depositor: `0x${string}`;
+  intentHash: Hex;
+  expiresAt: string;
+  registeredAt: string;
+};
+
+type StoredExecution = {
+  buyer?: StoredFunding;
+  seller?: StoredFunding;
+};
+
+type ExpectedFunding = {
+  role: "buyer" | "seller";
+  asset: "C2FLR" | "FXRP";
+  amountRaw: string;
+  owner: `0x${string}`;
+  intentHash: Hex;
+  expiresAt: string;
+};
+
 type StoredMatch = {
   version: 1;
   matchId: string;
@@ -68,7 +105,8 @@ type StoredMatch = {
   market: "C2FLR/FXRP";
   encryptedPayload: EncryptedPayload;
   status: "matched";
-  settlementStatus: "not_started";
+  settlementStatus: "not_started" | "funded" | "settled";
+  execution?: StoredExecution;
   createdAt: string;
 };
 
@@ -82,7 +120,7 @@ export type PublicMatch = {
   market: "C2FLR/FXRP";
   privacy: "encrypted";
   status: "matched";
-  settlementStatus: "not_started";
+  settlementStatus: "not_started" | "funded" | "settled";
   createdAt: string;
 };
 
@@ -105,6 +143,139 @@ type MatchRunResult = {
   matches: PublicMatch[];
 };
 
+export type MatchRunRequest = {
+  intentId?: string;
+  counterpartyIntentId?: string;
+};
+
+export type EscrowPlanRequest = {
+  address: string;
+  signature: Hex;
+};
+
+export type EscrowFundingRegistrationRequest = EscrowPlanRequest & {
+  transactionHash: Hex;
+  approvalTransactionHash?: Hex;
+};
+
+export type ExecutionFunding = {
+  role: "buyer" | "seller";
+  asset: "C2FLR" | "FXRP";
+  amountRaw: string;
+  depositId: Hex;
+  transactionHash: Hex;
+  approvalTransactionHash?: Hex;
+  intentHash: Hex;
+  expiresAt: string;
+  state: "available" | "locked" | "withdrawn" | "settled" | "unknown";
+};
+
+export type ExecutionTransaction = {
+  kind: "approval" | "deposit" | "fcc_instruction" | "lock" | "settlement";
+  role?: "buyer" | "seller";
+  hash: Hex;
+  label: string;
+};
+
+export type MatchExecution = {
+  matchId: string;
+  matchCommitment: Hex;
+  market: "C2FLR/FXRP";
+  stage: "matched" | "partially_funded" | "funded" | "settled";
+  buyer: ExecutionFunding | null;
+  seller: ExecutionFunding | null;
+  transactions: ExecutionTransaction[];
+  settlementStatus: string;
+  createdAt: string;
+};
+
+export type RecoverMatchRequest = {
+  address: string;
+  signature: Hex;
+};
+
+export type RecoveredPrivateMatch = {
+  matchId: string;
+  matchCommitment: Hex;
+  role: "buyer" | "seller";
+  intentId: string;
+  intentHash: Hex;
+  market: "C2FLR/FXRP";
+  status: "matched";
+  settlementStatus: string;
+  createdAt: string;
+};
+
+export type WalletIntentActivity = {
+  intentId: string;
+  intentHash: Hex;
+  market: string;
+  orderType: OrderType;
+  status: "sealed" | "matched" | "expired";
+  matchStatus: "searching" | "partially_matched" | "matched" | "expired";
+  settlementStatus: string;
+  createdAt: string;
+  expiresAt: string;
+};
+
+export type WalletPrivateActivity = {
+  wallet: `0x${string}`;
+  intents: WalletIntentActivity[];
+  executions: MatchExecution[];
+};
+
+export function buildRecoverMatchMessage(address: string): string {
+  return [
+    "FlareLock Resume Private Execution",
+    `Wallet: ${getAddress(address).toLowerCase()}`,
+    "Network: Coston2",
+    "Chain ID: 114",
+  ].join("\n");
+}
+
+export type EscrowPlan = {
+  matchId: string;
+  matchCommitment: Hex;
+  role: "buyer" | "seller";
+  asset: "C2FLR" | "FXRP";
+  amount: number;
+  amountRaw: string;
+  intentId: string;
+  intentHash: Hex;
+  owner: `0x${string}`;
+  expiresAt: string;
+};
+
+export function buildEscrowPlanMessage(matchId: string, address: string): string {
+  return [
+    "FlareLock Escrow Plan",
+    `Match ID: ${matchId}`,
+    `Wallet: ${getAddress(address).toLowerCase()}`,
+    "Network: Coston2",
+    "Chain ID: 114",
+  ].join("\n");
+}
+
+const COSTON2_RPC_URL = "https://coston2-api.flare.network/ext/C/rpc";
+
+const ESCROW_ADDRESS = "0x71A27096640D3D24545D505B5F830ea3d94355d6" as const;
+
+const FXRP_ADDRESS = "0x0b6A3645c240605887a5532109323A3E12273dc7" as const;
+
+const chainClient = createPublicClient({
+  transport: http(COSTON2_RPC_URL),
+});
+
+const escrowAbi = parseAbi([
+  "event NativeDeposited(bytes32 indexed depositId, address indexed depositor, bytes32 indexed intentHash, uint256 amount, uint64 expiresAt)",
+  "event TokenDeposited(bytes32 indexed depositId, address indexed depositor, bytes32 indexed intentHash, address token, uint256 amount, uint64 expiresAt)",
+  "function deposits(bytes32 depositId) view returns (address depositor, uint8 asset, uint256 amount, bytes32 intentHash, bytes32 matchCommitment, uint64 expiresAt, uint8 state)",
+]);
+
+const erc20ApprovalAbi = parseAbi([
+  "event Approval(address indexed owner, address indexed spender, uint256 value)",
+]);
+
 const DATA_DIRECTORY = path.resolve(process.cwd(), "data");
 
 const INTENTS_FILE = path.join(DATA_DIRECTORY, "sealed-intents.json");
@@ -121,6 +292,33 @@ const EPSILON = 0.00000001;
 
 function round(value: number, decimals = 8) {
   return Number(value.toFixed(decimals));
+}
+
+function decimalToRawAmount(amount: number, decimals: number): string {
+  const amountText = String(amount);
+
+  if (amountText.includes("e") || amountText.includes("E")) {
+    throw new Error("Escrow amount cannot use exponential notation.");
+  }
+
+  const [wholePart, fractionalPart = ""] = amountText.split(".");
+
+  if (fractionalPart.length > decimals) {
+    throw new Error(`Escrow amount exceeds ${decimals} decimal places.`);
+  }
+
+  return (
+    BigInt(wholePart) * 10n ** BigInt(decimals) +
+    BigInt(fractionalPart.padEnd(decimals, "0") || "0")
+  ).toString();
+}
+
+function depositStateName(value: number): ExecutionFunding["state"] {
+  if (value === 1) return "available";
+  if (value === 2) return "locked";
+  if (value === 3) return "withdrawn";
+  if (value === 4) return "settled";
+  return "unknown";
 }
 
 function isStoredIntent(value: unknown): value is StoredIntent {
@@ -163,8 +361,8 @@ export class MatchService {
     matches: [],
   });
 
-  runMatching(): Promise<MatchRunResult> {
-    const nextRun = this.runQueue.then(() => this.executeMatching());
+  runMatching(request: MatchRunRequest = {}): Promise<MatchRunResult> {
+    const nextRun = this.runQueue.then(() => this.executeMatching(request));
 
     this.runQueue = nextRun.catch(() => ({
       scannedIntents: 0,
@@ -193,9 +391,645 @@ export class MatchService {
     return match ? this.toPublicMatch(match) : null;
   }
 
-  private async executeMatching(): Promise<MatchRunResult> {
+  async recoverLatestMatch(request: RecoverMatchRequest): Promise<RecoveredPrivateMatch | null> {
+    const owner = getAddress(request.address);
+
+    const message = buildRecoverMatchMessage(owner);
+
+    const validSignature = await verifyMessage({
+      address: owner,
+      message,
+      signature: request.signature,
+    });
+
+    if (!validSignature) {
+      throw new Error("Private execution recovery signature verification failed.");
+    }
+
+    const matches = await this.readMatches();
+    const intents = await this.readIntents();
+
+    const newestMatches = [...matches].sort(
+      (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
+    );
+
+    for (const match of newestMatches) {
+      const details = await this.decryptPayload<PrivateMatchPayload>(match.encryptedPayload);
+
+      const isBuyer = details.buyOwner.toLowerCase() === owner.toLowerCase();
+
+      const isSeller = details.sellOwner.toLowerCase() === owner.toLowerCase();
+
+      if (!isBuyer && !isSeller) {
+        continue;
+      }
+
+      const role = isBuyer ? "buyer" : "seller";
+
+      const intentId = isBuyer ? match.buyIntentId : match.sellIntentId;
+
+      const intent = intents.find((entry) => entry.intentId === intentId) ?? null;
+
+      if (!intent) {
+        continue;
+      }
+
+      return {
+        matchId: match.matchId,
+        matchCommitment: match.matchCommitment,
+        role,
+        intentId,
+        intentHash: intent.intentHash,
+        market: match.market,
+        status: match.status,
+        settlementStatus: match.settlementStatus,
+        createdAt: match.createdAt,
+      };
+    }
+
+    return null;
+  }
+
+  async getWalletActivity(request: RecoverMatchRequest): Promise<WalletPrivateActivity> {
+    const owner = getAddress(request.address);
+    const message = buildRecoverMatchMessage(owner);
+
+    const validSignature = await verifyMessage({
+      address: owner,
+      message,
+      signature: request.signature,
+    });
+
+    if (!validSignature) {
+      throw new Error("Private activity signature verification failed.");
+    }
+
+    const intents = await this.readIntents();
+    const matches = await this.readMatches();
+
+    const walletIntents = intents
+      .filter((intent) => intent.owner.toLowerCase() === owner.toLowerCase())
+      .sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt))
+      .map((intent) => ({
+        intentId: intent.intentId,
+        intentHash: intent.intentHash,
+        market: intent.market,
+        orderType: intent.orderType,
+        status: intent.status,
+        matchStatus: intent.matchStatus,
+        settlementStatus: intent.settlementStatus,
+        createdAt: intent.createdAt,
+        expiresAt: intent.expiresAt,
+      }));
+
+    const ownedMatchIds: string[] = [];
+
+    for (const match of matches) {
+      const details = await this.decryptPayload<PrivateMatchPayload>(match.encryptedPayload);
+      const ownsMatch =
+        details.buyOwner.toLowerCase() === owner.toLowerCase() ||
+        details.sellOwner.toLowerCase() === owner.toLowerCase();
+
+      if (ownsMatch) {
+        ownedMatchIds.push(match.matchId);
+      }
+    }
+
+    const executions: MatchExecution[] = [];
+
+    for (const matchId of ownedMatchIds) {
+      executions.push(await this.getExecution(matchId));
+    }
+
+    executions.sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt));
+
+    return {
+      wallet: owner,
+      intents: walletIntents,
+      executions,
+    };
+  }
+
+  async getEscrowPlan(matchId: string, request: EscrowPlanRequest): Promise<EscrowPlan> {
+    const owner = getAddress(request.address);
+
+    const message = buildEscrowPlanMessage(matchId, owner);
+
+    const validSignature = await verifyMessage({
+      address: owner,
+      message,
+      signature: request.signature,
+    });
+
+    if (!validSignature) {
+      throw new Error("Escrow plan signature verification failed.");
+    }
+
+    const matches = await this.readMatches();
+
+    const match = matches.find((entry) => entry.matchId === matchId) ?? null;
+
+    if (!match) {
+      throw new Error("Private match was not found.");
+    }
+
+    const details = await this.decryptPayload<PrivateMatchPayload>(match.encryptedPayload);
+
+    const intents = await this.readIntents();
+
+    const isBuyer = details.buyOwner.toLowerCase() === owner.toLowerCase();
+
+    const isSeller = details.sellOwner.toLowerCase() === owner.toLowerCase();
+
+    if (!isBuyer && !isSeller) {
+      throw new Error("Connected wallet is not part of this private match.");
+    }
+
+    const intentId = isBuyer ? match.buyIntentId : match.sellIntentId;
+
+    const intent = intents.find((entry) => entry.intentId === intentId) ?? null;
+
+    if (!intent) {
+      throw new Error("Matched private intent was not found.");
+    }
+
+    const role = isBuyer ? "buyer" : "seller";
+
+    const asset = isBuyer ? "C2FLR" : "FXRP";
+
+    const amount = isBuyer ? details.quoteAmount : details.baseAmount;
+
+    const decimals = isBuyer ? 18 : 6;
+
+    const amountRaw = decimalToRawAmount(amount, decimals);
+
+    return {
+      matchId: match.matchId,
+      matchCommitment: match.matchCommitment,
+      role,
+      asset,
+      amount,
+      amountRaw,
+      intentId,
+      intentHash: intent.intentHash,
+      owner,
+      expiresAt: intent.expiresAt,
+    };
+  }
+
+  async registerFunding(
+    matchId: string,
+    request: EscrowFundingRegistrationRequest,
+  ): Promise<MatchExecution> {
+    const owner = getAddress(request.address);
+    const message = buildEscrowPlanMessage(matchId, owner);
+
+    const validSignature = await verifyMessage({
+      address: owner,
+      message,
+      signature: request.signature,
+    });
+
+    if (!validSignature) {
+      throw new Error("Escrow funding registration signature verification failed.");
+    }
+
+    const matches = await this.readMatches();
+    const match = matches.find((entry) => entry.matchId === matchId) ?? null;
+
+    if (!match) {
+      throw new Error("Private match was not found.");
+    }
+
+    const details = await this.decryptPayload<PrivateMatchPayload>(match.encryptedPayload);
+    const intents = await this.readIntents();
+
+    const role =
+      details.buyOwner.toLowerCase() === owner.toLowerCase()
+        ? "buyer"
+        : details.sellOwner.toLowerCase() === owner.toLowerCase()
+          ? "seller"
+          : null;
+
+    if (!role) {
+      throw new Error("Connected wallet is not part of this private match.");
+    }
+
+    const expected = this.expectedFunding(match, details, intents, role);
+    const receipt = await chainClient.getTransactionReceipt({
+      hash: request.transactionHash,
+    });
+
+    if (receipt.status !== "success") {
+      throw new Error("Escrow funding transaction did not succeed.");
+    }
+
+    const funding = this.decodeFundingReceipt(receipt.logs, expected, request.transactionHash);
+
+    if (request.approvalTransactionHash) {
+      const approvalReceipt = await chainClient.getTransactionReceipt({
+        hash: request.approvalTransactionHash,
+      });
+
+      if (approvalReceipt.status !== "success") {
+        throw new Error("FXRP approval transaction did not succeed.");
+      }
+
+      funding.approvalTransactionHash = request.approvalTransactionHash;
+    }
+
+    match.execution ??= {};
+    match.execution[role] = funding;
+
+    if (match.execution.buyer && match.execution.seller) {
+      match.settlementStatus = "funded";
+    }
+
+    await this.persistMatches(matches);
+
+    return this.getExecution(matchId);
+  }
+
+  async getExecution(matchId: string): Promise<MatchExecution> {
+    const matches = await this.readMatches();
+    const match = matches.find((entry) => entry.matchId === matchId) ?? null;
+
+    if (!match) {
+      throw new Error("Private match was not found.");
+    }
+
+    const details = await this.decryptPayload<PrivateMatchPayload>(match.encryptedPayload);
+    const intents = await this.readIntents();
+    let changed = false;
+
+    match.execution ??= {};
+
+    if (!match.execution.buyer) {
+      try {
+        const expected = this.expectedFunding(match, details, intents, "buyer");
+
+        const discovered = await this.discoverFunding(expected);
+
+        if (discovered) {
+          match.execution.buyer = discovered;
+          changed = true;
+        }
+      } catch {
+        // Legacy matches created before strict asset precision was
+        // enforced may not be representable by the escrow contract.
+        // They remain visible in activity history but are not used
+        // for automatic funding discovery.
+      }
+    }
+
+    if (!match.execution.seller) {
+      try {
+        const expected = this.expectedFunding(match, details, intents, "seller");
+
+        const discovered = await this.discoverFunding(expected);
+
+        if (discovered) {
+          match.execution.seller = discovered;
+          changed = true;
+        }
+      } catch {
+        // Do not let an unfundable legacy execution prevent the
+        // wallet's valid orders and transaction history from loading.
+      }
+    }
+
+    if (
+      match.execution.buyer &&
+      match.execution.seller &&
+      match.settlementStatus === "not_started"
+    ) {
+      match.settlementStatus = "funded";
+      changed = true;
+    }
+
+    if (changed) {
+      await this.persistMatches(matches);
+    }
+
+    const buyer = await this.toExecutionFunding(match.execution.buyer ?? null);
+    const seller = await this.toExecutionFunding(match.execution.seller ?? null);
+
+    const transactions: ExecutionTransaction[] = [];
+
+    for (const funding of [buyer, seller]) {
+      if (!funding) continue;
+
+      if (funding.approvalTransactionHash) {
+        transactions.push({
+          kind: "approval",
+          role: funding.role,
+          hash: funding.approvalTransactionHash,
+          label: `${funding.role === "buyer" ? "Buyer" : "Seller"} FXRP approval`,
+        });
+      }
+
+      transactions.push({
+        kind: "deposit",
+        role: funding.role,
+        hash: funding.transactionHash,
+        label: `${funding.role === "buyer" ? "Buyer" : "Seller"} escrow deposit`,
+      });
+    }
+
+    const bothFunded = Boolean(buyer && seller);
+    const oneFunded = Boolean(buyer || seller);
+    const settled = buyer?.state === "settled" && seller?.state === "settled";
+
+    return {
+      matchId: match.matchId,
+      matchCommitment: match.matchCommitment,
+      market: match.market,
+      stage: settled
+        ? "settled"
+        : bothFunded
+          ? "funded"
+          : oneFunded
+            ? "partially_funded"
+            : "matched",
+      buyer,
+      seller,
+      transactions,
+      settlementStatus: match.settlementStatus,
+      createdAt: match.createdAt,
+    };
+  }
+
+  private expectedFunding(
+    match: StoredMatch,
+    details: PrivateMatchPayload,
+    intents: StoredIntent[],
+    role: "buyer" | "seller",
+  ) {
+    const intentId = role === "buyer" ? match.buyIntentId : match.sellIntentId;
+    const intent = intents.find((entry) => entry.intentId === intentId) ?? null;
+
+    if (!intent) {
+      throw new Error("Matched private intent was not found.");
+    }
+
+    const owner = role === "buyer" ? details.buyOwner : details.sellOwner;
+    const asset = role === "buyer" ? "C2FLR" : "FXRP";
+    const amount = role === "buyer" ? details.quoteAmount : details.baseAmount;
+    const amountRaw = decimalToRawAmount(amount, role === "buyer" ? 18 : 6);
+
+    return {
+      role,
+      asset,
+      amountRaw,
+      owner,
+      intentHash: intent.intentHash,
+      expiresAt: intent.expiresAt,
+    } as const;
+  }
+
+  private decodeFundingReceipt(
+    logs: readonly { address: `0x${string}`; data: Hex; topics: readonly Hex[] }[],
+    expected: ExpectedFunding,
+    transactionHash: Hex,
+  ): StoredFunding {
+    for (const log of logs) {
+      if (log.address.toLowerCase() !== ESCROW_ADDRESS.toLowerCase()) continue;
+
+      try {
+        const decoded = decodeEventLog({
+          abi: escrowAbi,
+          data: log.data,
+          topics: log.topics,
+        });
+
+        if (expected.role === "buyer" && decoded.eventName === "NativeDeposited") {
+          const args = decoded.args as {
+            depositId: Hex;
+            depositor: `0x${string}`;
+            intentHash: Hex;
+            amount: bigint;
+            expiresAt: bigint;
+          };
+
+          if (
+            args.depositor.toLowerCase() === expected.owner.toLowerCase() &&
+            args.intentHash.toLowerCase() === expected.intentHash.toLowerCase() &&
+            args.amount.toString() === expected.amountRaw
+          ) {
+            return {
+              role: expected.role,
+              asset: expected.asset,
+              amountRaw: expected.amountRaw,
+              depositId: args.depositId,
+              transactionHash,
+              depositor: getAddress(args.depositor),
+              intentHash: expected.intentHash,
+              expiresAt: new Date(Number(args.expiresAt) * 1000).toISOString(),
+              registeredAt: new Date().toISOString(),
+            };
+          }
+        }
+
+        if (expected.role === "seller" && decoded.eventName === "TokenDeposited") {
+          const args = decoded.args as {
+            depositId: Hex;
+            depositor: `0x${string}`;
+            intentHash: Hex;
+            token: `0x${string}`;
+            amount: bigint;
+            expiresAt: bigint;
+          };
+
+          if (
+            args.depositor.toLowerCase() === expected.owner.toLowerCase() &&
+            args.intentHash.toLowerCase() === expected.intentHash.toLowerCase() &&
+            args.token.toLowerCase() === FXRP_ADDRESS.toLowerCase() &&
+            args.amount.toString() === expected.amountRaw
+          ) {
+            return {
+              role: expected.role,
+              asset: expected.asset,
+              amountRaw: expected.amountRaw,
+              depositId: args.depositId,
+              transactionHash,
+              depositor: getAddress(args.depositor),
+              intentHash: expected.intentHash,
+              expiresAt: new Date(Number(args.expiresAt) * 1000).toISOString(),
+              registeredAt: new Date().toISOString(),
+            };
+          }
+        }
+      } catch {}
+    }
+
+    throw new Error("Transaction does not contain the expected FlareLock escrow deposit.");
+  }
+
+  private async discoverFunding(expected: ExpectedFunding): Promise<StoredFunding | null> {
+    const latestBlock = await chainClient.getBlockNumber();
+
+    // Coston2 currently restricts eth_getLogs to a small block range.
+    // Funding is registered directly for all new executions, so this
+    // backwards scan is only a recovery fallback for recent deposits.
+    const lookback = 600n;
+    const minimumBlock = latestBlock > lookback ? latestBlock - lookback : 0n;
+
+    let toBlock = latestBlock;
+
+    while (toBlock >= minimumBlock) {
+      const candidateFromBlock = toBlock > 29n ? toBlock - 29n : 0n;
+      const fromBlock = candidateFromBlock < minimumBlock ? minimumBlock : candidateFromBlock;
+
+      const logs = await chainClient.getLogs({
+        address: ESCROW_ADDRESS,
+        fromBlock,
+        toBlock,
+      });
+
+      for (const log of [...logs].reverse()) {
+        try {
+          const funding = this.decodeFundingReceipt(
+            [
+              {
+                address: log.address,
+                data: log.data,
+                topics: log.topics,
+              },
+            ],
+            expected,
+            log.transactionHash,
+          );
+
+          if (expected.role === "seller" && log.blockNumber !== null) {
+            funding.approvalTransactionHash =
+              (await this.discoverSellerApproval(expected, log.blockNumber)) ?? undefined;
+          }
+
+          return funding;
+        } catch {}
+      }
+
+      if (fromBlock === minimumBlock || fromBlock === 0n) {
+        break;
+      }
+
+      toBlock = fromBlock - 1n;
+    }
+
+    return null;
+  }
+
+  private async discoverSellerApproval(
+    expected: ExpectedFunding,
+    depositBlock: bigint,
+  ): Promise<Hex | null> {
+    const lookback = 120n;
+    const minimumBlock = depositBlock > lookback ? depositBlock - lookback : 0n;
+
+    let toBlock = depositBlock;
+
+    while (toBlock >= minimumBlock) {
+      const candidateFromBlock = toBlock > 29n ? toBlock - 29n : 0n;
+      const fromBlock = candidateFromBlock < minimumBlock ? minimumBlock : candidateFromBlock;
+
+      const logs = await chainClient.getLogs({
+        address: FXRP_ADDRESS,
+        fromBlock,
+        toBlock,
+      });
+
+      for (const log of [...logs].reverse()) {
+        try {
+          const decoded = decodeEventLog({
+            abi: erc20ApprovalAbi,
+            data: log.data,
+            topics: log.topics,
+          });
+
+          if (decoded.eventName !== "Approval") {
+            continue;
+          }
+
+          const args = decoded.args as {
+            owner: `0x${string}`;
+            spender: `0x${string}`;
+            value: bigint;
+          };
+
+          if (
+            args.owner.toLowerCase() === expected.owner.toLowerCase() &&
+            args.spender.toLowerCase() === ESCROW_ADDRESS.toLowerCase() &&
+            args.value.toString() === expected.amountRaw
+          ) {
+            return log.transactionHash;
+          }
+        } catch {}
+      }
+
+      if (fromBlock === minimumBlock || fromBlock === 0n) {
+        break;
+      }
+
+      toBlock = fromBlock - 1n;
+    }
+
+    return null;
+  }
+
+  private async toExecutionFunding(
+    funding: StoredFunding | null,
+  ): Promise<ExecutionFunding | null> {
+    if (!funding) return null;
+
+    try {
+      const deposit = await chainClient.readContract({
+        address: ESCROW_ADDRESS,
+        abi: escrowAbi,
+        functionName: "deposits",
+        args: [funding.depositId],
+      });
+
+      return {
+        role: funding.role,
+        asset: funding.asset,
+        amountRaw: funding.amountRaw,
+        depositId: funding.depositId,
+        transactionHash: funding.transactionHash,
+        approvalTransactionHash: funding.approvalTransactionHash,
+        intentHash: funding.intentHash,
+        expiresAt: funding.expiresAt,
+        state: depositStateName(Number(deposit[6])),
+      };
+    } catch {
+      return {
+        role: funding.role,
+        asset: funding.asset,
+        amountRaw: funding.amountRaw,
+        depositId: funding.depositId,
+        transactionHash: funding.transactionHash,
+        approvalTransactionHash: funding.approvalTransactionHash,
+        intentHash: funding.intentHash,
+        expiresAt: funding.expiresAt,
+        state: "unknown",
+      };
+    }
+  }
+
+  private async executeMatching(request: MatchRunRequest = {}): Promise<MatchRunResult> {
     const intents = await this.readIntents();
     const existingMatches = await this.readMatches();
+
+    if (request.counterpartyIntentId && !request.intentId) {
+      throw new Error("counterpartyIntentId requires intentId.");
+    }
+
+    if (
+      request.intentId &&
+      request.counterpartyIntentId &&
+      request.intentId === request.counterpartyIntentId
+    ) {
+      throw new Error("Intent and counterparty intent must be different.");
+    }
 
     this.expireStaleIntents(intents);
 
@@ -281,11 +1115,34 @@ export class MatchService {
           continue;
         }
 
+        if (request.intentId && request.counterpartyIntentId) {
+          const exactPair =
+            (buy.stored.intentId === request.intentId &&
+              sell.stored.intentId === request.counterpartyIntentId) ||
+            (sell.stored.intentId === request.intentId &&
+              buy.stored.intentId === request.counterpartyIntentId);
+
+          if (!exactPair) {
+            continue;
+          }
+        } else if (
+          request.intentId &&
+          buy.stored.intentId !== request.intentId &&
+          sell.stored.intentId !== request.intentId
+        ) {
+          continue;
+        }
+
         if (!this.pricesCross(buy, sell)) {
           continue;
         }
 
-        const fillBaseAmount = round(Math.min(buy.remainingBaseAmount, sell.remainingBaseAmount));
+        // FXRP uses 6 decimals. A private match must never commit to
+        // a base amount that cannot be represented by the token onchain.
+        const fillBaseAmount = round(
+          Math.min(buy.remainingBaseAmount, sell.remainingBaseAmount),
+          6,
+        );
 
         if (fillBaseAmount <= EPSILON) {
           continue;

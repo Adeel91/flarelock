@@ -55,6 +55,8 @@ type WalletContextValue = {
 
 const WalletContext = createContext<WalletContextValue | null>(null);
 
+const MANUAL_DISCONNECT_KEY = "flarelock:wallet:disconnected";
+
 function getMetaMaskProvider(): EthereumProvider {
   if (typeof window === "undefined") {
     throw new Error("Wallet access is unavailable during server rendering.");
@@ -125,6 +127,17 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
     async function restoreWallet() {
       try {
+        if (window.localStorage.getItem(MANUAL_DISCONNECT_KEY) === "1") {
+          if (!cancelled) {
+            setAddress(null);
+            setChainId(null);
+            setStatus("idle");
+            setErrorMessage(null);
+          }
+
+          return;
+        }
+
         const provider = getProvider();
 
         const [accounts, currentChain] = await Promise.all([
@@ -184,6 +197,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const connect = useCallback(async () => {
     setStatus("connecting");
     setErrorMessage(null);
+
+    window.localStorage.removeItem(MANUAL_DISCONNECT_KEY);
 
     try {
       // The provider is accessed only after the user clicks Connect wallet.
