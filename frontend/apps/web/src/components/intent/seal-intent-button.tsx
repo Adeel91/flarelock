@@ -165,14 +165,12 @@ export function SealIntentButton({ quote, order }: Props) {
 
       rememberPendingIntent(quote.side, result);
 
-      if (!counterparty) {
-        setStage("searching");
-        return;
-      }
-
       setStage("matching");
 
-      const matchResult = await runPrivateMatching(result.intentId, counterparty.intentId);
+      const matchResult = counterparty
+        ? await runPrivateMatching(result.intentId, counterparty.intentId)
+        : await runPrivateMatching(result.intentId);
+
       setMatchResult(matchResult);
 
       const matchForIntent = matchResult.matches.find(

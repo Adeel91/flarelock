@@ -144,14 +144,21 @@ func SendConfidentialMatch(
 		)
 	}
 
-	receipt, err := bind.WaitMined(
+	ctx, cancel := context.WithTimeout(
 		context.Background(),
+		3*time.Minute,
+	)
+	defer cancel()
+
+	receipt, err := support.WaitMinedResilient(
+		ctx,
 		s.ChainClient,
 		tx,
 	)
 	if err != nil {
-		return common.Hash{}, common.Hash{}, errors.Errorf(
-			"failed waiting for transaction: %s",
+		return common.Hash{}, tx.Hash(), errors.Errorf(
+			"confidential instruction transaction %s was submitted but receipt confirmation failed: %s",
+			tx.Hash().Hex(),
 			err,
 		)
 	}

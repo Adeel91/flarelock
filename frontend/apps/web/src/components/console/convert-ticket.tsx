@@ -336,6 +336,7 @@ export function ConvertTicket({ disabled }: ConvertTicketProps) {
                     <option value="15">15 minutes</option>
 
                     <option value="60">1 hour</option>
+                    <option value="240">4 hours</option>
 
                     <option value="1440">24 hours</option>
 

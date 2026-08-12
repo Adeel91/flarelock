@@ -9,7 +9,7 @@ import {
   parseAbi,
 } from "viem";
 
-const COSTON2_RPC = "https://coston2-api.flare.network/ext/C/rpc";
+const COSTON2_RPC = "https://falling-skilled-uranium.flare-coston2.quiknode.pro/ext/bc/C/rpc";
 
 const COSTON2_CHAIN_ID = 114;
 

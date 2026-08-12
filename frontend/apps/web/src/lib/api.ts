@@ -1023,6 +1023,40 @@ export async function getMatchExecution(matchId: string): Promise<MatchExecution
   return (await response.json()) as MatchExecution;
 }
 
+export type ConfidentialSettlementResult = {
+  matchId: string;
+  status: "settled";
+  instructionId: `0x${string}`;
+  instructionTransaction: `0x${string}`;
+  buyerLockTransaction: `0x${string}`;
+  sellerLockTransaction: `0x${string}`;
+  settlementTransaction: `0x${string}`;
+  matchCommitment: `0x${string}`;
+};
+
+export async function settlePrivateExecution(
+  matchId: string,
+  address: `0x${string}`,
+  signature: `0x${string}`,
+): Promise<ConfidentialSettlementResult> {
+  const response = await fetch(`${apiUrl}/matches/${matchId}/settle`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      address,
+      signature,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response, "Unable to run confidential settlement."));
+  }
+
+  return (await response.json()) as ConfidentialSettlementResult;
+}
+
 export async function registerEscrowFunding(
   matchId: string,
   address: `0x${string}`,

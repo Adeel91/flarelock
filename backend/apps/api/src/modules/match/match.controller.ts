@@ -14,6 +14,7 @@ import {
   type MatchRunRequest,
   MatchService,
   type RecoverMatchRequest,
+  type SettlementRequest,
 } from "./match.service";
 
 @Controller("matches")
@@ -73,6 +74,18 @@ export class MatchController {
       return await this.matchService.registerFunding(matchId, request);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unable to register escrow funding.";
+
+      throw new BadRequestException(message);
+    }
+  }
+
+  @Post(":matchId/settle")
+  async settleMatch(@Param("matchId") matchId: string, @Body() request: SettlementRequest) {
+    try {
+      return await this.matchService.settleMatch(matchId, request);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unable to settle private execution.";
 
       throw new BadRequestException(message);
     }

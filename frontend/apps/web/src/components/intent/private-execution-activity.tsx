@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import { ConfidentialSettlementAction } from "@/components/intent/confidential-settlement-action";
 import { MatchEscrowFunding } from "@/components/intent/match-escrow-funding";
 import { useFlareWallet } from "@/components/wallet/wallet-provider";
 import {
@@ -557,6 +558,34 @@ export function PrivateExecutionActivity() {
                       {selectedExecution.stage !== "settled" && (
                         <div className="pt-5">
                           <MatchEscrowFunding matchId={selectedExecution.matchId} />
+
+                          {selectedExecution ? (
+                            <ConfidentialSettlementAction
+                              execution={selectedExecution}
+                              onSettled={async () => {
+                                const refreshed = await getMatchExecution(
+                                  selectedExecution.matchId,
+                                );
+
+                                setSelectedExecution(refreshed);
+
+                                setActivity((current) => {
+                                  if (!current) {
+                                    return current;
+                                  }
+
+                                  return {
+                                    ...current,
+                                    executions: current.executions.map((execution) =>
+                                      execution.matchId === refreshed.matchId
+                                        ? refreshed
+                                        : execution,
+                                    ),
+                                  };
+                                });
+                              }}
+                            />
+                          ) : null}
                         </div>
                       )}
                     </>

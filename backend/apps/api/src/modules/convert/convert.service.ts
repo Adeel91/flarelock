@@ -11,7 +11,7 @@ type ConvertQuoteInput = {
   amount?: string;
 };
 
-const COSTON2_RPC = "https://coston2-api.flare.network/ext/C/rpc";
+const COSTON2_RPC = "https://falling-skilled-uranium.flare-coston2.quiknode.pro/ext/bc/C/rpc";
 
 const FTSOV2_ADDRESS = "0x3d893C53D9e8056135C26C8c638B76C8b60Df726" as const;
 

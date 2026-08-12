@@ -1,6 +1,9 @@
+import { execFile } from "node:child_process";
 import { createCipheriv, createDecipheriv, randomBytes, randomUUID } from "node:crypto";
-import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rename, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import path from "node:path";
+import { promisify } from "node:util";
 import {
   createPublicClient,
   decodeEventLog,
@@ -12,6 +15,10 @@ import {
   toBytes,
   verifyMessage,
 } from "viem";
+
+import { buildPrivateIntentMessage } from "../intent/intent.service";
+
+const execFileAsync = promisify(execFile);
 
 type OrderType = "market" | "limit" | "stop";
 type TimeInForce = "IOC" | "GTC";
@@ -80,9 +87,25 @@ type StoredFunding = {
   registeredAt: string;
 };
 
+type StoredSettlement = {
+  instructionId: Hex;
+  instructionTransaction: Hex;
+  matchCommitment: Hex;
+  buyerLockTransaction: Hex;
+  sellerLockTransaction: Hex;
+  settlementTransaction: Hex;
+  submissionTag: string;
+  status: number;
+  baseAmountRaw: string;
+  quoteAmountRaw: string;
+  executionPriceE18: string;
+  settledAt: string;
+};
+
 type StoredExecution = {
   buyer?: StoredFunding;
   seller?: StoredFunding;
+  settlement?: StoredSettlement;
 };
 
 type ExpectedFunding = {
@@ -156,6 +179,66 @@ export type EscrowPlanRequest = {
 export type EscrowFundingRegistrationRequest = EscrowPlanRequest & {
   transactionHash: Hex;
   approvalTransactionHash?: Hex;
+};
+
+export type SettlementRequest = EscrowPlanRequest;
+
+export type SettlementResult = {
+  matchId: string;
+  status: "settled";
+  instructionId: Hex;
+  instructionTransaction: Hex;
+  buyerLockTransaction: Hex;
+  sellerLockTransaction: Hex;
+  settlementTransaction: Hex;
+  matchCommitment: Hex;
+};
+
+type FccExecutorIntent = {
+  owner: `0x${string}`;
+  intentHash: Hex;
+  depositId: Hex;
+  quoteId: string;
+  quoteHash: Hex;
+  side: Side;
+  fromAsset: string;
+  toAsset: string;
+  inputAmount: string;
+  receiveAmount: string;
+  orderType: OrderType;
+  limitPrice?: string;
+  stopPrice?: string;
+  timeInForce: TimeInForce;
+  validUntil: string;
+  signedMessage: string;
+  signature: Hex;
+  createdAt: string;
+};
+
+type FccExecutorInput = {
+  request: {
+    version: 1;
+    buy: FccExecutorIntent;
+    sell: FccExecutorIntent;
+  };
+};
+
+type FccExecutorOutput = {
+  instructionId: Hex;
+  instructionTransaction: Hex;
+  matchCommitment: Hex;
+  buyIntentHash: Hex;
+  sellIntentHash: Hex;
+  buyDepositId: Hex;
+  sellDepositId: Hex;
+  baseAmountRaw: string;
+  quoteAmountRaw: string;
+  executionPriceE18: string;
+  submissionTag: string;
+  status: number;
+  buyerLockTransaction: Hex;
+  sellerLockTransaction: Hex;
+  settlementTransaction: Hex;
 };
 
 export type ExecutionFunding = {
@@ -256,7 +339,7 @@ export function buildEscrowPlanMessage(matchId: string, address: string): string
   ].join("\n");
 }
 
-const COSTON2_RPC_URL = "https://coston2-api.flare.network/ext/C/rpc";
+const COSTON2_RPC_URL = "https://falling-skilled-uranium.flare-coston2.quiknode.pro/ext/bc/C/rpc";
 
 const ESCROW_ADDRESS = "0x71A27096640D3D24545D505B5F830ea3d94355d6" as const;
 
@@ -650,6 +733,294 @@ export class MatchService {
     return this.getExecution(matchId);
   }
 
+  async settleMatch(matchId: string, request: SettlementRequest): Promise<SettlementResult> {
+    const owner = getAddress(request.address);
+
+    const signatureIsValid = await verifyMessage({
+      address: owner,
+      message: buildEscrowPlanMessage(matchId, owner),
+      signature: request.signature,
+    });
+
+    if (!signatureIsValid) {
+      throw new Error("Confidential settlement signature verification failed.");
+    }
+
+    const matches = await this.readMatches();
+
+    const match = matches.find((entry) => entry.matchId === matchId) ?? null;
+
+    if (!match) {
+      throw new Error("Private execution was not found.");
+    }
+
+    if (match.settlementStatus === "settled") {
+      const settlement = match.execution?.settlement;
+
+      if (!settlement) {
+        throw new Error("Execution is settled but settlement evidence is missing.");
+      }
+
+      return {
+        matchId,
+        status: "settled",
+        instructionId: settlement.instructionId,
+        instructionTransaction: settlement.instructionTransaction,
+        buyerLockTransaction: settlement.buyerLockTransaction,
+        sellerLockTransaction: settlement.sellerLockTransaction,
+        settlementTransaction: settlement.settlementTransaction,
+        matchCommitment: settlement.matchCommitment,
+      };
+    }
+
+    const execution = match.execution;
+
+    if (!execution?.buyer || !execution.seller) {
+      throw new Error("Both sides must fund escrow before confidential settlement.");
+    }
+
+    const matchDetails = await this.decryptPayload<PrivateMatchPayload>(match.encryptedPayload);
+
+    const isParticipant =
+      matchDetails.buyOwner.toLowerCase() === owner.toLowerCase() ||
+      matchDetails.sellOwner.toLowerCase() === owner.toLowerCase();
+
+    if (!isParticipant) {
+      throw new Error("Only a participant in this execution can start settlement.");
+    }
+
+    const now = Date.now();
+
+    for (const funding of [execution.buyer, execution.seller]) {
+      if (Date.parse(funding.expiresAt) <= now) {
+        throw new Error(`${funding.role} escrow deposit has expired.`);
+      }
+    }
+
+    const buyerState = await this.toExecutionFunding(execution.buyer);
+
+    const sellerState = await this.toExecutionFunding(execution.seller);
+
+    if (buyerState?.state !== "available" || sellerState?.state !== "available") {
+      throw new Error("Both escrow deposits must be available before FCC settlement.");
+    }
+
+    const intents = await this.readIntents();
+
+    const buyIntent = intents.find((intent) => intent.intentId === match.buyIntentId) ?? null;
+
+    const sellIntent = intents.find((intent) => intent.intentId === match.sellIntentId) ?? null;
+
+    if (!buyIntent || !sellIntent) {
+      throw new Error("One or more signed intents could not be recovered.");
+    }
+
+    const buyPayload = await this.decryptPayload<PrivateIntentPayload>(buyIntent.encryptedPayload);
+
+    const sellPayload = await this.decryptPayload<PrivateIntentPayload>(
+      sellIntent.encryptedPayload,
+    );
+
+    if (buyPayload.orderType !== "limit" || sellPayload.orderType !== "limit") {
+      throw new Error("FCC confidential settlement currently supports Limit orders only.");
+    }
+
+    const buildFccIntent = (
+      stored: StoredIntent,
+      payload: PrivateIntentPayload,
+      depositId: Hex,
+    ): FccExecutorIntent => {
+      const signedMessage = buildPrivateIntentMessage(
+        stored.owner,
+        {
+          quoteId: stored.quoteId,
+          quoteHash: stored.quoteHash,
+          side: payload.side,
+          fromAsset: payload.fromAsset,
+          toAsset: payload.toAsset,
+          inputAmount: payload.inputAmount,
+          receiveAmount: payload.receiveAmount,
+          expiresAt: stored.expiresAt,
+        },
+        {
+          type: payload.orderType,
+          limitPrice: payload.limitPrice,
+          stopPrice: payload.stopPrice,
+          timeInForce: payload.timeInForce,
+          validUntil: stored.expiresAt,
+        },
+      );
+
+      return {
+        owner: stored.owner,
+        intentHash: stored.intentHash,
+        depositId,
+        quoteId: stored.quoteId,
+        quoteHash: stored.quoteHash,
+        side: payload.side,
+        fromAsset: payload.fromAsset,
+        toAsset: payload.toAsset,
+        inputAmount: payload.inputAmount.toString(),
+        receiveAmount: payload.receiveAmount.toString(),
+        orderType: payload.orderType,
+        limitPrice: payload.limitPrice?.toString(),
+        stopPrice: payload.stopPrice?.toString(),
+        timeInForce: payload.timeInForce,
+        validUntil: stored.expiresAt,
+        signedMessage,
+        signature: payload.signature,
+        createdAt: stored.createdAt,
+      };
+    };
+
+    const executorInput: FccExecutorInput = {
+      request: {
+        version: 1,
+        buy: buildFccIntent(buyIntent, buyPayload, execution.buyer.depositId),
+        sell: buildFccIntent(sellIntent, sellPayload, execution.seller.depositId),
+      },
+    };
+
+    /*
+     * Yarn may launch the API with either the repository root
+     * or backend/apps/api as process.cwd(). Resolve both safely.
+     */
+    const candidateRoots = [
+      process.env.FLARELOCK_REPO_ROOT,
+      process.cwd(),
+      path.resolve(process.cwd(), "../../.."),
+    ].filter((value): value is string => typeof value === "string" && value.length > 0);
+
+    let toolsDirectory: string | null = null;
+
+    for (const root of candidateRoots) {
+      const candidate = path.join(root, "confidential/fcc_service/tools");
+
+      try {
+        await readFile(path.join(candidate, "go.mod"), "utf8");
+
+        toolsDirectory = candidate;
+        break;
+      } catch {
+        // Try the next repository-root candidate.
+      }
+    }
+
+    if (!toolsDirectory) {
+      throw new Error("Unable to locate the Flare FCC settlement tooling.");
+    }
+
+    const tempDirectory = await mkdtemp(path.join(tmpdir(), "flarelock-fcc-"));
+
+    const inputFile = path.join(tempDirectory, "input.json");
+
+    const outputFile = path.join(tempDirectory, "output.json");
+
+    try {
+      await writeFile(inputFile, `${JSON.stringify(executorInput, null, 2)}\n`, {
+        encoding: "utf8",
+        mode: 0o600,
+      });
+
+      const proxyUrl = process.env.EXT_PROXY_URL ?? "https://fcc.shaderift.com";
+
+      const instructionSenderAddress =
+        process.env.INSTRUCTION_SENDER_ADDRESS ?? "0xaeB8E980C87E58093E02d8d45698Fc9ECBb42cea";
+
+      const { stdout, stderr } = await execFileAsync(
+        "go",
+        [
+          "run",
+          "./cmd/settle-match",
+          "-input",
+          inputFile,
+          "-output",
+          outputFile,
+          "-a",
+          "../config/coston2/deployed-addresses.json",
+          "-c",
+          COSTON2_RPC_URL,
+          "-p",
+          proxyUrl,
+          "-instructionSender",
+          instructionSenderAddress,
+          "-escrow",
+          ESCROW_ADDRESS,
+        ],
+        {
+          cwd: toolsDirectory,
+          env: process.env,
+          timeout: 300_000,
+          maxBuffer: 4 * 1024 * 1024,
+        },
+      );
+
+      if (stdout.trim()) {
+        console.info(`[FlareLock FCC] ${stdout.trim()}`);
+      }
+
+      if (stderr.trim()) {
+        console.info(`[FlareLock FCC] ${stderr.trim()}`);
+      }
+
+      const executorOutput = JSON.parse(await readFile(outputFile, "utf8")) as FccExecutorOutput;
+
+      if (executorOutput.status !== 1) {
+        throw new Error(`FCC returned unexpected status ${executorOutput.status}.`);
+      }
+
+      if (
+        executorOutput.buyIntentHash.toLowerCase() !== match.buyIntentHash.toLowerCase() ||
+        executorOutput.sellIntentHash.toLowerCase() !== match.sellIntentHash.toLowerCase()
+      ) {
+        throw new Error("FCC settlement intent hashes do not match the execution.");
+      }
+
+      if (
+        executorOutput.buyDepositId.toLowerCase() !== execution.buyer.depositId.toLowerCase() ||
+        executorOutput.sellDepositId.toLowerCase() !== execution.seller.depositId.toLowerCase()
+      ) {
+        throw new Error("FCC settlement deposit IDs do not match the funded execution.");
+      }
+
+      const settlement: StoredSettlement = {
+        instructionId: executorOutput.instructionId,
+        instructionTransaction: executorOutput.instructionTransaction,
+        matchCommitment: executorOutput.matchCommitment,
+        buyerLockTransaction: executorOutput.buyerLockTransaction,
+        sellerLockTransaction: executorOutput.sellerLockTransaction,
+        settlementTransaction: executorOutput.settlementTransaction,
+        submissionTag: executorOutput.submissionTag,
+        status: executorOutput.status,
+        baseAmountRaw: executorOutput.baseAmountRaw,
+        quoteAmountRaw: executorOutput.quoteAmountRaw,
+        executionPriceE18: executorOutput.executionPriceE18,
+        settledAt: new Date().toISOString(),
+      };
+
+      match.execution.settlement = settlement;
+      match.settlementStatus = "settled";
+
+      await this.persistMatches(matches);
+
+      return {
+        matchId,
+        status: "settled",
+        instructionId: settlement.instructionId,
+        instructionTransaction: settlement.instructionTransaction,
+        buyerLockTransaction: settlement.buyerLockTransaction,
+        sellerLockTransaction: settlement.sellerLockTransaction,
+        settlementTransaction: settlement.settlementTransaction,
+        matchCommitment: settlement.matchCommitment,
+      };
+    } finally {
+      await rm(tempDirectory, {
+        recursive: true,
+        force: true,
+      });
+    }
+  }
+
   async getExecution(matchId: string): Promise<MatchExecution> {
     const matches = await this.readMatches();
     const match = matches.find((entry) => entry.matchId === matchId) ?? null;
@@ -738,6 +1109,48 @@ export class MatchService {
 
     const bothFunded = Boolean(buyer && seller);
     const oneFunded = Boolean(buyer || seller);
+    const settlement = match.execution?.settlement;
+
+    if (settlement) {
+      transactions.push(
+        {
+          kind: "fcc_instruction",
+
+          hash: settlement.instructionTransaction,
+
+          label: "FCC confidential instruction",
+        },
+
+        {
+          kind: "lock",
+
+          role: "buyer",
+
+          hash: settlement.buyerLockTransaction,
+
+          label: "Buyer escrow lock",
+        },
+
+        {
+          kind: "lock",
+
+          role: "seller",
+
+          hash: settlement.sellerLockTransaction,
+
+          label: "Seller escrow lock",
+        },
+
+        {
+          kind: "settlement",
+
+          hash: settlement.settlementTransaction,
+
+          label: "Atomic FCC settlement",
+        },
+      );
+    }
+
     const settled = buyer?.state === "settled" && seller?.state === "settled";
 
     return {
