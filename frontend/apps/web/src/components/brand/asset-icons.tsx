@@ -6,7 +6,7 @@ type IconProps = {
 export function FlareLockLogo({ compact = false }: { compact?: boolean }) {
   return (
     <div className="flex items-center gap-3">
-      <div className="relative grid h-9 w-9 place-items-center rounded-xl bg-[#e62058] shadow-[0_7px_18px_rgba(230,32,88,0.18)]">
+      <div className="relative grid h-9 w-9 place-items-center rounded-xl bg-[#c10f45] shadow-[0_7px_18px_rgba(193,15,69,0.18)]">
         <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24">
           <path
             d="M7.2 10V8.5C7.2 5.9 9.2 4 12 4s4.8 1.9 4.8 4.5"
@@ -16,7 +16,7 @@ export function FlareLockLogo({ compact = false }: { compact?: boolean }) {
             strokeWidth="2"
           />
           <rect fill="white" height="9" rx="2.2" width="14" x="5" y="9" />
-          <circle cx="12" cy="13.5" fill="#e62058" r="1.4" />
+          <circle cx="12" cy="13.5" fill="#c10f45" r="1.4" />
         </svg>
       </div>
 
@@ -106,7 +106,7 @@ export function FlareIcon({ size = 42, className = "" }: IconProps) {
     >
       <title>Flare</title>
 
-      <circle cx="24" cy="24" fill="#e62058" r="24" />
+      <circle cx="24" cy="24" fill="#c10f45" r="24" />
 
       <path
         d="M14 18.5C14 14.9 16.9 12 20.5 12H34V17.5H21.2C20.3 17.5 19.5 18.3 19.5 19.2V21H30V26.5H19.5V36H14V18.5Z"

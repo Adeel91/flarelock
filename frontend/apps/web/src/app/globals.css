@@ -17,7 +17,7 @@
   --line: #e7e9ed;
   --line-strong: #d8dbe1;
 
-  --flare: #e62058;
+  --flare: #c10f45;
   --flare-hover: #ce174d;
   --flare-dark: #a80f3b;
   --flare-soft: #fff0f4;
@@ -82,7 +82,7 @@ a {
 }
 
 ::selection {
-  background: rgba(230, 32, 88, 0.15);
+  background: rgba(193, 15, 69, 0.15);
 }
 
 .mono {
@@ -119,7 +119,7 @@ a {
 .primary-button {
   background: var(--flare);
   color: #ffffff;
-  box-shadow: 0 10px 24px rgba(230, 32, 88, 0.17);
+  box-shadow: 0 10px 24px rgba(193, 15, 69, 0.17);
   transition:
     transform 160ms ease,
     background 160ms ease,
@@ -129,7 +129,7 @@ a {
 .primary-button:hover {
   background: var(--flare-hover);
   transform: translateY(-1px);
-  box-shadow: 0 14px 30px rgba(230, 32, 88, 0.23);
+  box-shadow: 0 14px 30px rgba(193, 15, 69, 0.23);
 }
 
 .primary-button:active {
@@ -349,8 +349,8 @@ a {
   min-height: 760px;
   border-bottom: 1px solid var(--line);
   background:
-    radial-gradient(circle at 76% 18%, rgba(230, 32, 88, 0.11), transparent 25rem),
-    radial-gradient(circle at 22% 74%, rgba(230, 32, 88, 0.05), transparent 26rem), #ffffff;
+    radial-gradient(circle at 76% 18%, rgba(193, 15, 69, 0.11), transparent 25rem),
+    radial-gradient(circle at 22% 74%, rgba(193, 15, 69, 0.05), transparent 26rem), #ffffff;
 }
 
 .hero-noise {
@@ -482,7 +482,7 @@ a {
   height: 15px;
   border-radius: 50%;
   background: var(--flare);
-  box-shadow: 0 0 32px rgba(230, 32, 88, 0.75);
+  box-shadow: 0 0 32px rgba(193, 15, 69, 0.75);
   content: "";
 }
 
@@ -497,7 +497,7 @@ a {
   border-radius: 50%;
   background: linear-gradient(145deg, #ef3568, #b80e42);
   color: white;
-  box-shadow: 0 0 75px rgba(230, 32, 88, 0.28);
+  box-shadow: 0 0 75px rgba(193, 15, 69, 0.28);
 }
 
 .route-node {
@@ -689,11 +689,11 @@ a {
 @keyframes pulse-ring {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(230, 32, 88, 0.14);
+    box-shadow: 0 0 0 0 rgba(193, 15, 69, 0.14);
   }
 
   50% {
-    box-shadow: 0 0 0 9px rgba(230, 32, 88, 0);
+    box-shadow: 0 0 0 9px rgba(193, 15, 69, 0);
   }
 }
 
@@ -832,7 +832,7 @@ a {
 }
 
 .sidebar-link-active {
-  box-shadow: inset 3px 0 0 #e62058;
+  box-shadow: inset 3px 0 0 #c10f45;
 }
 
 .metric-card {
@@ -1013,13 +1013,13 @@ a {
   justify-content: center;
   border: 0;
   border-radius: 12px;
-  background: #e62058;
+  background: #c10f45;
   padding: 0 22px;
   color: white;
   font-size: 14px;
   font-weight: 600;
   letter-spacing: -0.01em;
-  box-shadow: 0 8px 18px rgba(230, 32, 88, 0.16);
+  box-shadow: 0 8px 18px rgba(193, 15, 69, 0.16);
   transition:
     background 150ms ease,
     transform 150ms ease;
@@ -1081,7 +1081,7 @@ a {
   min-height: 760px;
   border-bottom: 1px solid #e8eaed;
   background:
-    radial-gradient(circle at 77% 27%, rgba(230, 32, 88, 0.1), transparent 27rem),
+    radial-gradient(circle at 77% 27%, rgba(193, 15, 69, 0.1), transparent 27rem),
     linear-gradient(#fff, #fcfcfd);
 }
 
@@ -1193,12 +1193,12 @@ a {
 }
 
 .landing-chart-fill {
-  fill: rgba(230, 32, 88, 0.08);
+  fill: rgba(193, 15, 69, 0.08);
 }
 
 .landing-chart-path {
   fill: none;
-  stroke: #e62058;
+  stroke: #c10f45;
   stroke-width: 2.5;
   stroke-linecap: round;
   stroke-dasharray: 1100;
@@ -1263,7 +1263,7 @@ a {
   bottom: -55px;
   width: 150px;
   height: 150px;
-  border: 1px solid rgba(230, 32, 88, 0.18);
+  border: 1px solid rgba(193, 15, 69, 0.18);
   border-radius: 50%;
 }
 
@@ -1274,7 +1274,7 @@ a {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #e62058;
+  background: #c10f45;
   content: "";
   animation: orbit-dot 6s linear infinite;
   transform-origin: 58px 58px;
@@ -1501,13 +1501,13 @@ a {
   100% {
     box-shadow:
       0 30px 90px rgba(15, 23, 42, 0.12),
-      0 0 0 0 rgba(230, 32, 88, 0);
+      0 0 0 0 rgba(193, 15, 69, 0);
   }
 
   50% {
     box-shadow:
       0 34px 100px rgba(15, 23, 42, 0.15),
-      0 0 0 10px rgba(230, 32, 88, 0.035);
+      0 0 0 10px rgba(193, 15, 69, 0.035);
   }
 }
 
@@ -1535,13 +1535,1427 @@ a {
   0%,
   100% {
     box-shadow:
-      0 8px 22px rgba(230, 32, 88, 0.18),
-      0 0 0 0 rgba(230, 32, 88, 0);
+      0 8px 22px rgba(193, 15, 69, 0.18),
+      0 0 0 0 rgba(193, 15, 69, 0);
   }
 
   50% {
     box-shadow:
-      0 8px 24px rgba(230, 32, 88, 0.24),
-      0 0 0 8px rgba(230, 32, 88, 0.08);
+      0 8px 24px rgba(193, 15, 69, 0.24),
+      0 0 0 8px rgba(193, 15, 69, 0.08);
   }
 }
+
+/* ===== FLARELOCK LANDING MOTION ===== */
+
+.flarelock-hero-grid {
+  opacity: 0.72;
+  background-image:
+    linear-gradient(rgba(15, 23, 42, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.035) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(to bottom, black 0%, rgba(0, 0, 0, 0.55) 55%, transparent 100%);
+}
+
+.flarelock-ring::before,
+.flarelock-flow-line {
+  animation: flarelockFlow 4.8s ease-in-out infinite;
+}
+
+.flarelock-node-pulse {
+  animation: flarelockNodePulse 3s ease-in-out infinite;
+}
+
+.flarelock-privacy-lines {
+  opacity: 0.55;
+  background:
+    linear-gradient(
+      115deg,
+      transparent 0%,
+      transparent 41%,
+      rgba(193, 15, 69, 0.035) 41.15%,
+      transparent 41.3%,
+      transparent 100%
+    ),
+    linear-gradient(
+      65deg,
+      transparent 0%,
+      transparent 61%,
+      rgba(15, 23, 42, 0.028) 61.15%,
+      transparent 61.3%,
+      transparent 100%
+    );
+}
+
+.flarelock-cta-orbit {
+  border: 1px solid rgba(193, 15, 69, 0.08);
+  box-shadow:
+    0 0 0 80px rgba(193, 15, 69, 0.018),
+    0 0 0 160px rgba(193, 15, 69, 0.012);
+  animation: flarelockCtaOrbit 9s ease-in-out infinite;
+}
+
+@keyframes flarelockBeam {
+  0%,
+  100% {
+    opacity: 0.72;
+    transform: translateX(-50%) scale(0.96);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.04);
+  }
+}
+
+@keyframes flarelockOrbitA {
+  from {
+    transform: translateX(-50%) rotate(0deg);
+  }
+
+  to {
+    transform: translateX(-50%) rotate(360deg);
+  }
+}
+
+@keyframes flarelockOrbitB {
+  from {
+    transform: translateX(-50%) rotate(360deg);
+  }
+
+  to {
+    transform: translateX(-50%) rotate(0deg);
+  }
+}
+
+@keyframes flarelockFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-9px);
+  }
+}
+
+@keyframes flarelockFlow {
+  0% {
+    transform: translateX(-120%);
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  80% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(420%);
+    opacity: 0;
+  }
+}
+
+@keyframes flarelockNodePulse {
+  0%,
+  100% {
+    box-shadow: 0 9px 28px rgba(193, 15, 69, 0.22);
+  }
+
+  50% {
+    box-shadow:
+      0 9px 32px rgba(193, 15, 69, 0.28),
+      0 0 0 8px rgba(193, 15, 69, 0.07);
+  }
+}
+
+@keyframes flarelockCtaOrbit {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.04);
+  }
+}
+
+@media (max-width: 767px) {
+  .flarelock-hero-grid {
+    background-size: 44px 44px;
+  }
+
+  .flarelock-ring {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flarelock-hero-beam,
+  .flarelock-ring-one,
+  .flarelock-ring-two,
+  .flarelock-flow-line,
+  .flarelock-node-pulse,
+  .flarelock-cta-orbit {
+    animation: none;
+  }
+}
+
+/* ===== END FLARELOCK LANDING MOTION ===== */
+
+/* ===== FLARELOCK INTERACTIVE CONSTELLATION ===== */
+
+.flarelock-hero-accent {
+  background: linear-gradient(
+    90deg,
+    #c10f45 0%,
+    #c10f45 34%,
+    #c10f45 58%,
+    #c10f45 78%,
+    #c10f45 100%
+  );
+  background-size: 220% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: flarelockHeroAccent 7s ease-in-out infinite;
+}
+
+.flarelock-protocol-grid {
+  opacity: 0.48;
+  background-image:
+    linear-gradient(rgba(15, 23, 42, 0.024) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.024) 1px, transparent 1px);
+  background-size: 84px 84px;
+  mask-image: radial-gradient(circle at center, black 22%, transparent 79%);
+}
+
+.flarelock-constellation {
+  perspective: 1200px;
+}
+
+.flarelock-constellation-orbit {
+  border: 1px solid rgba(193, 15, 69, 0.1);
+}
+
+.flarelock-orbit-a {
+  animation: flarelockConstellationRotate 24s linear infinite;
+}
+
+.flarelock-orbit-b {
+  border-color: rgba(15, 23, 42, 0.055);
+  animation: flarelockConstellationRotateReverse 18s linear infinite;
+}
+
+.flarelock-orbit-c {
+  border-color: rgba(193, 15, 69, 0.06);
+  animation: flarelockConstellationBreath 9s ease-in-out infinite;
+}
+
+.flarelock-path {
+  fill: none;
+  stroke: url(#flarelockLink);
+  stroke-width: 1.15;
+  stroke-dasharray: 5 9;
+  animation: flarelockPathDash 15s linear infinite;
+}
+
+.flarelock-path-pulse {
+  fill: #c10f45;
+  filter: drop-shadow(0 0 7px rgba(193, 15, 69, 0.7));
+}
+
+.flarelock-core-glow {
+  background: radial-gradient(
+    circle,
+    rgba(193, 15, 69, 0.14),
+    rgba(193, 15, 69, 0.035) 42%,
+    transparent 70%
+  );
+  animation: flarelockCoreGlow 5s ease-in-out infinite;
+}
+
+.flarelock-feature-node {
+  transition:
+    transform 450ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 450ms ease;
+  animation: flarelockFeatureFloat 7s ease-in-out infinite;
+}
+
+.flarelock-feature-node:nth-of-type(2n) {
+  animation-delay: -2.1s;
+}
+
+.flarelock-feature-node:nth-of-type(3n) {
+  animation-delay: -4.3s;
+}
+
+.flarelock-feature-dot {
+  opacity: 0;
+  background: radial-gradient(circle, rgba(193, 15, 69, 0.15), transparent 68%);
+  transition:
+    opacity 350ms ease,
+    transform 500ms ease;
+}
+
+.flarelock-feature-node:hover .flarelock-feature-dot {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.7);
+}
+
+.flarelock-node-marker {
+  box-shadow:
+    0 8px 30px rgba(15, 23, 42, 0.04),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+}
+
+.flarelock-node-detail {
+  opacity: 0.72;
+  transition:
+    opacity 300ms ease,
+    transform 300ms ease,
+    color 300ms ease;
+}
+
+.flarelock-feature-node:hover .flarelock-node-detail {
+  opacity: 1;
+  color: #334155;
+  transform: translateX(4px);
+}
+
+@keyframes flarelockHeroAccent {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes flarelockConstellationRotate {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes flarelockConstellationRotateReverse {
+  from {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+
+  to {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+}
+
+@keyframes flarelockConstellationBreath {
+  0%,
+  100% {
+    opacity: 0.48;
+    transform: translate(-50%, -50%) scale(0.97);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.03);
+  }
+}
+
+@keyframes flarelockPathDash {
+  to {
+    stroke-dashoffset: -280;
+  }
+}
+
+@keyframes flarelockCoreGlow {
+  0%,
+  100% {
+    opacity: 0.65;
+    transform: scale(0.94);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes flarelockFeatureFloat {
+  0%,
+  100% {
+    margin-top: 0;
+  }
+
+  50% {
+    margin-top: -8px;
+  }
+}
+
+@media (max-width: 767px) {
+  .flarelock-constellation {
+    height: 920px;
+  }
+
+  .flarelock-constellation-orbit {
+    opacity: 0.3;
+  }
+
+  .flarelock-feature-node {
+    transform: scale(0.82);
+  }
+
+  .flarelock-feature-node:hover {
+    transform: scale(0.87);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flarelock-hero-accent,
+  .flarelock-orbit-a,
+  .flarelock-orbit-b,
+  .flarelock-orbit-c,
+  .flarelock-path,
+  .flarelock-core-glow,
+  .flarelock-feature-node {
+    animation: none;
+  }
+}
+
+/* ===== END FLARELOCK INTERACTIVE CONSTELLATION ===== */
+
+/* ===== FLARELOCK LANDING INTERACTION PASS ===== */
+
+/* Landing navigation/CTA controls.
+   These wrappers use Go to app when already connected, so the
+   account dropdown remains an internal-app interaction only. */
+
+.flarelock-landing-nav-connect button,
+.flarelock-landing-cta-connect button {
+  border-color: #c10f45;
+  background: #c10f45;
+  color: #fff;
+  box-shadow: 0 10px 28px rgba(193, 15, 69, 0.16);
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    background-color 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.flarelock-landing-nav-connect button:hover,
+.flarelock-landing-cta-connect button:hover {
+  border-color: #a50d3b;
+  background: #a50d3b;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 14px 32px rgba(193, 15, 69, 0.21);
+}
+
+.flarelock-landing-nav-connect button svg,
+.flarelock-landing-cta-connect button svg {
+  color: currentColor;
+}
+
+/* Hero execution signal */
+
+.flarelock-execution-track,
+.flarelock-lifecycle-track {
+  overflow: visible;
+  background: linear-gradient(
+    90deg,
+    rgba(148, 163, 184, 0.18),
+    rgba(193, 15, 69, 0.38) 42%,
+    rgba(193, 15, 69, 0.2) 67%,
+    rgba(148, 163, 184, 0.18)
+  );
+}
+
+.flarelock-execution-track::after,
+.flarelock-lifecycle-track::after {
+  content: "";
+  position: absolute;
+  inset: -1px auto -1px 0;
+  width: 20%;
+  background: linear-gradient(90deg, transparent, rgba(193, 15, 69, 0.95), transparent);
+  filter: blur(0.2px);
+  animation: flarelockTrackSweep 5s ease-in-out infinite;
+}
+
+.flarelock-execution-signal {
+  box-shadow:
+    0 0 0 5px rgba(193, 15, 69, 0.08),
+    0 0 18px rgba(193, 15, 69, 0.55);
+  animation: flarelockExecutionSignal 7s linear infinite;
+}
+
+.flarelock-execution-node {
+  transition:
+    transform 350ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 350ms ease,
+    color 350ms ease,
+    background-color 350ms ease,
+    box-shadow 350ms ease;
+}
+
+.flarelock-execution-node-active {
+  box-shadow:
+    0 12px 34px rgba(193, 15, 69, 0.22),
+    0 0 0 6px rgba(193, 15, 69, 0.05);
+  animation: flarelockActiveNode 3.2s ease-in-out infinite;
+}
+
+.flarelock-execution-stage:hover .flarelock-execution-node {
+  transform: translateY(-7px) scale(1.1);
+  border-color: rgba(193, 15, 69, 0.45);
+  color: #c10f45;
+  box-shadow:
+    0 14px 38px rgba(15, 23, 42, 0.08),
+    0 0 0 7px rgba(193, 15, 69, 0.045);
+}
+
+.flarelock-execution-stage:hover .flarelock-execution-node-active {
+  color: #fff;
+  box-shadow:
+    0 17px 42px rgba(193, 15, 69, 0.27),
+    0 0 0 9px rgba(193, 15, 69, 0.07);
+}
+
+.flarelock-execution-stage:hover .flarelock-execution-node-complete {
+  color: #047857;
+  border-color: rgba(16, 185, 129, 0.38);
+}
+
+.flarelock-execution-fact {
+  transition: transform 250ms ease;
+}
+
+.flarelock-execution-fact:hover {
+  transform: translateY(-3px);
+}
+
+/* Private execution vertical rail */
+
+.flarelock-private-rail {
+  background: linear-gradient(
+    to bottom,
+    rgba(193, 15, 69, 0.1),
+    rgba(193, 15, 69, 0.42),
+    rgba(16, 185, 129, 0.18)
+  );
+}
+
+.flarelock-private-signal {
+  z-index: 20;
+  box-shadow:
+    0 0 0 5px rgba(193, 15, 69, 0.07),
+    0 0 20px rgba(193, 15, 69, 0.45);
+  animation: flarelockPrivateSignal 6.5s ease-in-out infinite;
+}
+
+.flarelock-private-step::before {
+  content: "";
+  position: absolute;
+  inset: 10px -12px;
+  z-index: -1;
+  border-radius: 24px;
+  background: radial-gradient(circle at 20% 50%, rgba(193, 15, 69, 0.055), transparent 56%);
+  opacity: 0;
+  transform: scale(0.96);
+  transition:
+    opacity 300ms ease,
+    transform 350ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.flarelock-private-step:hover::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* FXRP lifecycle */
+
+.flarelock-lifecycle-signal {
+  box-shadow:
+    0 0 0 5px rgba(193, 15, 69, 0.07),
+    0 0 18px rgba(193, 15, 69, 0.55);
+  animation: flarelockLifecycleSignal 8s linear infinite;
+}
+
+.flarelock-lifecycle-circle {
+  transition:
+    transform 400ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 400ms ease,
+    border-color 300ms ease,
+    color 300ms ease;
+}
+
+.flarelock-lifecycle-node:hover .flarelock-lifecycle-circle {
+  transform: translateY(-10px) scale(1.09);
+  border-color: rgba(193, 15, 69, 0.4);
+  color: #c10f45;
+  box-shadow:
+    0 18px 46px rgba(15, 23, 42, 0.09),
+    0 0 0 8px rgba(193, 15, 69, 0.045);
+}
+
+.flarelock-lifecycle-node:nth-child(3):hover .flarelock-lifecycle-circle {
+  color: #fff;
+  box-shadow:
+    0 20px 50px rgba(193, 15, 69, 0.28),
+    0 0 0 10px rgba(193, 15, 69, 0.07);
+}
+
+@keyframes flarelockTrackSweep {
+  0% {
+    left: -20%;
+    opacity: 0;
+  }
+
+  15% {
+    opacity: 1;
+  }
+
+  85% {
+    opacity: 1;
+  }
+
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes flarelockExecutionSignal {
+  from {
+    left: 8%;
+  }
+
+  to {
+    left: 91%;
+  }
+}
+
+@keyframes flarelockPrivateSignal {
+  0%,
+  100% {
+    top: 3%;
+  }
+
+  50% {
+    top: 94%;
+  }
+}
+
+@keyframes flarelockLifecycleSignal {
+  from {
+    left: 8%;
+  }
+
+  to {
+    left: 91%;
+  }
+}
+
+@keyframes flarelockActiveNode {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.055);
+  }
+}
+
+@media (max-width: 767px) {
+  .flarelock-private-step::before {
+    inset: 8px -4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flarelock-execution-track::after,
+  .flarelock-lifecycle-track::after,
+  .flarelock-execution-signal,
+  .flarelock-private-signal,
+  .flarelock-lifecycle-signal,
+  .flarelock-execution-stage .flarelock-execution-node-active {
+    animation: none;
+  }
+}
+
+/* ===== END FLARELOCK LANDING INTERACTION PASS ===== */
+
+/* ===== FLARELOCK FINAL POLISH ===== */
+
+/* Brand */
+.flarelock-hero-accent {
+  background: none;
+  color: #c10f45;
+  -webkit-text-fill-color: currentColor;
+  animation: none;
+}
+
+/* Protocol constellation:
+   nodes stay anchored. Only their inner visual treatment reacts. */
+.flarelock-feature-node {
+  animation: none;
+  filter: none;
+}
+
+.flarelock-feature-node-content {
+  transition:
+    transform 240ms ease,
+    opacity 240ms ease;
+}
+
+.flarelock-feature-node:hover .flarelock-feature-node-content {
+  transform: translateY(-2px);
+}
+
+.flarelock-core-shell {
+  transition:
+    border-color 240ms ease,
+    box-shadow 240ms ease;
+}
+
+.flarelock-core:hover .flarelock-core-shell {
+  border-color: rgba(193, 15, 69, 0.28);
+  box-shadow: 0 28px 90px rgba(193, 15, 69, 0.16);
+}
+
+/* Private execution signal:
+   centered on the rail, behind the number nodes. */
+.flarelock-private-rail {
+  z-index: 0;
+}
+
+.flarelock-private-signal {
+  --signal-start: 54px;
+  --signal-end: calc(100% - 64px);
+  z-index: 0;
+  left: 22px;
+  top: var(--signal-start);
+  box-shadow:
+    0 0 0 4px rgba(193, 15, 69, 0.055),
+    0 0 13px rgba(193, 15, 69, 0.32);
+  animation: flarelockPrivateSignalNatural 6.5s ease-in-out infinite;
+}
+
+.flarelock-private-step {
+  z-index: 1;
+}
+
+.flarelock-private-step > div:first-of-type {
+  background-color: #fff;
+}
+
+/* Responsive constellation:
+   retain constellation on large desktop;
+   use a clean node grid elsewhere instead of broken absolute positions. */
+@media (max-width: 1279px) {
+  .flarelock-constellation {
+    display: grid;
+    height: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 30px 24px;
+  }
+
+  .flarelock-constellation-orbit,
+  .flarelock-constellation > svg {
+    display: none;
+  }
+
+  .flarelock-constellation .flarelock-core,
+  .flarelock-constellation .flarelock-feature-node {
+    position: static;
+    inset: auto;
+    transform: none;
+  }
+
+  .flarelock-constellation .flarelock-core {
+    grid-column: 1 / -1;
+    justify-self: center;
+    margin-bottom: 12px;
+  }
+
+  .flarelock-constellation .flarelock-feature-node {
+    width: 100%;
+  }
+
+  .flarelock-constellation .flarelock-feature-node-content {
+    min-width: 0;
+    width: 100%;
+    padding: 8px 4px;
+  }
+
+  .flarelock-constellation .flarelock-node-detail {
+    max-width: none;
+  }
+
+  .flarelock-feature-node:hover .flarelock-feature-node-content {
+    transform: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .flarelock-constellation {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .flarelock-execution-track,
+  .flarelock-execution-signal,
+  .flarelock-lifecycle-track,
+  .flarelock-lifecycle-signal {
+    display: none;
+  }
+
+  .flarelock-private-signal {
+    --signal-start: 48px;
+    --signal-end: calc(100% - 58px);
+    left: 22px;
+  }
+}
+
+@keyframes flarelockPrivateSignalNatural {
+  0%,
+  100% {
+    top: var(--signal-start);
+    opacity: 0.35;
+  }
+
+  15%,
+  85% {
+    opacity: 1;
+  }
+
+  50% {
+    top: var(--signal-end);
+    opacity: 1;
+  }
+}
+
+/* ===== END FLARELOCK FINAL POLISH ===== */
+
+/* ===== FLARELOCK EDITORIAL MOTION ===== */
+
+/* Infinite protocol stack rail */
+
+.flarelock-stack-track {
+  animation: flarelockStackMarquee 42s linear infinite;
+  will-change: transform;
+}
+
+.flarelock-stack-fade-left {
+  background: linear-gradient(to right, #fff 4%, rgba(255, 255, 255, 0));
+}
+
+.flarelock-stack-fade-right {
+  background: linear-gradient(to left, #fff 4%, rgba(255, 255, 255, 0));
+}
+
+/* Layered dashboard editorial section */
+
+.flarelock-dashboard-stage {
+  perspective: 1400px;
+}
+
+.flarelock-dashboard-grid {
+  opacity: 0.35;
+  background-image:
+    linear-gradient(rgba(15, 23, 42, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.025) 1px, transparent 1px);
+  background-size: 52px 52px;
+  mask-image: radial-gradient(circle at 60% 50%, black 20%, transparent 75%);
+}
+
+.flarelock-dashboard-line {
+  stroke-dasharray: 1100;
+  stroke-dashoffset: 1100;
+  animation: flarelockDashboardDraw 5s ease-in-out infinite alternate;
+}
+
+@keyframes flarelockStackMarquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes flarelockDashboardDraw {
+  0% {
+    stroke-dashoffset: 1100;
+    opacity: 0.45;
+  }
+
+  55%,
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@media (max-width: 1023px) {
+  .flarelock-dashboard-stage {
+    height: 580px;
+    max-width: 720px;
+  }
+}
+
+@media (max-width: 639px) {
+  .flarelock-dashboard-stage {
+    display: flex;
+    height: auto;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .flarelock-dashboard-stage:hover .flarelock-dashboard-back,
+  .flarelock-dashboard-stage:hover .flarelock-stack-track {
+    animation-duration: 34s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flarelock-stack-track,
+  .flarelock-dashboard-line {
+    animation: none;
+  }
+
+  .flarelock-stack-track {
+    transform: none;
+  }
+}
+
+.flarelock-stack-viewport:hover .flarelock-stack-track {
+  animation-play-state: paused;
+}
+
+/* ===== END FLARELOCK EDITORIAL MOTION ===== */
+
+/* ===== FLARELOCK SYNCHRONIZED MOTION ===== */
+
+/*
+ * Horizontal execution:
+ * 16-second signal.
+ * Each node receives the same 16-second cycle with a staggered delay.
+ */
+
+.flarelock-execution-signal {
+  animation: flarelockExecutionSignalSynced 16s linear infinite;
+  box-shadow:
+    0 0 0 5px rgba(193, 15, 69, 0.06),
+    0 0 16px rgba(193, 15, 69, 0.35);
+}
+
+.flarelock-execution-node-cycle {
+  animation: flarelockExecutionNode 16s linear infinite;
+}
+
+.flarelock-execution-node-cycle-complete {
+  animation: flarelockExecutionNodeComplete 16s linear infinite;
+}
+
+@keyframes flarelockExecutionSignalSynced {
+  from {
+    left: 8%;
+  }
+
+  to {
+    left: 91%;
+  }
+}
+
+@keyframes flarelockExecutionNode {
+  0%,
+  8% {
+    border-color: #c10f45;
+    background-color: #c10f45;
+    color: #fff;
+    box-shadow:
+      0 0 0 8px rgba(193, 15, 69, 0.07),
+      0 12px 32px rgba(193, 15, 69, 0.18);
+  }
+
+  14%,
+  100% {
+    border-color: #e2e8f0;
+    background-color: #fff;
+    color: #64748b;
+    box-shadow: none;
+  }
+}
+
+@keyframes flarelockExecutionNodeComplete {
+  0%,
+  8% {
+    border-color: #c10f45;
+    background-color: #c10f45;
+    color: #fff;
+    box-shadow:
+      0 0 0 8px rgba(193, 15, 69, 0.07),
+      0 12px 32px rgba(193, 15, 69, 0.18);
+  }
+
+  14%,
+  100% {
+    border-color: #a7f3d0;
+    background-color: #ecfdf5;
+    color: #047857;
+    box-shadow: none;
+  }
+}
+
+/*
+ * Private execution vertical rail.
+ * Signal is deliberately slow and always below the numbered nodes.
+ */
+
+.flarelock-private-signal {
+  --private-start: 58px;
+  --private-end: calc(100% - 74px);
+
+  left: 21px;
+  top: var(--private-start);
+
+  animation: flarelockPrivateSignalSynced 20s ease-in-out infinite;
+
+  box-shadow:
+    0 0 0 4px rgba(193, 15, 69, 0.045),
+    0 0 12px rgba(193, 15, 69, 0.24);
+}
+
+@keyframes flarelockPrivateSignalSynced {
+  0%,
+  100% {
+    top: var(--private-start);
+  }
+
+  50% {
+    top: var(--private-end);
+  }
+}
+
+@media (min-width: 640px) {
+  .flarelock-private-signal {
+    --private-start: 64px;
+    --private-end: calc(100% - 86px);
+
+    /*
+     * rail center = 31px
+     * 8px dot => left 27px
+     */
+    left: 27px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flarelock-execution-signal,
+  .flarelock-execution-node-cycle,
+  .flarelock-execution-node-cycle-complete,
+  .flarelock-private-signal {
+    animation: none;
+  }
+}
+
+/* ===== END FLARELOCK SYNCHRONIZED MOTION ===== */
+
+/* ===== FLARELOCK HERO AND STACK POLISH ===== */
+
+/* Shared landing primary action:
+   Connect wallet and Enter FlareLock are identical. */
+.flarelock-landing-nav-connect button,
+.flarelock-landing-cta-connect button {
+  height: 48px;
+  min-height: 48px;
+  border: 1px solid #c10f45;
+  border-radius: 12px;
+  background: #c10f45;
+  padding-inline: 24px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  box-shadow: 0 10px 26px rgba(193, 15, 69, 0.17);
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.flarelock-landing-nav-connect button:hover,
+.flarelock-landing-cta-connect button:hover {
+  border-color: #a50d3b;
+  background: #a50d3b;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 13px 30px rgba(193, 15, 69, 0.21);
+}
+
+/* Clean hero network */
+
+.flarelock-hero-network {
+  opacity: 0.9;
+}
+
+.flarelock-hero-orbit {
+  stroke: rgba(193, 15, 69, 0.09);
+  stroke-width: 1;
+}
+
+.flarelock-hero-orbit-a {
+  stroke-dasharray: 4 11;
+  animation: flarelockHeroOrbitDash 34s linear infinite;
+}
+
+.flarelock-hero-orbit-b {
+  stroke: rgba(15, 23, 42, 0.055);
+  stroke-dasharray: 3 13;
+  animation: flarelockHeroOrbitDashReverse 42s linear infinite;
+}
+
+.flarelock-hero-orbit-c {
+  stroke: rgba(193, 15, 69, 0.055);
+  stroke-dasharray: 2 15;
+  animation: flarelockHeroOrbitDash 50s linear infinite;
+}
+
+.flarelock-hero-route {
+  stroke: rgba(193, 15, 69, 0.13);
+  stroke-width: 1.1;
+  stroke-dasharray: 5 11;
+}
+
+.flarelock-hero-route-secondary {
+  stroke: rgba(15, 23, 42, 0.07);
+}
+
+.flarelock-hero-signal {
+  fill: #c10f45;
+  filter: drop-shadow(0 0 7px rgba(193, 15, 69, 0.45));
+}
+
+/* Protocol rail should feel like one continuous surface,
+   not a row of cards. */
+
+.flarelock-stack-track {
+  animation-duration: 64s;
+}
+
+.flarelock-stack-item {
+  background: transparent;
+}
+
+.flarelock-stack-item:hover {
+  background: linear-gradient(90deg, transparent, rgba(193, 15, 69, 0.025), transparent);
+}
+
+.flarelock-stack-fade-left {
+  background: linear-gradient(to right, #fff 18%, rgba(255, 255, 255, 0));
+}
+
+.flarelock-stack-fade-right {
+  background: linear-gradient(to left, #fff 18%, rgba(255, 255, 255, 0));
+}
+
+@keyframes flarelockHeroOrbitDash {
+  to {
+    stroke-dashoffset: -420;
+  }
+}
+
+@keyframes flarelockHeroOrbitDashReverse {
+  to {
+    stroke-dashoffset: 420;
+  }
+}
+
+@media (max-width: 767px) {
+  .flarelock-hero-network {
+    width: 1050px;
+    height: 720px;
+    opacity: 0.65;
+  }
+
+  .flarelock-stack-track {
+    animation-duration: 50s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flarelock-hero-orbit-a,
+  .flarelock-hero-orbit-b,
+  .flarelock-hero-orbit-c {
+    animation: none;
+  }
+}
+
+/* ===== END FLARELOCK HERO AND STACK POLISH ===== */
+
+/* ===== FLARELOCK HERO LIVE MOTION ===== */
+
+.flarelock-hero-radar {
+  border-style: dashed;
+  animation: flarelockHeroRadar 36s linear infinite;
+}
+
+.flarelock-hero-radar-reverse {
+  animation-direction: reverse;
+  animation-duration: 46s;
+}
+
+.flarelock-hero-lock-halo {
+  border-style: dashed;
+  animation: flarelockHeroHalo 12s linear infinite;
+}
+
+.flarelock-hero-satellite {
+  animation: flarelockHeroSatellite 7s ease-in-out infinite;
+}
+
+.flarelock-hero-satellite-two {
+  animation-delay: -2s;
+}
+
+.flarelock-hero-satellite-three {
+  animation-delay: -4s;
+}
+
+.flarelock-hero-satellite-four {
+  animation-delay: -6s;
+}
+
+.flarelock-hero-orbit-dot {
+  transform-origin: 0 0;
+}
+
+.flarelock-hero-orbit-dot-one {
+  animation: flarelockHeroOrbitDotOne 18s linear infinite;
+}
+
+.flarelock-hero-orbit-dot-two {
+  animation: flarelockHeroOrbitDotTwo 24s linear infinite reverse;
+}
+
+.flarelock-hero-flow-pulse {
+  animation: flarelockHeroFlowPulse 12s ease-in-out infinite;
+}
+
+@keyframes flarelockHeroRadar {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes flarelockHeroHalo {
+  from {
+    transform: translateX(-50%) rotate(0deg);
+  }
+
+  to {
+    transform: translateX(-50%) rotate(-360deg);
+  }
+}
+
+@keyframes flarelockHeroSatellite {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.72;
+  }
+
+  50% {
+    transform: translateY(-8px);
+    opacity: 1;
+  }
+}
+
+@keyframes flarelockHeroOrbitDotOne {
+  from {
+    transform: rotate(0deg) translateX(350px);
+  }
+
+  to {
+    transform: rotate(360deg) translateX(350px);
+  }
+}
+
+@keyframes flarelockHeroOrbitDotTwo {
+  from {
+    transform: rotate(0deg) translateX(245px);
+  }
+
+  to {
+    transform: rotate(360deg) translateX(245px);
+  }
+}
+
+@keyframes flarelockHeroFlowPulse {
+  0% {
+    left: 2%;
+    opacity: 0;
+  }
+
+  8% {
+    opacity: 1;
+  }
+
+  92% {
+    opacity: 1;
+  }
+
+  100% {
+    left: 97%;
+    opacity: 0;
+  }
+}
+
+@media (max-width: 1023px) {
+  .flarelock-hero-orbit-dot-one {
+    animation-name: flarelockHeroOrbitDotOneTablet;
+  }
+
+  .flarelock-hero-orbit-dot-two {
+    animation-name: flarelockHeroOrbitDotTwoTablet;
+  }
+}
+
+@keyframes flarelockHeroOrbitDotOneTablet {
+  from {
+    transform: rotate(0deg) translateX(280px);
+  }
+
+  to {
+    transform: rotate(360deg) translateX(280px);
+  }
+}
+
+@keyframes flarelockHeroOrbitDotTwoTablet {
+  from {
+    transform: rotate(0deg) translateX(195px);
+  }
+
+  to {
+    transform: rotate(360deg) translateX(195px);
+  }
+}
+
+@media (max-width: 639px) {
+  .flarelock-hero-radar {
+    width: 430px;
+    height: 430px;
+  }
+
+  .flarelock-hero-radar-reverse {
+    width: 310px;
+    height: 310px;
+  }
+
+  .flarelock-hero-orbit-dot-one,
+  .flarelock-hero-orbit-dot-two {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flarelock-hero-radar,
+  .flarelock-hero-lock-halo,
+  .flarelock-hero-satellite,
+  .flarelock-hero-orbit-dot-one,
+  .flarelock-hero-orbit-dot-two,
+  .flarelock-hero-flow-pulse {
+    animation: none;
+  }
+}
+
+/* ===== END FLARELOCK HERO LIVE MOTION ===== */
+
+/* ===== FLARELOCK HERO SURFACE ===== */
+
+.flarelock-hero-surface {
+  background: #fbf8f9;
+}
+
+.flarelock-hero-surface .flarelock-hero-grid {
+  opacity: 0.72;
+  background-image:
+    linear-gradient(rgba(71, 85, 105, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(71, 85, 105, 0.045) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.88), rgba(0, 0, 0, 0.58) 72%, transparent);
+}
+
+.flarelock-hero-network {
+  opacity: 1;
+}
+
+.flarelock-hero-orbit {
+  stroke: rgba(193, 15, 69, 0.14);
+}
+
+.flarelock-hero-orbit-b {
+  stroke: rgba(71, 85, 105, 0.11);
+}
+
+.flarelock-hero-orbit-c {
+  stroke: rgba(193, 15, 69, 0.09);
+}
+
+.flarelock-hero-route {
+  stroke: rgba(193, 15, 69, 0.19);
+}
+
+.flarelock-hero-route-secondary {
+  stroke: rgba(71, 85, 105, 0.1);
+}
+
+.flarelock-hero-radar {
+  border-color: rgba(193, 15, 69, 0.11);
+}
+
+.flarelock-hero-radar-reverse {
+  border-color: rgba(71, 85, 105, 0.09);
+}
+
+.flarelock-hero-lock-halo {
+  border-color: rgba(193, 15, 69, 0.15);
+  box-shadow:
+    0 0 0 20px rgba(193, 15, 69, 0.015),
+    0 0 70px rgba(193, 15, 69, 0.06);
+}
+
+.flarelock-hero-satellite {
+  opacity: 0.9;
+}
+
+.flarelock-hero-satellite p:last-child {
+  color: #94a3b8;
+}
+
+@media (max-width: 767px) {
+  .flarelock-hero-surface .flarelock-hero-grid {
+    background-size: 48px 48px;
+    opacity: 0.55;
+  }
+}
+
+/* ===== END FLARELOCK HERO SURFACE ===== */

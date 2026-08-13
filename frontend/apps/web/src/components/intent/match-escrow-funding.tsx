@@ -197,7 +197,7 @@ export function MatchEscrowFunding({ matchId, initialExecution }: Props) {
     <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#e62058]">
+          <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#c10f45]">
             Execution funding
           </p>
           <p className="mt-1 text-[12px] font-semibold text-[#0a0b0d]">

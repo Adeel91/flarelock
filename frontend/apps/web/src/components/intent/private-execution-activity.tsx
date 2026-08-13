@@ -329,7 +329,7 @@ export function PrivateExecutionActivity() {
       <div className="mx-auto max-w-[1500px] overflow-hidden rounded-[18px] border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.03)] sm:rounded-[26px]">
         <div className="flex flex-col gap-5 border-b border-slate-200 px-4 py-5 sm:px-6 sm:py-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#e62058]">
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#c10f45]">
               My private activity
             </p>
 
@@ -360,7 +360,7 @@ export function PrivateExecutionActivity() {
 
             {wallet.isConnected && !wallet.privateActivitySignature ? (
               <button
-                className="clean-button inline-flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded-[10px] bg-[#e62058] px-4 text-[11px] font-semibold text-white shadow-[0_5px_14px_rgba(230,32,88,0.16)] transition hover:bg-[#cf184d] disabled:cursor-not-allowed disabled:opacity-50"
+                className="clean-button inline-flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded-[10px] bg-[#c10f45] px-4 text-[11px] font-semibold text-white shadow-[0_5px_14px_rgba(193,15,69,0.16)] transition hover:bg-[#a50d3b] disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={authorizingActivity}
                 onClick={() => {
                   void authorizePrivateActivity();
@@ -390,7 +390,7 @@ export function PrivateExecutionActivity() {
             !activity &&
             privateActivityQuery.isError ? (
               <button
-                className="text-[10px] font-semibold text-[#e62058] hover:underline"
+                className="text-[10px] font-semibold text-[#c10f45] hover:underline"
                 onClick={() => {
                   void privateActivityQuery.refetch();
                 }}
@@ -427,7 +427,7 @@ export function PrivateExecutionActivity() {
                 <button
                   className={
                     tab === item.id
-                      ? "border-b-2 border-[#e62058] px-3 py-3.5 text-[11px] sm:px-4 sm:py-4 sm:text-[12px] font-semibold text-[#e62058]"
+                      ? "border-b-2 border-[#c10f45] px-3 py-3.5 text-[11px] sm:px-4 sm:py-4 sm:text-[12px] font-semibold text-[#c10f45]"
                       : "border-b-2 border-transparent px-3 py-3.5 text-[11px] sm:px-4 sm:py-4 sm:text-[12px] font-semibold text-slate-500 transition hover:text-slate-900"
                   }
                   key={item.id}
@@ -530,7 +530,7 @@ export function PrivateExecutionActivity() {
                           <button
                             className={
                               active
-                                ? "rounded-xl border border-[#e62058]/30 bg-[#fff6f8] p-4 text-left"
+                                ? "rounded-xl border border-[#c10f45]/30 bg-[#fff6f8] p-4 text-left"
                                 : "rounded-xl border border-slate-200 bg-white p-4 text-left transition hover:bg-slate-50"
                             }
                             key={execution.matchId}
@@ -602,7 +602,7 @@ export function PrivateExecutionActivity() {
                     <>
                       <div className="mb-5 flex items-center justify-between border-b border-slate-200 pb-4 2xl:hidden">
                         <div>
-                          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#e62058]">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#c10f45]">
                             Execution details
                           </p>
 
@@ -623,7 +623,7 @@ export function PrivateExecutionActivity() {
 
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                         <div>
-                          <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#e62058]">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#c10f45]">
                             Selected execution
                           </p>
 

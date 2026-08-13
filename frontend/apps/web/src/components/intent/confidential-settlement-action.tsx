@@ -120,7 +120,7 @@ export function ConfidentialSettlementAction({ execution, onSettled }: Props) {
           onClick={() => {
             void runSettlement();
           }}
-          className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#e62058] px-4 text-[12px] font-semibold text-white transition hover:bg-[#cf184d] disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#c10f45] px-4 text-[12px] font-semibold text-white transition hover:bg-[#a50d3b] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {stepLabel(step)}
         </button>

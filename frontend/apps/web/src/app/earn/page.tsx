@@ -65,7 +65,7 @@ export default function EarnPage() {
           </div>
 
           <Link
-            className="inline-flex h-[46px] w-full min-w-[104px] items-center justify-center rounded-[10px] bg-[#e62058] sm:w-auto px-5 font-sans text-[14px] font-medium leading-none tracking-[-0.015em] !text-white shadow-[0_6px_16px_rgba(230,32,88,0.16)] transition hover:bg-[#ce174d]"
+            className="inline-flex h-[46px] w-full min-w-[104px] items-center justify-center rounded-[10px] bg-[#c10f45] sm:w-auto px-5 font-sans text-[14px] font-medium leading-none tracking-[-0.015em] !text-white shadow-[0_6px_16px_rgba(193,15,69,0.16)] transition hover:bg-[#ce174d]"
             href="/earn/firelight-fxrp"
           >
             Manage
@@ -78,7 +78,7 @@ export default function EarnPage() {
 
             <div className="mt-4 grid gap-5 sm:grid-cols-3">
               <div>
-                <p className="text-[11px] font-bold text-[#e62058]">01</p>
+                <p className="text-[11px] font-bold text-[#c10f45]">01</p>
 
                 <p className="mt-2 text-[13px] font-semibold">Deposit FXRP</p>
 
@@ -88,7 +88,7 @@ export default function EarnPage() {
               </div>
 
               <div>
-                <p className="text-[11px] font-bold text-[#e62058]">02</p>
+                <p className="text-[11px] font-bold text-[#c10f45]">02</p>
 
                 <p className="mt-2 text-[13px] font-semibold">Hold vault shares</p>
 
@@ -98,7 +98,7 @@ export default function EarnPage() {
               </div>
 
               <div>
-                <p className="text-[11px] font-bold text-[#e62058]">03</p>
+                <p className="text-[11px] font-bold text-[#c10f45]">03</p>
 
                 <p className="mt-2 text-[13px] font-semibold">Request exit</p>
 

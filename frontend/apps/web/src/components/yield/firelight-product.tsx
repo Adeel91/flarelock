@@ -80,7 +80,7 @@ export function FirelightProduct() {
           <button
             className={
               tab === value
-                ? "border-b-2 border-[#e62058] px-1 py-4 text-[14px] font-semibold text-[#101217]"
+                ? "border-b-2 border-[#c10f45] px-1 py-4 text-[14px] font-semibold text-[#101217]"
                 : "border-b-2 border-transparent px-1 py-4 text-[14px] font-medium text-slate-500 transition hover:text-[#101217]"
             }
             key={value}
@@ -206,7 +206,7 @@ export function FirelightProduct() {
 
             <div className="flex flex-wrap gap-3 border-t border-slate-200 px-4 py-4 sm:px-6 sm:py-5">
               <button
-                className="inline-flex h-[46px] min-w-[130px] items-center justify-center rounded-[10px] bg-[#e62058] px-5 text-[14px] font-medium !text-white shadow-[0_6px_16px_rgba(230,32,88,0.16)] transition hover:bg-[#ce174d]"
+                className="inline-flex h-[46px] min-w-[130px] items-center justify-center rounded-[10px] bg-[#c10f45] px-5 text-[14px] font-medium !text-white shadow-[0_6px_16px_rgba(193,15,69,0.16)] transition hover:bg-[#ce174d]"
                 onClick={() => setTab("deposit")}
                 type="button"
               >
@@ -239,7 +239,7 @@ export function FirelightProduct() {
                   }
                   key={number}
                 >
-                  <p className="text-[10px] font-bold text-[#e62058]">{number}</p>
+                  <p className="text-[10px] font-bold text-[#c10f45]">{number}</p>
 
                   <p className="mt-3 text-[13px] font-semibold">{title}</p>
 

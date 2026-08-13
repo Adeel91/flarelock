@@ -23,7 +23,7 @@ function SectionHeader({
         <p className="mt-1 text-[11px] text-slate-500">{subtitle}</p>
       </div>
 
-      <Link className="text-[12px] font-semibold text-[#e62058]" href={href}>
+      <Link className="text-[12px] font-semibold text-[#c10f45]" href={href}>
         {action}
       </Link>
     </div>

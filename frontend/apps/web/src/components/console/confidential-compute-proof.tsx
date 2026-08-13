@@ -141,7 +141,7 @@ export function ConfidentialComputeProof() {
               key={number}
             >
               <div className="flex items-center justify-between">
-                <span className="text-[9px] font-bold text-[#e62058]">{number}</span>
+                <span className="text-[9px] font-bold text-[#c10f45]">{number}</span>
 
                 <span className="grid h-5 w-5 place-items-center rounded-full bg-emerald-50 text-emerald-700">
                   <CheckIcon />
@@ -229,7 +229,7 @@ export function ConfidentialComputeProof() {
                   </div>
 
                   <a
-                    className="text-[11px] font-semibold text-[#e62058] hover:underline"
+                    className="text-[11px] font-semibold text-[#c10f45] hover:underline"
                     href={`${explorerBase}/${data.proof.fccTransaction.hash}`}
                     rel="noreferrer"
                     target="_blank"
@@ -268,7 +268,7 @@ export function ConfidentialComputeProof() {
                   </div>
 
                   <a
-                    className="text-[11px] font-semibold text-[#e62058] hover:underline"
+                    className="text-[11px] font-semibold text-[#c10f45] hover:underline"
                     href={`${explorerBase}/${data.proof.settlementTransaction.hash}`}
                     rel="noreferrer"
                     target="_blank"

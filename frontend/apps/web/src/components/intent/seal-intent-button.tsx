@@ -97,7 +97,7 @@ function StatusDot({ active, complete }: { active?: boolean; complete?: boolean 
         complete
           ? "grid h-6 w-6 shrink-0 place-items-center rounded-full bg-emerald-100 text-[11px] font-bold text-emerald-700"
           : active
-            ? "grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#fff0f4] text-[11px] font-bold text-[#e62058]"
+            ? "grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#fff0f4] text-[11px] font-bold text-[#c10f45]"
             : "grid h-6 w-6 shrink-0 place-items-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-400"
       }
     >
@@ -242,7 +242,7 @@ export function SealIntentButton({ quote, order }: Props) {
           <div className="border-b border-slate-200 bg-[#fafbfc] px-5 py-4">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#e62058]">
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#c10f45]">
                   Private order
                 </p>
 
@@ -312,7 +312,7 @@ export function SealIntentButton({ quote, order }: Props) {
         <div className="border-b border-slate-200 bg-[#fafbfc] px-5 py-4">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#e62058]">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#c10f45]">
                 Private execution
               </p>
 
@@ -455,7 +455,7 @@ export function SealIntentButton({ quote, order }: Props) {
           )}
 
           {matched && (
-            <div className="mt-4 rounded-xl border border-[#e62058]/20 bg-[#fff6f8] p-4">
+            <div className="mt-4 rounded-xl border border-[#c10f45]/20 bg-[#fff6f8] p-4">
               <p className="text-[11px] font-semibold text-[#b71645]">FCC path available</p>
 
               <p className="mt-1 text-[11px] leading-5 text-slate-600">

@@ -67,8 +67,8 @@ export function MarketChartPanel() {
         >
           <defs>
             <linearGradient id="privateChartFill" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="rgba(230,32,88,0.24)" />
-              <stop offset="100%" stopColor="rgba(230,32,88,0)" />
+              <stop offset="0%" stopColor="rgba(193,15,69,0.24)" />
+              <stop offset="100%" stopColor="rgba(193,15,69,0)" />
             </linearGradient>
 
             <filter id="chartGlow">

@@ -25,7 +25,17 @@ function isRejected(error: unknown) {
   );
 }
 
-export function ConnectWallet() {
+type ConnectWalletProps = {
+  connectLabel?: string;
+  connectedMode?: "menu" | "go_to_app";
+  appLabel?: string;
+};
+
+export function ConnectWallet({
+  connectLabel = "Connect wallet",
+  connectedMode = "menu",
+  appLabel = "Go to app",
+}: ConnectWalletProps) {
   const wallet = useFlareWallet();
   const pathname = usePathname();
   const router = useRouter();
@@ -107,6 +117,47 @@ export function ConnectWallet() {
 
   if (wallet.isConnected && wallet.address) {
     const isCoston2 = wallet.chainId === coston2.id;
+
+    if (connectedMode === "go_to_app") {
+      return (
+        <div className="relative flex items-center gap-2">
+          {!isCoston2 ? (
+            <button
+              className="clean-button rounded-full bg-amber-100 px-4 py-2.5 text-[12px] font-semibold text-amber-800 transition hover:bg-amber-200 disabled:opacity-60 sm:px-5 sm:py-3 sm:text-[13px]"
+              disabled={isSwitchingNetwork}
+              onClick={handleSwitchChain}
+              type="button"
+            >
+              {isSwitchingNetwork ? "Switching…" : "Switch network"}
+            </button>
+          ) : null}
+
+          <button
+            className="clean-button inline-flex h-12 items-center gap-2 whitespace-nowrap rounded-[12px] border border-slate-200 bg-white px-6 text-[13px] font-semibold text-[#0a0b0d] transition hover:border-slate-300 hover:shadow-sm"
+            onClick={() => router.push("/overview")}
+            type="button"
+          >
+            <span>{appLabel}</span>
+
+            <svg aria-hidden="true" className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24">
+              <path
+                d="M5 12h14M14 7l5 5-5 5"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1.8"
+              />
+            </svg>
+          </button>
+
+          {localError || wallet.errorMessage ? (
+            <p className="absolute right-0 top-14 w-72 rounded-2xl border border-slate-200 bg-white p-3 text-xs font-medium text-slate-600 shadow-xl">
+              {localError ?? wallet.errorMessage}
+            </p>
+          ) : null}
+        </div>
+      );
+    }
 
     return (
       <div className="relative flex items-center gap-2">
@@ -244,7 +295,7 @@ export function ConnectWallet() {
         onClick={handleConnect}
         type="button"
       >
-        {wallet.status === "connecting" ? "Connecting" : "Connect wallet"}
+        {wallet.status === "connecting" ? "Connecting…" : connectLabel}
       </button>
 
       {showInstallPrompt && (

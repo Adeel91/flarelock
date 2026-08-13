@@ -9,7 +9,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 border-b border-[#e7e9ed] bg-white/95 backdrop-blur-xl">
       <nav className="marketing-shell flex h-[70px] items-center justify-between">
         <Link className="flex items-center gap-3" href="/">
-          <div className="grid h-9 w-9 place-items-center rounded-full bg-[#e62058] text-[15px] font-bold text-white">
+          <div className="grid h-9 w-9 place-items-center rounded-full bg-[#c10f45] text-[15px] font-bold text-white">
             F
           </div>
 

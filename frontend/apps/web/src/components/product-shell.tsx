@@ -253,7 +253,7 @@ export function ProductShell({
           <div className="relative z-10 w-[min(430px,calc(100vw-24px))] rounded-[20px] border border-slate-200 bg-white p-5 shadow-[0_30px_90px_rgba(17,19,24,0.18)] sm:p-8">
             <FlareLockLogo />
 
-            <p className="mt-8 text-[10px] font-bold uppercase tracking-[0.16em] text-[#e62058]">
+            <p className="mt-8 text-[10px] font-bold uppercase tracking-[0.16em] text-[#c10f45]">
               Wallet required
             </p>
 
@@ -267,7 +267,7 @@ export function ProductShell({
             </p>
 
             <button
-              className="mt-7 flex h-11 w-full items-center justify-center rounded-[10px] bg-[#e62058] px-5 text-[13px] font-semibold text-white shadow-[0_6px_18px_rgba(230,32,88,0.18)] transition hover:bg-[#ce174d] disabled:opacity-50"
+              className="mt-7 flex h-11 w-full items-center justify-center rounded-[10px] bg-[#c10f45] px-5 text-[13px] font-semibold text-white shadow-[0_6px_18px_rgba(193,15,69,0.18)] transition hover:bg-[#ce174d] disabled:opacity-50"
               disabled={status === "connecting"}
               onClick={() => void connectWallet()}
               type="button"

@@ -24,7 +24,7 @@ export function RiskConsole() {
               <AssetPair base="xrp" quote />
 
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#e62058]">
+                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#c10f45]">
                   Private market
                 </p>
 
@@ -115,7 +115,7 @@ export function RiskConsole() {
                       className="border-l border-slate-200 pl-4 sm:[&:nth-child(odd)]:border-l-0 sm:[&:nth-child(odd)]:pl-0 xl:border-l xl:pl-4 xl:first:border-l-0 xl:first:pl-0"
                       key={number}
                     >
-                      <p className="text-[8px] font-bold text-[#e62058]">{number}</p>
+                      <p className="text-[8px] font-bold text-[#c10f45]">{number}</p>
 
                       <p className="mt-1 text-[11px] font-semibold text-slate-700">{title}</p>
 

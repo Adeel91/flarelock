@@ -43,7 +43,7 @@ export default function RedeemFxrpPage() {
               }
               key={number}
             >
-              <p className="text-[10px] font-bold text-[#e62058]">{number}</p>
+              <p className="text-[10px] font-bold text-[#c10f45]">{number}</p>
 
               <p className="mt-3 text-[14px] font-semibold">{title}</p>
 

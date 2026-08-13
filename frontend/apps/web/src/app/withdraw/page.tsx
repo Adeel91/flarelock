@@ -59,7 +59,7 @@ export default function RedeemPage() {
           </div>
 
           <Link
-            className="inline-flex h-[46px] w-full min-w-[104px] items-center justify-center rounded-[10px] bg-[#e62058] sm:w-auto px-5 font-sans text-[14px] font-medium leading-none tracking-[-0.015em] !text-white shadow-[0_6px_16px_rgba(230,32,88,0.16)] transition hover:bg-[#ce174d]"
+            className="inline-flex h-[46px] w-full min-w-[104px] items-center justify-center rounded-[10px] bg-[#c10f45] sm:w-auto px-5 font-sans text-[14px] font-medium leading-none tracking-[-0.015em] !text-white shadow-[0_6px_16px_rgba(193,15,69,0.16)] transition hover:bg-[#ce174d]"
             href="/withdraw/fxrp-xrpl"
           >
             Redeem

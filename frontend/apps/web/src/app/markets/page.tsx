@@ -64,7 +64,7 @@ export default function MarketsPage() {
           <div
             className={
               index === 0
-                ? "grid grid-cols-[minmax(260px,1.6fr)_0.75fr_0.75fr_0.8fr_auto] items-center gap-5 border-b border-slate-100 bg-[linear-gradient(90deg,rgba(230,32,88,0.025),transparent_34%)] px-6 py-4"
+                ? "grid grid-cols-[minmax(260px,1.6fr)_0.75fr_0.75fr_0.8fr_auto] items-center gap-5 border-b border-slate-100 bg-[linear-gradient(90deg,rgba(193,15,69,0.025),transparent_34%)] px-6 py-4"
                 : "grid grid-cols-[minmax(260px,1.6fr)_0.75fr_0.75fr_0.8fr_auto] items-center gap-5 border-b border-slate-100 px-6 py-4 opacity-45"
             }
             key={row.market}

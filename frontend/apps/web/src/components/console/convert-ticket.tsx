@@ -368,7 +368,7 @@ export function ConvertTicket({ disabled }: ConvertTicketProps) {
             </div>
 
             <div className="flex h-10 items-center justify-center">
-              <div className="grid h-8 w-8 place-items-center rounded-full border border-slate-200 bg-white text-[14px] font-semibold text-[#e62058]">
+              <div className="grid h-8 w-8 place-items-center rounded-full border border-slate-200 bg-white text-[14px] font-semibold text-[#c10f45]">
                 ↓
               </div>
             </div>
