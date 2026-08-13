@@ -1,6 +1,7 @@
 "use client";
 
 import { coston2 } from "@flarelock/web3/chains";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useFlareWallet } from "@/components/wallet/wallet-provider";
 
@@ -26,6 +27,8 @@ function isRejected(error: unknown) {
 
 export function ConnectWallet() {
   const wallet = useFlareWallet();
+  const pathname = usePathname();
+  const router = useRouter();
 
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
@@ -37,6 +40,10 @@ export function ConnectWallet() {
 
     try {
       await wallet.connect();
+
+      if (pathname === "/") {
+        router.push("/overview");
+      }
     } catch (error) {
       if (isWalletMissing(error)) {
         setShowInstallPrompt(true);
@@ -83,6 +90,12 @@ export function ConnectWallet() {
     for (const key of Object.keys(window.sessionStorage)) {
       if (key.startsWith("flarelock:")) {
         window.sessionStorage.removeItem(key);
+      }
+    }
+
+    for (const key of Object.keys(window.localStorage)) {
+      if (key.startsWith("flarelock:activity-signature:")) {
+        window.localStorage.removeItem(key);
       }
     }
 

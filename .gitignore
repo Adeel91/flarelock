@@ -39,3 +39,18 @@ contracts/broadcast/
 
 # Foundry dependencies
 contracts/lib/
+
+# FlareLock local runtime / sensitive artifacts
+backend/apps/api/data/matches.before-patch11-funding-backfill.json
+backend/apps/api/data/*.tmp.json
+
+# Local environment / secrets
+.env.*
+!.env.example
+*.pem
+*.key
+*.keystore
+*.secret
+
+# Local build/runtime noise
+*.log

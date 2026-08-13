@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+
+import { useCallback, useEffect, useState } from "react";
 
 import { MatchEscrowFunding } from "@/components/intent/match-escrow-funding";
 import { useFlareWallet } from "@/components/wallet/wallet-provider";
 import {
-  buildRecoverMatchMessage,
   getMatchExecution,
   getWalletPrivateActivity,
   type MatchExecution,
@@ -14,8 +15,41 @@ import {
 
 const EXPLORER = "https://coston2-explorer.flare.network/tx/";
 const ACTIVE_EXECUTION_KEY = "flarelock:active-execution:C2FLR-FXRP";
+const PRIVATE_ACTIVITY_CACHE_PREFIX = "flarelock:private-activity:";
 
-type ActivityTab = "orders" | "executions" | "transactions";
+function privateActivityCacheKey(address: string) {
+  return `${PRIVATE_ACTIVITY_CACHE_PREFIX}${address.toLowerCase()}`;
+}
+
+function readCachedPrivateActivity(address: string): WalletPrivateActivity | undefined {
+  if (typeof window === "undefined") {
+    return undefined;
+  }
+
+  const raw = window.sessionStorage.getItem(privateActivityCacheKey(address));
+
+  if (!raw) {
+    return undefined;
+  }
+
+  try {
+    return JSON.parse(raw) as WalletPrivateActivity;
+  } catch {
+    window.sessionStorage.removeItem(privateActivityCacheKey(address));
+
+    return undefined;
+  }
+}
+
+function writeCachedPrivateActivity(address: string, activity: WalletPrivateActivity) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.sessionStorage.setItem(privateActivityCacheKey(address), JSON.stringify(activity));
+}
+
+type ActivityTab = "orders" | "executions";
 
 function shorten(value: string, start = 10, end = 8) {
   if (value.length <= start + end + 3) return value;
@@ -73,7 +107,7 @@ export function rememberActiveExecution(matchId: string) {
 
 export function PrivateExecutionActivity() {
   const wallet = useFlareWallet();
-
+  const queryClient = useQueryClient();
   const [activity, setActivity] = useState<WalletPrivateActivity | null>(null);
 
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
@@ -81,13 +115,12 @@ export function PrivateExecutionActivity() {
   const [selectedExecution, setSelectedExecution] = useState<MatchExecution | null>(null);
 
   const [tab, setTab] = useState<ActivityTab>("executions");
-
-  const [loadingActivity, setLoadingActivity] = useState(false);
   const [refreshingExecution, setRefreshingExecution] = useState(false);
+  const [authorizingActivity, setAuthorizingActivity] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const updateExecution = useCallback((next: MatchExecution) => {
-    setSelectedExecution(next);
+    setSelectedExecution((current) => (current?.matchId === next.matchId ? next : current));
 
     setActivity((current) => {
       if (!current) return current;
@@ -129,17 +162,10 @@ export function PrivateExecutionActivity() {
 
   useEffect(() => {
     setActivity(null);
+    setSelectedMatchId(null);
     setSelectedExecution(null);
     setError(null);
-
-    const remembered = window.localStorage.getItem(ACTIVE_EXECUTION_KEY);
-
-    setSelectedMatchId(remembered);
-
-    if (remembered) {
-      void refreshExecution(remembered);
-    }
-  }, [wallet.address, refreshExecution]);
+  }, [wallet.address]);
 
   useEffect(() => {
     function handleExecutionEvent(event: Event) {
@@ -180,26 +206,23 @@ export function PrivateExecutionActivity() {
     };
   }, [refreshExecution, selectedMatchId]);
 
-  async function loadActivity() {
+  async function authorizePrivateActivity() {
     if (!wallet.address) {
-      setError("Connect your wallet to view private activity.");
+      setError("Connect your wallet first.");
       return;
     }
 
-    setLoadingActivity(true);
+    setAuthorizingActivity(true);
     setError(null);
 
     try {
-      if (wallet.chainId !== 114) {
-        await wallet.switchToCoston2();
-      }
-
-      const message = buildRecoverMatchMessage(wallet.address);
-
-      const signature = await wallet.signMessage(message);
+      const signature = await wallet.ensurePrivateActivityAuth();
 
       const next = await getWalletPrivateActivity(wallet.address, signature);
 
+      queryClient.setQueryData(["private-activity", wallet.address], next);
+
+      writeCachedPrivateActivity(wallet.address, next);
       setActivity(next);
 
       const remembered = window.localStorage.getItem(ACTIVE_EXECUTION_KEY);
@@ -210,32 +233,77 @@ export function PrivateExecutionActivity() {
         null;
 
       if (preferred) {
-        rememberActiveExecution(preferred.matchId);
+        window.localStorage.setItem(ACTIVE_EXECUTION_KEY, preferred.matchId);
+
         setSelectedMatchId(preferred.matchId);
         setSelectedExecution(preferred);
-      } else {
-        setSelectedMatchId(null);
-        setSelectedExecution(null);
       }
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Unable to load private activity.");
+      setError(cause instanceof Error ? cause.message : "Unable to authorize private activity.");
     } finally {
-      setLoadingActivity(false);
+      setAuthorizingActivity(false);
     }
   }
 
-  const transactions = useMemo(() => {
-    if (!activity) return [];
+  const privateActivityQuery = useQuery({
+    queryKey: ["private-activity", wallet.address],
+    queryFn: async () => {
+      if (!wallet.address || !wallet.privateActivitySignature) {
+        throw new Error("Private wallet authentication is not available.");
+      }
 
-    return activity.executions.flatMap((execution, executionIndex) =>
-      execution.transactions.map((transaction) => ({
-        ...transaction,
-        matchId: execution.matchId,
-        executionNumber: activity.executions.length - executionIndex,
-        createdAt: execution.createdAt,
-      })),
+      return getWalletPrivateActivity(wallet.address, wallet.privateActivitySignature);
+    },
+    enabled: Boolean(wallet.isConnected && wallet.address && wallet.privateActivitySignature),
+    initialData: wallet.address ? () => readCachedPrivateActivity(wallet.address) : undefined,
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+
+  useEffect(() => {
+    const next = privateActivityQuery.data;
+
+    if (!next) {
+      return;
+    }
+
+    setActivity(next);
+    setError(null);
+
+    if (wallet.address) {
+      writeCachedPrivateActivity(wallet.address, next);
+    }
+
+    const remembered = window.localStorage.getItem(ACTIVE_EXECUTION_KEY);
+
+    const preferred =
+      next.executions.find((execution) => execution.matchId === remembered) ??
+      next.executions[0] ??
+      null;
+
+    if (preferred) {
+      window.localStorage.setItem(ACTIVE_EXECUTION_KEY, preferred.matchId);
+      setSelectedMatchId(preferred.matchId);
+      setSelectedExecution(preferred);
+    } else {
+      setSelectedMatchId(null);
+      setSelectedExecution(null);
+    }
+  }, [privateActivityQuery.data, wallet.address]);
+
+  useEffect(() => {
+    if (!privateActivityQuery.error) {
+      return;
+    }
+
+    setError(
+      privateActivityQuery.error instanceof Error
+        ? privateActivityQuery.error.message
+        : "Unable to load private activity.",
     );
-  }, [activity]);
+  }, [privateActivityQuery.error]);
 
   const tabs: Array<{
     id: ActivityTab;
@@ -252,11 +320,6 @@ export function PrivateExecutionActivity() {
       label: "Executions",
       count: activity?.executions.length ?? 0,
     },
-    {
-      id: "transactions",
-      label: "Transactions",
-      count: transactions.length,
-    },
   ];
 
   return (
@@ -269,27 +332,72 @@ export function PrivateExecutionActivity() {
             </p>
 
             <h2 className="mt-2 text-[26px] font-semibold tracking-[-0.035em] text-[#0a0b0d]">
-              Orders, executions and transactions
+              Orders and executions
             </h2>
 
             <p className="mt-1 max-w-2xl text-[12px] leading-5 text-slate-500">
-              A simple private history for this wallet. Detailed cryptographic evidence stays behind
-              the execution and explorer links.
+              All private Market, Limit and Stop Loss orders appear here. Matched Limit orders
+              continue to Executions for escrow funding, FCC verification and final settlement.
             </p>
           </div>
 
-          <button
-            className="h-11 rounded-xl bg-[#0a0b0d] px-5 text-[12px] font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50"
-            disabled={!wallet.isConnected || loadingActivity}
-            onClick={() => void loadActivity()}
-            type="button"
-          >
-            {loadingActivity
-              ? "Confirm in MetaMask…"
-              : activity
-                ? "Refresh activity"
-                : "Load activity"}
-          </button>
+          <div className="flex flex-col items-end gap-2">
+            <p className="text-[11px] font-semibold text-slate-600">
+              {!wallet.isConnected
+                ? "Connect wallet to view private activity"
+                : !wallet.privateActivitySignature
+                  ? "Private session not authorized"
+                  : privateActivityQuery.isFetching
+                    ? activity
+                      ? "Checking for updates…"
+                      : "Loading private activity…"
+                    : privateActivityQuery.isError
+                      ? "Unable to load private activity"
+                      : "Private activity up to date"}
+            </p>
+
+            {wallet.isConnected && !wallet.privateActivitySignature ? (
+              <button
+                className="clean-button inline-flex h-9 items-center justify-center rounded-[10px] bg-[#e62058] px-4 text-[11px] font-semibold text-white shadow-[0_5px_14px_rgba(230,32,88,0.16)] transition hover:bg-[#cf184d] disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={authorizingActivity}
+                onClick={() => {
+                  void authorizePrivateActivity();
+                }}
+                type="button"
+              >
+                {authorizingActivity ? "Authorizing…" : "Authorize once"}
+              </button>
+            ) : null}
+
+            {wallet.isConnected && wallet.privateActivitySignature && activity ? (
+              <button
+                className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={privateActivityQuery.isFetching}
+                onClick={() => {
+                  void privateActivityQuery.refetch();
+                }}
+                title="Fetch new orders, matches, funding or settlement updates."
+                type="button"
+              >
+                {privateActivityQuery.isFetching ? "Checking…" : "Check for updates"}
+              </button>
+            ) : null}
+
+            {wallet.isConnected &&
+            wallet.privateActivitySignature &&
+            !activity &&
+            privateActivityQuery.isError ? (
+              <button
+                className="text-[10px] font-semibold text-[#e62058] hover:underline"
+                onClick={() => {
+                  void privateActivityQuery.refetch();
+                }}
+                type="button"
+              >
+                Retry
+              </button>
+            ) : null}
+          </div>
         </div>
 
         {!activity ? (
@@ -297,8 +405,12 @@ export function PrivateExecutionActivity() {
             <div className="rounded-2xl border border-dashed border-slate-300 bg-[#fafbfc] px-5 py-8 text-center">
               <p className="text-[14px] font-semibold text-slate-800">
                 {wallet.isConnected
-                  ? "Authorize your wallet to view private history"
-                  : "Connect wallet to view private history"}
+                  ? privateActivityQuery.isLoading
+                    ? "Loading your private activity…"
+                    : error
+                      ? "Unable to load your private activity"
+                      : "Preparing your private activity…"
+                  : "Connect wallet to view private activity"}
               </p>
 
               <p className="mx-auto mt-2 max-w-xl text-[11px] leading-5 text-slate-500">
@@ -318,9 +430,22 @@ export function PrivateExecutionActivity() {
                   }
                   key={item.id}
                   onClick={() => setTab(item.id)}
+                  title={
+                    item.id === "orders"
+                      ? "Orders includes all private Market, Limit and Stop Loss orders."
+                      : "Executions is currently available for matched Limit orders only, including escrow funding, FCC verification and final settlement."
+                  }
                   type="button"
                 >
                   {item.label}
+
+                  <span
+                    aria-hidden="true"
+                    className="ml-2 inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 bg-white text-[12px] font-bold leading-none text-slate-600 shadow-sm"
+                  >
+                    i
+                  </span>
+
                   <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-[9px] text-slate-500">
                     {item.count}
                   </span>
@@ -407,10 +532,9 @@ export function PrivateExecutionActivity() {
                             }
                             key={execution.matchId}
                             onClick={() => {
-                              rememberActiveExecution(execution.matchId);
+                              window.localStorage.setItem(ACTIVE_EXECUTION_KEY, execution.matchId);
 
                               setSelectedMatchId(execution.matchId);
-
                               setSelectedExecution(execution);
                             }}
                             type="button"
@@ -595,57 +719,14 @@ export function PrivateExecutionActivity() {
                         )}
 
                       <div className="mt-5">
-                        <MatchEscrowFunding matchId={selectedExecution.matchId} />
+                        <MatchEscrowFunding
+                          initialExecution={selectedExecution}
+                          matchId={selectedExecution.matchId}
+                        />
                       </div>
                     </>
                   )}
                 </div>
-              </div>
-            )}
-
-            {tab === "transactions" && (
-              <div className="p-5">
-                {transactions.length === 0 ? (
-                  <p className="rounded-2xl bg-slate-50 px-5 py-8 text-center text-[11px] text-slate-500">
-                    No onchain transactions recorded yet.
-                  </p>
-                ) : (
-                  <div className="overflow-hidden rounded-2xl border border-slate-200">
-                    {transactions.map((transaction, index) => (
-                      <a
-                        className={
-                          index === transactions.length - 1
-                            ? "flex items-center justify-between gap-5 px-4 py-4 transition hover:bg-slate-50"
-                            : "flex items-center justify-between gap-5 border-b border-slate-100 px-4 py-4 transition hover:bg-slate-50"
-                        }
-                        href={`${EXPLORER}${transaction.hash}`}
-                        key={`${transaction.matchId}-${transaction.kind}-${transaction.hash}`}
-                        rel="noreferrer"
-                        target="_blank"
-                      >
-                        <div className="min-w-0">
-                          <p className="text-[11px] font-semibold text-slate-800">
-                            {transaction.label}
-                          </p>
-
-                          <p className="mt-1 text-[9px] text-slate-400">
-                            Execution {transaction.executionNumber}
-                            {" · "}
-                            {formatDate(transaction.createdAt)}
-                          </p>
-
-                          <p className="mt-1 truncate font-mono text-[9px] text-slate-400">
-                            {shorten(transaction.hash, 12, 10)}
-                          </p>
-                        </div>
-
-                        <span className="shrink-0 text-[10px] font-semibold text-slate-500">
-                          Explorer ↗
-                        </span>
-                      </a>
-                    ))}
-                  </div>
-                )}
               </div>
             )}
           </>

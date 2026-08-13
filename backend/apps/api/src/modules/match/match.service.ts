@@ -565,24 +565,24 @@ export class MatchService {
         expiresAt: intent.expiresAt,
       }));
 
-    const ownedMatchIds: string[] = [];
+    const decryptedMatches = await Promise.all(
+      matches.map(async (match) => ({
+        match,
+        details: await this.decryptPayload<PrivateMatchPayload>(match.encryptedPayload),
+      })),
+    );
 
-    for (const match of matches) {
-      const details = await this.decryptPayload<PrivateMatchPayload>(match.encryptedPayload);
-      const ownsMatch =
-        details.buyOwner.toLowerCase() === owner.toLowerCase() ||
-        details.sellOwner.toLowerCase() === owner.toLowerCase();
+    const ownedMatchIds = decryptedMatches
+      .filter(
+        ({ details }) =>
+          details.buyOwner.toLowerCase() === owner.toLowerCase() ||
+          details.sellOwner.toLowerCase() === owner.toLowerCase(),
+      )
+      .map(({ match }) => match.matchId);
 
-      if (ownsMatch) {
-        ownedMatchIds.push(match.matchId);
-      }
-    }
-
-    const executions: MatchExecution[] = [];
-
-    for (const matchId of ownedMatchIds) {
-      executions.push(await this.getExecution(matchId));
-    }
+    const executions = await Promise.all(
+      ownedMatchIds.map((matchId) => this.getExecution(matchId)),
+    );
 
     executions.sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt));
 

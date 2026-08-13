@@ -70,7 +70,9 @@ export function ConfidentialSettlementAction({ execution, onSettled }: Props) {
       setStep("complete");
 
       await onSettled();
-      await queryClient.invalidateQueries();
+      await queryClient.invalidateQueries({
+        queryKey: ["private-activity"],
+      });
     } catch (cause) {
       setStep("idle");
 

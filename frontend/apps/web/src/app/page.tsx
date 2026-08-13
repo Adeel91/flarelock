@@ -197,14 +197,6 @@ export default function HomePage() {
 
           <div className="ml-auto flex items-center gap-3">
             <ConnectWallet />
-
-            <Link
-              className="hidden h-10 items-center gap-2 rounded-[10px] bg-[#101217] px-4 text-[13px] font-semibold !text-white transition hover:bg-black sm:inline-flex"
-              href="/overview"
-            >
-              Open app
-              <ArrowIcon />
-            </Link>
           </div>
         </div>
       </header>

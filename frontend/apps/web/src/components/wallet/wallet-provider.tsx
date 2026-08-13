@@ -10,6 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { buildRecoverMatchMessage } from "@/lib/api";
 
 type EthereumProvider = {
   isMetaMask?: boolean;
@@ -35,6 +36,8 @@ type WalletContextValue = {
   errorMessage: string | null;
   isConnected: boolean;
   status: WalletStatus;
+  privateActivitySignature: `0x${string}` | null;
+  ensurePrivateActivityAuth: () => Promise<`0x${string}`>;
   connect: () => Promise<void>;
   disconnect: () => void;
   refreshWallet: () => Promise<void>;
@@ -56,6 +59,49 @@ type WalletContextValue = {
 const WalletContext = createContext<WalletContextValue | null>(null);
 
 const MANUAL_DISCONNECT_KEY = "flarelock:wallet:disconnected";
+const PRIVATE_ACTIVITY_AUTH_PREFIX = "flarelock:activity-signature:";
+
+function privateActivityAuthKey(address: string) {
+  return `${PRIVATE_ACTIVITY_AUTH_PREFIX}${address.toLowerCase()}`;
+}
+
+function readPrivateActivitySignature(address: string): `0x${string}` | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const value = window.localStorage.getItem(privateActivityAuthKey(address));
+
+  return value?.startsWith("0x") ? (value as `0x${string}`) : null;
+}
+
+async function createPrivateActivitySignature(
+  provider: EthereumProvider,
+  address: `0x${string}`,
+): Promise<`0x${string}`> {
+  const cached = readPrivateActivitySignature(address);
+
+  if (cached) {
+    return cached;
+  }
+
+  const message = buildRecoverMatchMessage(address);
+
+  const result = await provider.request({
+    method: "personal_sign",
+    params: [message, address],
+  });
+
+  if (typeof result !== "string" || !result.startsWith("0x")) {
+    throw new Error("MetaMask returned an invalid private activity authorization.");
+  }
+
+  const signature = result as `0x${string}`;
+
+  window.localStorage.setItem(privateActivityAuthKey(address), signature);
+
+  return signature;
+}
 
 function getMetaMaskProvider(): EthereumProvider {
   if (typeof window === "undefined") {
@@ -110,6 +156,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [chainId, setChainId] = useState<number | null>(null);
   const [status, setStatus] = useState<WalletStatus>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [privateActivitySignature, setPrivateActivitySignature] = useState<`0x${string}` | null>(
+    null,
+  );
 
   const getProvider = useCallback(() => {
     if (providerRef.current) {
@@ -194,6 +243,18 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     };
   }, [getProvider]);
 
+  const ensurePrivateActivityAuth = useCallback(async () => {
+    if (!address) {
+      throw new Error("Connect your wallet before authorizing private activity.");
+    }
+
+    const signature = await createPrivateActivitySignature(getProvider(), address);
+
+    setPrivateActivitySignature(signature);
+
+    return signature;
+  }, [address, getProvider]);
+
   const connect = useCallback(async () => {
     setStatus("connecting");
     setErrorMessage(null);
@@ -220,8 +281,11 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         method: "eth_chainId",
       });
 
+      const authSignature = await createPrivateActivitySignature(provider, nextAddress);
+
       setAddress(nextAddress);
       setChainId(parseChainId(currentChain));
+      setPrivateActivitySignature(authSignature);
       setStatus("connected");
       setErrorMessage(null);
     } catch (error) {
@@ -259,6 +323,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     providerRef.current = null;
     setAddress(null);
     setChainId(null);
+    setPrivateActivitySignature(null);
     setStatus("idle");
     setErrorMessage(null);
   }, []);
@@ -432,6 +497,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       errorMessage,
       isConnected: Boolean(address),
       status,
+      privateActivitySignature,
+      ensurePrivateActivityAuth,
       connect,
       disconnect,
       refreshWallet,

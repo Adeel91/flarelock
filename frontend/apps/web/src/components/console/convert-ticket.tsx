@@ -543,7 +543,7 @@ export function ConvertTicket({ disabled }: ConvertTicketProps) {
                 onClick={editOrder}
                 type="button"
               >
-                ← Edit order
+                ← New order
               </button>
 
               <details className="mt-4 border-t border-slate-200 pt-4">

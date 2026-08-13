@@ -163,7 +163,46 @@ export function SealIntentButton({ quote, order }: Props) {
 
       setSealedIntent(result);
 
-      void queryClient.invalidateQueries();
+      queryClient.setQueryData(
+        ["private-activity", wallet.address],
+        (current: import("@/lib/api").WalletPrivateActivity | undefined) => {
+          if (!current) {
+            return current;
+          }
+
+          const exists = current.intents.some((intent) => intent.intentId === result.intentId);
+
+          if (exists) {
+            return current;
+          }
+
+          return {
+            ...current,
+            intents: [
+              {
+                intentId: result.intentId,
+                intentHash: result.intentHash,
+                market: result.market,
+                orderType: result.orderType,
+                status: result.status,
+                matchStatus: result.matchStatus,
+                settlementStatus: result.settlementStatus,
+                createdAt: result.createdAt,
+                expiresAt: result.expiresAt,
+              },
+              ...current.intents,
+            ],
+          };
+        },
+      );
+
+      void queryClient.invalidateQueries({
+        queryKey: ["private-order-book"],
+      });
+
+      void queryClient.invalidateQueries({
+        queryKey: ["private-activity"],
+      });
 
       const counterparty = readPendingCounterparty(quote.side);
 
@@ -196,6 +235,77 @@ export function SealIntentButton({ quote, order }: Props) {
 
   if (sealedIntent) {
     const matched = Boolean(matchedEntry);
+
+    if (order.type !== "limit") {
+      return (
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+          <div className="border-b border-slate-200 bg-[#fafbfc] px-5 py-4">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#e62058]">
+                  Private order
+                </p>
+
+                <p className="mt-1 text-[17px] font-semibold capitalize tracking-[-0.025em] text-[#0a0b0d]">
+                  {order.type === "stop" ? "Stop loss order sealed" : "Market order sealed"}
+                </p>
+              </div>
+
+              <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-[10px] font-semibold text-emerald-700">
+                Encrypted
+              </span>
+            </div>
+          </div>
+
+          <div className="px-5 py-5">
+            <div className="flex gap-3">
+              <StatusDot complete />
+
+              <div>
+                <p className="text-[12px] font-semibold text-[#0a0b0d]">Private intent submitted</p>
+
+                <p className="mt-1 text-[11px] leading-5 text-slate-500">
+                  The order is signed and stored privately. FCC escrow settlement is currently
+                  available for Limit orders only.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-xl bg-slate-50 px-4 py-3">
+              <p className="text-[10px] font-semibold text-slate-500">
+                {matched
+                  ? "A compatible private order was found."
+                  : order.type === "market"
+                    ? "Market orders use IOC and expire if they cannot match immediately."
+                    : "The stop loss intent remains private until its conditions are eligible."}
+              </p>
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="rounded-xl border border-slate-100 px-3 py-3">
+                <p className="text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400">
+                  Intent ID
+                </p>
+
+                <p className="mt-1 font-mono text-[9px] text-slate-600">
+                  {shorten(sealedIntent.intentId)}
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-slate-100 px-3 py-3">
+                <p className="text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400">
+                  Order type
+                </p>
+
+                <p className="mt-1 text-[11px] font-semibold capitalize text-slate-700">
+                  {order.type === "stop" ? "Stop loss" : order.type}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
 
     return (
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">

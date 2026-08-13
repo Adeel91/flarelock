@@ -1,6 +1,5 @@
 "use client";
 
-import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { encodeFunctionData, parseAbi } from "viem";
 
@@ -28,6 +27,7 @@ const erc20Abi = parseAbi(["function approve(address spender, uint256 amount) re
 
 type Props = {
   matchId: string;
+  initialExecution?: MatchExecution;
 };
 
 type Stage = "idle" | "authorizing" | "approving" | "depositing" | "registering" | "error";
@@ -50,32 +50,27 @@ function formatRawAmount(amountRaw: string, asset: "C2FLR" | "FXRP") {
   return fraction ? `${whole}.${fraction}` : whole.toString();
 }
 
-export function MatchEscrowFunding({ matchId }: Props) {
+export function MatchEscrowFunding({ matchId, initialExecution }: Props) {
   const wallet = useFlareWallet();
-  const queryClient = useQueryClient();
   const [stage, setStage] = useState<Stage>("idle");
-  const [execution, setExecution] = useState<MatchExecution | null>(null);
-
-  useEffect(() => {
-    if (!execution) return;
-
-    window.dispatchEvent(
-      new CustomEvent("flarelock:execution-updated", {
-        detail: { matchId },
-      }),
-    );
-
-    void queryClient.invalidateQueries();
-  }, [execution, matchId]);
+  const [execution, setExecution] = useState<MatchExecution | null>(initialExecution ?? null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    if (initialExecution?.matchId === matchId) {
+      setExecution(initialExecution);
+      return;
+    }
+
     let cancelled = false;
 
     async function refresh() {
       try {
         const next = await getMatchExecution(matchId);
-        if (!cancelled) setExecution(next);
+
+        if (!cancelled) {
+          setExecution(next);
+        }
       } catch {
         // Funding can still proceed; surface errors only after explicit user action.
       }
@@ -86,7 +81,7 @@ export function MatchEscrowFunding({ matchId }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [matchId]);
+  }, [initialExecution, matchId]);
 
   const allFunded = Boolean(execution?.buyer && execution?.seller);
 
@@ -185,6 +180,12 @@ export function MatchEscrowFunding({ matchId }: Props) {
       );
 
       setExecution(nextExecution);
+
+      window.dispatchEvent(
+        new CustomEvent("flarelock:execution-updated", {
+          detail: { matchId },
+        }),
+      );
       setStage("idle");
     } catch (error) {
       setStage("error");
