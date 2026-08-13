@@ -1,0 +1,24 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>FlareLock</title>
+  <defs>
+    <linearGradient id="flarelockBg" x1="10" y1="8" x2="54" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D41455"/>
+      <stop offset="1" stop-color="#B10D3F"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="4" y="4" width="56" height="56" rx="16" fill="url(#flarelockBg)"/>
+
+  <path
+    d="M20 23.5C20 21.2 21.9 19.3 24.2 19.3H31.5C33.8 19.3 35.7 17.5 35.7 15.2V13.5H44.8V18.2C44.8 21 42.6 23.2 39.8 23.2H28.6L24.9 27H20V23.5Z"
+    fill="white"
+  />
+
+  <path
+    d="M24.5 31.2C24.5 27.5 27.5 24.5 31.2 24.5C34.9 24.5 37.9 27.5 37.9 31.2V33.4H40.2C41.8 33.4 43.1 34.7 43.1 36.3V45.3C43.1 46.9 41.8 48.2 40.2 48.2H22.3C20.7 48.2 19.4 46.9 19.4 45.3V36.3C19.4 34.7 20.7 33.4 22.3 33.4H24.5V31.2ZM28.4 31.2V33.4H34V31.2C34 29.7 32.8 28.5 31.2 28.5C29.6 28.5 28.4 29.7 28.4 31.2Z"
+    fill="white"
+  />
+
+  <circle cx="31.2" cy="40.7" r="2.1" fill="#C10F45"/>
+  <rect x="30.1" y="40.7" width="2.2" height="4.4" rx="1.1" fill="#C10F45"/>
+</svg>

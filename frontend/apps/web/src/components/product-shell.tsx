@@ -4,8 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { useState } from "react";
+import { FlareLockLogo } from "@/components/brand/flarelock-logo";
 
-import { FlareLockLogo } from "@/components/brand/asset-icons";
 import { ConnectWallet } from "@/components/connect-wallet";
 import { QuickTradeRail } from "@/components/console/quick-trade-rail";
 import { useFlareWallet } from "@/components/wallet/wallet-provider";
@@ -129,7 +129,7 @@ export function ProductShell({
   return (
     <main className="min-h-screen bg-white text-[#101217]">
       <header className="sticky top-0 z-[70] flex h-[66px] items-center border-b border-slate-200 bg-white/95 px-3 backdrop-blur-xl sm:px-[18px]">
-        <Link href="/">
+        <Link aria-label="FlareLock home" className="flex shrink-0 items-center" href="/">
           <FlareLockLogo />
         </Link>
 

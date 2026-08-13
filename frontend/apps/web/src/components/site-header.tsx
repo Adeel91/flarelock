@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { FlareLockLogo } from "@/components/brand/flarelock-logo";
 
 import { ConnectWallet } from "@/components/connect-wallet";
 
@@ -8,12 +9,8 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-[#e7e9ed] bg-white/95 backdrop-blur-xl">
       <nav className="marketing-shell flex h-[70px] items-center justify-between">
-        <Link className="flex items-center gap-3" href="/">
-          <div className="grid h-9 w-9 place-items-center rounded-full bg-[#c10f45] text-[15px] font-bold text-white">
-            F
-          </div>
-
-          <span className="text-[19px] font-bold tracking-[-0.035em]">FlareLock</span>
+        <Link aria-label="FlareLock home" className="flex shrink-0 items-center" href="/">
+          <FlareLockLogo />
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">

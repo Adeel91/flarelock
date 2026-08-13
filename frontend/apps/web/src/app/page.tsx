@@ -1,4 +1,5 @@
-import { FlareIcon, FlareLockLogo, XrpIcon } from "@/components/brand/asset-icons";
+import { FlareIcon, XrpIcon } from "@/components/brand/asset-icons";
+import { FlareLockLogo } from "@/components/brand/flarelock-logo";
 import { ConnectWallet } from "@/components/connect-wallet";
 
 function ArrowIcon() {
@@ -162,9 +163,11 @@ export default function HomePage() {
     <main className="overflow-hidden bg-[#fbfbfc] text-[#101217]">
       <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/78 backdrop-blur-2xl">
         <div className="mx-auto flex h-[68px] max-w-[1480px] items-center px-4 sm:px-6 lg:px-10">
-          <FlareLockLogo />
+          <a aria-label="FlareLock home" className="flex shrink-0 items-center" href="/">
+            <FlareLockLogo />
+          </a>
 
-          <nav className="ml-12 hidden items-center gap-8 lg:flex">
+          <nav className="ml-10 hidden items-center gap-8 lg:flex xl:ml-12">
             <a
               className="text-[13px] font-medium text-slate-500 transition hover:text-slate-950"
               href="#protocol"
