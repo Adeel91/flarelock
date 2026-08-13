@@ -257,7 +257,9 @@ export function PrivateExecutionActivity() {
       return getWalletPrivateActivity(wallet.address, wallet.privateActivitySignature);
     },
     enabled: Boolean(wallet.isConnected && wallet.address && wallet.privateActivitySignature),
-    initialData: wallet.address ? () => readCachedPrivateActivity(wallet.address) : undefined,
+    initialData: wallet.address
+      ? () => readCachedPrivateActivity(wallet.address as `0x${string}`)
+      : undefined,
     staleTime: 0,
     refetchOnMount: "always",
     refetchOnWindowFocus: false,
