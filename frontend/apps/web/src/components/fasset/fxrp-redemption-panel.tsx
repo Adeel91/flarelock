@@ -171,14 +171,14 @@ export function FxrpRedemptionPanel() {
 
   return (
     <div className="grid gap-6">
-      <section className="clean-card rounded-[28px] p-7">
+      <section className="clean-card rounded-[20px] p-4 sm:rounded-[28px] sm:p-7">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-400">
               Withdrawal request
             </p>
 
-            <h2 className="mt-2 text-4xl font-normal tracking-[-0.04em] text-slate-950">
+            <h2 className="mt-2 text-3xl font-normal tracking-[-0.04em] text-slate-950 sm:text-4xl">
               Create redemption
             </h2>
 
@@ -215,7 +215,7 @@ export function FxrpRedemptionPanel() {
 
         {address && isCoston2 && status && (
           <>
-            <div className="mt-7 grid gap-3 md:grid-cols-3">
+            <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <div className="rounded-2xl bg-slate-50 p-5">
                 <p className="text-sm text-slate-500">Wallet balance</p>
                 <p className="mt-2 text-xl font-semibold text-slate-950">
@@ -242,13 +242,13 @@ export function FxrpRedemptionPanel() {
               </div>
             </div>
 
-            <div className="mt-6 grid gap-4 lg:grid-cols-2">
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
               <label className="rounded-[1.7rem] bg-slate-50 p-6">
                 <span className="text-base font-medium text-slate-500">FTestXRP to redeem</span>
 
                 <div className="mt-4 flex items-end gap-3">
                   <input
-                    className="min-w-0 flex-1 bg-transparent text-4xl font-medium tracking-[-0.05em] text-slate-950 outline-none placeholder:text-slate-300"
+                    className="min-w-0 flex-1 bg-transparent text-3xl font-medium tracking-[-0.05em] sm:text-4xl text-slate-950 outline-none placeholder:text-slate-300"
                     inputMode="decimal"
                     onChange={(event) => {
                       setAmount(event.target.value);

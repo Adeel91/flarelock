@@ -69,7 +69,7 @@ export function OrderBookPanel() {
 
   return (
     <section>
-      <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">
             Private liquidity
@@ -90,7 +90,7 @@ export function OrderBookPanel() {
         </div>
 
         {data && (
-          <div className="flex gap-10 text-right">
+          <div className="flex w-full gap-6 text-left sm:w-auto sm:gap-10 sm:text-right">
             <div>
               <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
                 Private buys
@@ -157,7 +157,7 @@ export function OrderBookPanel() {
             </div>
           </div>
 
-          <div className="grid gap-12 py-7 lg:grid-cols-2">
+          <div className="grid gap-8 py-6 xl:grid-cols-2 xl:gap-12 xl:py-7">
             <div>
               <div className="grid grid-cols-[1fr_1fr_80px] px-2 pb-2 text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
                 <span>Ask price</span>
@@ -180,7 +180,7 @@ export function OrderBookPanel() {
           </div>
 
           <div className="flex flex-col gap-4 border-t border-slate-200 py-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex gap-8">
+            <div className="flex flex-wrap gap-x-8 gap-y-2">
               <div>
                 <span className="text-[10px] text-slate-400">Midpoint</span>
                 <span className="ml-3 text-[11px] font-semibold text-slate-700">

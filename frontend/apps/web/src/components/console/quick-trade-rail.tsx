@@ -11,8 +11,8 @@ export function QuickTradeRail() {
   const isCoston2 = chainId === coston2.id;
 
   return (
-    <div className="min-h-full bg-white">
-      <div className="border-b border-slate-200 px-5 py-5">
+    <div className="min-h-full min-w-0 bg-white">
+      <div className="border-b border-slate-200 px-4 py-4 sm:px-5 sm:py-5">
         <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400">
           Quick trade
         </p>
@@ -31,11 +31,11 @@ export function QuickTradeRail() {
         </div>
       </div>
 
-      <div className="p-3">
+      <div className="p-2 sm:p-3">
         <ConvertTicket disabled={!isConnected || !isCoston2} />
       </div>
 
-      <div className="border-t border-slate-200 px-5 py-5">
+      <div className="border-t border-slate-200 px-4 py-4 sm:px-5 sm:py-5">
         <div className="grid grid-cols-3 gap-3 text-center">
           <div>
             <p className="text-[8px] font-bold uppercase tracking-[0.08em] text-slate-400">Price</p>

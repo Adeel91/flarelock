@@ -31,6 +31,7 @@ export function ConnectWallet() {
   const router = useRouter();
 
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+  const [showWalletMenu, setShowWalletMenu] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const [isSwitchingNetwork, setIsSwitchingNetwork] = useState(false);
 
@@ -120,15 +121,111 @@ export function ConnectWallet() {
           </button>
         )}
 
-        <button
-          className="clean-button rounded-full border border-slate-200/90 bg-white px-5 py-3 text-[15px] font-semibold text-[#0a0b0d] hover:border-slate-300 hover:shadow-sm"
-          aria-label="Disconnect wallet and reset FlareLock session"
-          onClick={handleDisconnect}
-          title="Disconnect and reset session"
-          type="button"
-        >
-          {shortenAddress(wallet.address)}
-        </button>
+        <div className="relative">
+          <button
+            aria-expanded={showWalletMenu}
+            aria-haspopup="menu"
+            className="clean-button inline-flex items-center gap-2 rounded-full border border-slate-200/90 bg-white px-3 py-2.5 text-[12px] font-semibold text-[#0a0b0d] transition hover:border-slate-300 hover:shadow-sm sm:px-5 sm:py-3 sm:text-[15px]"
+            onClick={() => setShowWalletMenu((open) => !open)}
+            title="Wallet menu"
+            type="button"
+          >
+            <span>{shortenAddress(wallet.address)}</span>
+
+            <svg
+              aria-hidden="true"
+              className={`h-3.5 w-3.5 shrink-0 text-slate-400 transition-transform ${
+                showWalletMenu ? "rotate-180" : ""
+              }`}
+              fill="none"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="m5 7.5 5 5 5-5"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1.7"
+              />
+            </svg>
+          </button>
+
+          {showWalletMenu ? (
+            <>
+              <button
+                aria-label="Close wallet menu"
+                className="fixed inset-0 z-[78] cursor-default bg-transparent"
+                onClick={() => setShowWalletMenu(false)}
+                type="button"
+              />
+
+              <div
+                className="absolute right-0 top-[calc(100%+8px)] z-[79] w-[220px] overflow-hidden rounded-2xl border border-slate-200 bg-white p-1.5 shadow-[0_18px_50px_rgba(15,23,42,0.16)]"
+                role="menu"
+              >
+                <div className="border-b border-slate-100 px-3 py-2.5">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                    Connected wallet
+                  </p>
+
+                  <p
+                    className="mt-1 truncate font-mono text-[10px] text-slate-600"
+                    title={wallet.address}
+                  >
+                    {shortenAddress(wallet.address)}
+                  </p>
+                </div>
+
+                <button
+                  className="mt-1 flex h-10 w-full items-center gap-3 rounded-xl px-3 text-left text-[12px] font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
+                  onClick={() => {
+                    setShowWalletMenu(false);
+                    router.push("/overview");
+                  }}
+                  role="menuitem"
+                  type="button"
+                >
+                  <svg
+                    aria-hidden="true"
+                    className="h-4 w-4 text-slate-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M4 10.5 12 4l8 6.5V20H5a1 1 0 0 1-1-1v-8.5Z"
+                      stroke="currentColor"
+                      strokeLinejoin="round"
+                      strokeWidth="1.7"
+                    />
+                    <path d="M9 20v-6h6v6" stroke="currentColor" strokeWidth="1.7" />
+                  </svg>
+                  Overview
+                </button>
+
+                <button
+                  className="flex h-10 w-full items-center gap-3 rounded-xl px-3 text-left text-[12px] font-semibold text-red-600 transition hover:bg-red-50"
+                  onClick={() => {
+                    setShowWalletMenu(false);
+                    handleDisconnect();
+                  }}
+                  role="menuitem"
+                  type="button"
+                >
+                  <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <path
+                      d="M10 5H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4M14 8l4 4-4 4M18 12H9"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.7"
+                    />
+                  </svg>
+                  Disconnect
+                </button>
+              </div>
+            </>
+          ) : null}
+        </div>
 
         {(localError || wallet.errorMessage) && (
           <p className="absolute right-0 top-14 w-72 rounded-2xl border border-slate-200/90 bg-white p-3 text-xs font-medium text-slate-600 shadow-xl">

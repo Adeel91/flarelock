@@ -6,10 +6,10 @@ export default function AssetsPage() {
   return (
     <ProductShell title="Assets">
       <div>
-        <div className="border-b border-slate-200 px-8 py-7">
+        <div className="border-b border-slate-200 px-4 py-6 sm:px-6 sm:py-7 xl:px-8">
           <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">Assets</p>
 
-          <h1 className="mt-2 text-[32px] font-semibold tracking-[-0.045em] text-[#101217]">
+          <h1 className="mt-2 text-[27px] font-semibold tracking-[-0.045em] text-[#101217] sm:text-[32px]">
             Your FAssets
           </h1>
 
@@ -18,7 +18,7 @@ export default function AssetsPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-[minmax(260px,1.4fr)_0.8fr_0.8fr_0.7fr_auto] gap-5 border-b border-slate-200 bg-[#fafbfc] px-6 py-3 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+        <div className="hidden grid-cols-[minmax(260px,1.4fr)_0.8fr_0.8fr_0.7fr_auto] gap-5 border-b border-slate-200 bg-[#fafbfc] px-6 py-3 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400 md:grid">
           <span>Asset</span>
           <span>Available</span>
           <span>In Earn</span>
@@ -28,7 +28,7 @@ export default function AssetsPage() {
 
         <FxrpAssetRow />
 
-        <div className="grid grid-cols-[minmax(260px,1.4fr)_0.8fr_0.8fr_0.7fr_auto] items-center gap-5 border-b border-slate-100 px-6 py-5 opacity-45">
+        <div className="grid grid-cols-1 items-start gap-4 border-b border-slate-100 px-4 py-5 opacity-45 sm:px-6 md:grid-cols-[minmax(260px,1.4fr)_0.8fr_0.8fr_0.7fr_auto] md:items-center md:gap-5">
           <div className="flex items-center gap-4">
             <BitcoinIcon size={40} />
 
@@ -49,7 +49,7 @@ export default function AssetsPage() {
           <span />
         </div>
 
-        <div className="grid grid-cols-[minmax(260px,1.4fr)_0.8fr_0.8fr_0.7fr_auto] items-center gap-5 border-b border-slate-100 px-6 py-5 opacity-45">
+        <div className="grid grid-cols-1 items-start gap-4 border-b border-slate-100 px-4 py-5 opacity-45 sm:px-6 md:grid-cols-[minmax(260px,1.4fr)_0.8fr_0.8fr_0.7fr_auto] md:items-center md:gap-5">
           <div className="flex items-center gap-4">
             <DogeIcon size={40} />
 

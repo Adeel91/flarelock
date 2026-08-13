@@ -23,14 +23,16 @@ export function LiveMarketOverview() {
   });
 
   return (
-    <section className="rounded-[26px] border border-slate-200 bg-white">
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 px-6 py-5">
+    <section className="border-y border-slate-200 bg-white sm:rounded-[22px] sm:border md:rounded-[26px]">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 px-4 py-4 sm:px-6 sm:py-5">
         <div>
           <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-slate-400">
             Live market reference
           </p>
 
-          <p className="mt-1 text-[28px] font-semibold tracking-[-0.04em]">FXRP / C2FLR</p>
+          <p className="mt-1 text-[23px] font-semibold tracking-[-0.04em] sm:text-[28px]">
+            FXRP / C2FLR
+          </p>
         </div>
 
         <span className="live-pulse rounded-full bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700">
@@ -52,11 +54,11 @@ export function LiveMarketOverview() {
 
       {quote.data && (
         <>
-          <div className="grid gap-5 p-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 p-4 sm:gap-5 sm:p-6 lg:grid-cols-4">
             <div>
               <p className="text-[13px] text-slate-500">1 FXRP</p>
 
-              <p className="mt-2 text-[30px] font-semibold tracking-[-0.055em]">
+              <p className="mt-2 break-words text-[23px] font-semibold tracking-[-0.055em] sm:text-[30px]">
                 {format(quote.data.rate, 8)}
               </p>
 
@@ -88,7 +90,7 @@ export function LiveMarketOverview() {
             </div>
           </div>
 
-          <div className="border-t border-slate-100 px-6 py-4 text-xs leading-5 text-slate-500">
+          <div className="border-t border-slate-100 px-4 py-4 text-[11px] leading-5 text-slate-500 sm:px-6 sm:text-xs">
             This is a live FTSOv2 reference snapshot. FlareLock does not display invented historical
             chart data.
           </div>

@@ -128,7 +128,7 @@ export function ProductShell({
 
   return (
     <main className="min-h-screen bg-white text-[#101217]">
-      <header className="sticky top-0 z-[70] flex h-[66px] items-center border-b border-slate-200 bg-white/95 px-[18px] backdrop-blur-xl">
+      <header className="sticky top-0 z-[70] flex h-[66px] items-center border-b border-slate-200 bg-white/95 px-3 backdrop-blur-xl sm:px-[18px]">
         <Link href="/">
           <FlareLockLogo />
         </Link>
@@ -151,14 +151,40 @@ export function ProductShell({
         </div>
       </header>
 
+      <nav className="sticky top-[66px] z-[65] flex h-[56px] items-center gap-1 overflow-x-auto border-b border-slate-200 bg-white px-2 lg:hidden">
+        {navigation.map((item) => {
+          const active =
+            pathname === item.href ||
+            (item.href !== "/overview" && pathname?.startsWith(`${item.href}/`));
+
+          return (
+            <Link
+              className={
+                active
+                  ? "flex h-10 shrink-0 items-center gap-2 rounded-[10px] bg-[#eff1f4] px-3 text-[12px] font-semibold text-[#101217]"
+                  : "flex h-10 shrink-0 items-center gap-2 rounded-[10px] px-3 text-[12px] font-medium text-slate-500 transition hover:bg-slate-50 hover:text-[#101217]"
+              }
+              href={item.href}
+              key={`mobile-${item.href}`}
+            >
+              <span className="grid w-5 place-items-center [&>svg]:h-4 [&>svg]:w-4">
+                {item.icon}
+              </span>
+
+              {item.label}
+            </Link>
+          );
+        })}
+      </nav>
+
       <div
         className={
           hideRightRail
-            ? "grid min-h-[calc(100vh-66px)] grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)]"
-            : "grid min-h-[calc(100vh-66px)] grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)_560px]"
+            ? "grid min-h-[calc(100vh-122px)] grid-cols-1 lg:min-h-[calc(100vh-66px)] lg:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[240px_minmax(0,1fr)] 2xl:grid-cols-[280px_minmax(0,1fr)]"
+            : "grid min-h-[calc(100vh-122px)] grid-cols-1 lg:min-h-[calc(100vh-66px)] lg:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[240px_minmax(0,1fr)_420px] 2xl:grid-cols-[280px_minmax(0,1fr)_560px]"
         }
       >
-        <aside className="sticky top-[66px] hidden h-[calc(100vh-66px)] flex-col border-r border-slate-200 bg-white px-4 py-5 lg:flex">
+        <aside className="sticky top-[66px] hidden h-[calc(100vh-66px)] flex-col border-r border-slate-200 bg-white px-3 py-5 lg:flex xl:px-4">
           <nav className="grid gap-1">
             {navigation.map((item) => {
               const active =
@@ -169,8 +195,8 @@ export function ProductShell({
                 <Link
                   className={
                     active
-                      ? "flex h-[48px] items-center gap-3 rounded-[10px] bg-[#eff1f4] px-4 text-[15px] font-semibold text-[#101217]"
-                      : "flex h-[48px] items-center gap-3 rounded-[10px] px-4 text-[15px] font-medium text-slate-600 transition hover:bg-[#f5f6f8] hover:text-[#101217]"
+                      ? "flex h-[46px] items-center gap-2 rounded-[10px] bg-[#eff1f4] px-3 text-[13px] font-semibold text-[#101217] xl:h-[48px] xl:gap-3 xl:px-4 xl:text-[15px]"
+                      : "flex h-[46px] items-center gap-2 rounded-[10px] px-3 text-[13px] font-medium text-slate-600 transition hover:bg-[#f5f6f8] hover:text-[#101217] xl:h-[48px] xl:gap-3 xl:px-4 xl:text-[15px]"
                   }
                   href={item.href}
                   key={item.href}
@@ -202,30 +228,36 @@ export function ProductShell({
           </div>
         </aside>
 
-        <section className="min-w-0 border-r border-slate-200 bg-white">{children}</section>
+        <section className="min-w-0 bg-white xl:border-r xl:border-slate-200">{children}</section>
 
         {!hideRightRail && (
-          <aside className="sticky top-[66px] hidden h-[calc(100vh-66px)] overflow-y-auto bg-white lg:block">
-            {rightRail ?? <QuickTradeRail />}
-          </aside>
+          <>
+            <aside className="hidden bg-white xl:sticky xl:top-[66px] xl:block xl:h-[calc(100vh-66px)] xl:overflow-y-auto">
+              {rightRail ?? <QuickTradeRail />}
+            </aside>
+
+            <aside className="min-w-0 border-t border-slate-200 bg-white lg:col-start-2 xl:hidden">
+              {rightRail ?? <QuickTradeRail />}
+            </aside>
+          </>
         )}
       </div>
 
       {!isConnected && (
-        <div className="fixed inset-x-0 bottom-0 top-[66px] z-[60] grid place-items-center lg:left-[280px]">
+        <div className="fixed inset-x-0 bottom-0 top-[122px] z-[60] grid place-items-center lg:left-[220px] lg:top-[66px] xl:left-[240px] 2xl:left-[280px]">
           <div
             aria-hidden="true"
             className="absolute inset-0 bg-[#111318]/20 backdrop-blur-[3px]"
           />
 
-          <div className="relative z-10 w-[min(430px,calc(100vw-32px))] rounded-[20px] border border-slate-200 bg-white p-8 shadow-[0_30px_90px_rgba(17,19,24,0.18)]">
+          <div className="relative z-10 w-[min(430px,calc(100vw-24px))] rounded-[20px] border border-slate-200 bg-white p-5 shadow-[0_30px_90px_rgba(17,19,24,0.18)] sm:p-8">
             <FlareLockLogo />
 
             <p className="mt-8 text-[10px] font-bold uppercase tracking-[0.16em] text-[#e62058]">
               Wallet required
             </p>
 
-            <h2 className="mt-3 text-[31px] font-semibold leading-[1.05] tracking-[-0.055em]">
+            <h2 className="mt-3 text-[26px] font-semibold leading-[1.05] tracking-[-0.055em] sm:text-[31px]">
               Connect MetaMask to continue.
             </h2>
 

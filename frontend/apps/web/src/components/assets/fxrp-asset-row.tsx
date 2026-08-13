@@ -31,7 +31,7 @@ export function FxrpAssetRow() {
   });
 
   return (
-    <div className="grid grid-cols-[minmax(260px,1.4fr)_0.8fr_0.8fr_0.7fr_auto] items-center gap-5 border-b border-slate-100 px-6 py-5">
+    <div className="grid grid-cols-1 items-start gap-4 border-b border-slate-100 px-4 py-5 sm:px-6 md:grid-cols-[minmax(260px,1.4fr)_0.8fr_0.8fr_0.7fr_auto] md:items-center md:gap-5">
       <div className="flex items-center gap-4">
         <XrpIcon size={40} />
 
@@ -69,7 +69,7 @@ export function FxrpAssetRow() {
       </span>
 
       <Link
-        className="inline-flex h-10 min-w-[92px] items-center justify-center rounded-[10px] border border-slate-200 bg-white px-4 text-[12px] font-semibold text-[#101217] transition hover:bg-slate-50"
+        className="inline-flex h-10 w-full min-w-[92px] items-center justify-center rounded-[10px] border border-slate-200 bg-white px-4 text-[12px] font-semibold text-[#101217] transition hover:bg-slate-50 sm:w-auto"
         href="/earn/firelight-fxrp"
       >
         Manage

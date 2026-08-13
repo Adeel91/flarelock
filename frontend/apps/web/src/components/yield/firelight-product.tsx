@@ -12,7 +12,7 @@ type Tab = "overview" | "deposit" | "withdrawals";
 
 function Metric({ label, value, suffix }: { label: string; value: string; suffix?: string }) {
   return (
-    <div className="border-r border-slate-200 px-6 py-5 last:border-r-0">
+    <div className="border-r border-slate-200 px-4 py-4 sm:px-6 sm:py-5 last:border-r-0">
       <p className="text-[11px] font-medium text-slate-500">{label}</p>
 
       <div className="mt-2 flex items-baseline gap-2">
@@ -95,7 +95,7 @@ export function FirelightProduct() {
       {tab === "overview" && (
         <div>
           <section className="border-b border-slate-200">
-            <div className="flex items-center justify-between px-6 py-5">
+            <div className="flex items-center justify-between px-4 py-4 sm:px-6 sm:py-5">
               <div>
                 <p className="text-[15px] font-semibold">Your position</p>
 
@@ -143,7 +143,7 @@ export function FirelightProduct() {
           </section>
 
           <section className="border-b border-slate-200">
-            <div className="px-6 py-5">
+            <div className="px-4 py-4 sm:px-6 sm:py-5">
               <p className="text-[15px] font-semibold">Firelight status</p>
 
               <p className="mt-1 text-[12px] text-slate-500">
@@ -152,7 +152,7 @@ export function FirelightProduct() {
             </div>
 
             <div className="grid border-t border-slate-200 md:grid-cols-4">
-              <div className="border-r border-slate-200 px-6 py-5">
+              <div className="border-r border-slate-200 px-4 py-4 sm:px-6 sm:py-5">
                 <p className="text-[11px] text-slate-500">Protocol</p>
 
                 <p className="mt-2 text-[16px] font-semibold">Firelight</p>
@@ -160,7 +160,7 @@ export function FirelightProduct() {
                 <p className="mt-1 text-[11px] text-emerald-700">Live on Coston2</p>
               </div>
 
-              <div className="border-r border-slate-200 px-6 py-5">
+              <div className="border-r border-slate-200 px-4 py-4 sm:px-6 sm:py-5">
                 <p className="text-[11px] text-slate-500">Current period</p>
 
                 <p className="mt-2 text-[16px] font-semibold">
@@ -170,7 +170,7 @@ export function FirelightProduct() {
                 <p className="mt-1 text-[11px] text-slate-500">Period based exits</p>
               </div>
 
-              <div className="border-r border-slate-200 px-6 py-5">
+              <div className="border-r border-slate-200 px-4 py-4 sm:px-6 sm:py-5">
                 <p className="text-[11px] text-slate-500">Vault assets</p>
 
                 <p className="mt-2 text-[16px] font-semibold">
@@ -180,7 +180,7 @@ export function FirelightProduct() {
                 <p className="mt-1 text-[11px] text-slate-500">ERC 4626 vault</p>
               </div>
 
-              <div className="px-6 py-5">
+              <div className="px-4 py-4 sm:px-6 sm:py-5">
                 <p className="text-[11px] text-slate-500">Claimable</p>
 
                 <p className="mt-2 text-[16px] font-semibold">
@@ -196,7 +196,7 @@ export function FirelightProduct() {
           </section>
 
           <section className="border-b border-slate-200">
-            <div className="px-6 py-5">
+            <div className="px-4 py-4 sm:px-6 sm:py-5">
               <p className="text-[15px] font-semibold">Manage your position</p>
 
               <p className="mt-1 text-[12px] text-slate-500">
@@ -204,7 +204,7 @@ export function FirelightProduct() {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-3 border-t border-slate-200 px-6 py-5">
+            <div className="flex flex-wrap gap-3 border-t border-slate-200 px-4 py-4 sm:px-6 sm:py-5">
               <button
                 className="inline-flex h-[46px] min-w-[130px] items-center justify-center rounded-[10px] bg-[#e62058] px-5 text-[14px] font-medium !text-white shadow-[0_6px_16px_rgba(230,32,88,0.16)] transition hover:bg-[#ce174d]"
                 onClick={() => setTab("deposit")}
@@ -223,7 +223,7 @@ export function FirelightProduct() {
             </div>
           </section>
 
-          <section className="px-6 py-6">
+          <section className="px-4 py-5 sm:px-6 sm:py-6">
             <p className="text-[15px] font-semibold">How Firelight works</p>
 
             <div className="mt-5 grid border border-slate-200 md:grid-cols-4">

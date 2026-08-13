@@ -16,7 +16,7 @@ function SectionHeader({
   action: string;
 }) {
   return (
-    <div className="flex items-center justify-between border-b border-slate-200 bg-[#fafbfc] px-6 py-4">
+    <div className="flex flex-col items-start justify-between gap-3 border-b border-slate-200 bg-[#fafbfc] px-4 py-4 sm:flex-row sm:items-center sm:px-6">
       <div>
         <h2 className="text-[17px] font-semibold tracking-[-0.02em]">{title}</h2>
 
@@ -34,12 +34,12 @@ export default function OverviewPage() {
   return (
     <ProductShell title="Home">
       <div>
-        <div className="border-b border-slate-200 px-7 py-7 xl:px-8">
+        <div className="border-b border-slate-200 px-4 py-6 sm:px-6 sm:py-7 xl:px-8">
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
             Portfolio
           </p>
 
-          <h1 className="mt-2 text-[30px] font-semibold tracking-[-0.045em]">
+          <h1 className="mt-2 text-[26px] font-semibold tracking-[-0.045em] sm:text-[30px]">
             Your FlareLock account
           </h1>
 
@@ -56,7 +56,7 @@ export default function OverviewPage() {
             title="Assets"
           />
 
-          <div className="grid gap-4 px-6 py-5 md:grid-cols-[minmax(260px,1.6fr)_0.7fr_0.8fr_auto] md:items-center">
+          <div className="grid gap-4 px-4 py-5 sm:px-6 md:grid-cols-[minmax(260px,1.6fr)_0.7fr_0.8fr_auto] md:items-center">
             <div className="flex items-center gap-4">
               <XrpIcon size={38} />
 
@@ -86,7 +86,7 @@ export default function OverviewPage() {
             </div>
 
             <Link
-              className="inline-flex h-[46px] min-w-[104px] items-center justify-center rounded-[10px] border border-slate-200 bg-white px-5 text-[13px] font-semibold text-[#101217] transition hover:bg-slate-50 active:scale-[0.995]"
+              className="inline-flex h-[46px] w-full min-w-[104px] items-center justify-center sm:w-auto rounded-[10px] border border-slate-200 bg-white px-5 text-[13px] font-semibold text-[#101217] transition hover:bg-slate-50 active:scale-[0.995]"
               href="/assets"
             >
               View
@@ -102,7 +102,7 @@ export default function OverviewPage() {
             title="Markets"
           />
 
-          <div className="grid gap-4 px-6 py-5 md:grid-cols-[minmax(260px,1.6fr)_0.7fr_auto] md:items-center">
+          <div className="grid gap-4 px-4 py-5 sm:px-6 md:grid-cols-[minmax(260px,1.6fr)_0.7fr_auto] md:items-center">
             <div className="flex items-center gap-4">
               <AssetPair base="xrp" quote />
 
@@ -117,7 +117,10 @@ export default function OverviewPage() {
               LIVE
             </span>
 
-            <Link className={`${primaryActionClass} min-w-[104px]`} href="/markets/fxrp-c2flr">
+            <Link
+              className={`${primaryActionClass} w-full min-w-[104px] sm:w-auto`}
+              href="/markets/fxrp-c2flr"
+            >
               Trade
             </Link>
           </div>
@@ -131,7 +134,7 @@ export default function OverviewPage() {
             title="Earn"
           />
 
-          <div className="grid gap-4 px-6 py-5 md:grid-cols-[minmax(260px,1.6fr)_0.7fr_auto] md:items-center">
+          <div className="grid gap-4 px-4 py-5 sm:px-6 md:grid-cols-[minmax(260px,1.6fr)_0.7fr_auto] md:items-center">
             <div className="flex items-center gap-4">
               <div className="relative">
                 <FlareIcon size={38} />
@@ -153,7 +156,7 @@ export default function OverviewPage() {
             </span>
 
             <Link
-              className="inline-flex h-[46px] min-w-[104px] items-center justify-center rounded-[10px] border border-slate-200 bg-white px-5 text-[13px] font-semibold text-[#101217] transition hover:bg-slate-50 active:scale-[0.995]"
+              className="inline-flex h-[46px] w-full min-w-[104px] items-center justify-center sm:w-auto rounded-[10px] border border-slate-200 bg-white px-5 text-[13px] font-semibold text-[#101217] transition hover:bg-slate-50 active:scale-[0.995]"
               href="/earn/firelight-fxrp"
             >
               Manage

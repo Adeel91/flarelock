@@ -6,7 +6,7 @@ import { ProductShell } from "@/components/product-shell";
 export default function RedeemFxrpPage() {
   return (
     <ProductShell hideRightRail title="Redeem">
-      <div className="px-8 py-7">
+      <div className="px-4 py-5 sm:px-6 sm:py-7 xl:px-8">
         <Link
           className="text-[13px] font-semibold text-slate-500 transition hover:text-[#101217]"
           href="/withdraw"
@@ -19,7 +19,7 @@ export default function RedeemFxrpPage() {
             FXRP redemption
           </p>
 
-          <h1 className="mt-2 text-[32px] font-semibold tracking-[-0.045em]">
+          <h1 className="mt-2 text-[27px] font-semibold tracking-[-0.045em] sm:text-[32px]">
             Redeem FXRP to XRP Ledger
           </h1>
 

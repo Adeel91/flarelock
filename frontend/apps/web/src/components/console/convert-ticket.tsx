@@ -225,7 +225,7 @@ export function ConvertTicket({ disabled }: ConvertTicketProps) {
 
   return (
     <section className="overflow-hidden bg-white">
-      <div className="border-b border-slate-200 px-7 pb-5 pt-6">
+      <div className="border-b border-slate-200 px-4 pb-4 pt-5 sm:px-6 sm:pb-5 sm:pt-6 xl:px-7">
         <div className="flex items-start justify-between gap-5">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">
@@ -267,7 +267,7 @@ export function ConvertTicket({ disabled }: ConvertTicketProps) {
         </div>
       </div>
 
-      <div className="relative min-h-[620px] overflow-hidden">
+      <div className="relative min-h-[540px] overflow-hidden sm:min-h-[620px]">
         <div
           className={
             isReviewing
@@ -275,14 +275,14 @@ export function ConvertTicket({ disabled }: ConvertTicketProps) {
               : "relative translate-x-0 opacity-100 transition-all duration-300 ease-in-out"
           }
         >
-          <div className="px-7 py-6">
+          <div className="px-4 py-5 sm:px-6 sm:py-6 xl:px-7">
             <div className="grid grid-cols-3 rounded-lg bg-slate-100 p-1">
               {(["market", "limit", "stop"] as OrderType[]).map((type) => (
                 <button
                   className={
                     orderType === type
-                      ? "rounded-md bg-white px-3 py-3 text-[13px] font-semibold capitalize text-slate-950 shadow-sm"
-                      : "rounded-md px-3 py-3 text-[13px] font-semibold capitalize text-slate-500 transition hover:text-slate-900"
+                      ? "rounded-md bg-white px-2 py-3 text-[11px] sm:px-3 sm:text-[13px] font-semibold capitalize text-slate-950 shadow-sm"
+                      : "rounded-md px-2 py-3 text-[11px] sm:px-3 sm:text-[13px] font-semibold capitalize text-slate-500 transition hover:text-slate-900"
                   }
                   key={type}
                   onClick={() => {
@@ -298,14 +298,14 @@ export function ConvertTicket({ disabled }: ConvertTicketProps) {
             </div>
 
             {orderType !== "market" && (
-              <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <label className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                   <span className="text-[14px] font-medium text-slate-500">
                     {orderType === "limit" ? "Limit price" : "Stop price"}
                   </span>
 
                   <input
-                    className="mt-2 w-full bg-transparent !text-[22px] font-semibold tracking-[-0.035em] outline-none"
+                    className="mt-2 w-full bg-transparent !text-[19px] font-semibold tracking-[-0.035em] outline-none sm:!text-[22px]"
                     inputMode="decimal"
                     onChange={(event) => {
                       if (orderType === "limit") {
@@ -325,7 +325,7 @@ export function ConvertTicket({ disabled }: ConvertTicketProps) {
                   <span className="text-[14px] font-medium text-slate-500">Valid for</span>
 
                   <select
-                    className="mt-2 w-full bg-transparent !text-[22px] font-semibold outline-none"
+                    className="mt-2 w-full bg-transparent !text-[19px] font-semibold outline-none sm:!text-[22px]"
                     onChange={(event) => {
                       setValidMinutes(event.target.value);
 
@@ -351,7 +351,7 @@ export function ConvertTicket({ disabled }: ConvertTicketProps) {
 
               <div className="mt-3 flex items-center gap-4">
                 <input
-                  className="min-w-0 flex-1 bg-transparent font-semibold leading-none tracking-[-0.055em] outline-none placeholder:text-slate-300 !text-[24px]"
+                  className="min-w-0 flex-1 bg-transparent font-semibold leading-none tracking-[-0.055em] outline-none placeholder:text-slate-300 !text-[21px] sm:!text-[24px]"
                   inputMode="decimal"
                   onChange={(event) => {
                     setAmount(event.target.value);
@@ -434,7 +434,7 @@ export function ConvertTicket({ disabled }: ConvertTicketProps) {
           }
         >
           {quote && (
-            <div className="px-7 py-6">
+            <div className="px-4 py-5 sm:px-6 sm:py-6 xl:px-7">
               <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-5">
                 <div className="flex items-center gap-3">
                   <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-emerald-100 text-[15px] font-bold text-emerald-700">
@@ -464,7 +464,7 @@ export function ConvertTicket({ disabled }: ConvertTicketProps) {
               </div>
 
               <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200">
-                <div className="grid grid-cols-2 border-b border-slate-200">
+                <div className="grid grid-cols-1 min-[420px]:grid-cols-2 border-b border-slate-200">
                   <div className="border-r border-slate-200 p-5 [&_input]:!text-[30px]">
                     <p className="text-[10px] font-medium uppercase tracking-[0.08em] text-slate-400">
                       You pay

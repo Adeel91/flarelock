@@ -6,7 +6,7 @@ import { FirelightProduct } from "@/components/yield/firelight-product";
 export default function FirelightFxrpPage() {
   return (
     <ProductShell hideRightRail title="Earn">
-      <section className="px-8 py-7">
+      <section className="px-4 py-5 sm:px-6 sm:py-7 xl:px-8">
         <Link className="text-sm font-semibold text-slate-500 hover:text-black" href="/earn">
           ← Earn products
         </Link>
@@ -16,7 +16,9 @@ export default function FirelightFxrpPage() {
             Firelight
           </p>
 
-          <h1 className="mt-2 text-[32px] font-semibold tracking-[-0.045em]">FXRP Vault</h1>
+          <h1 className="mt-2 text-[27px] font-semibold tracking-[-0.045em] sm:text-[32px]">
+            FXRP Vault
+          </h1>
 
           <p className="mt-2 max-w-2xl text-[14px] leading-6 text-slate-500">
             Manage the Firelight FXRP product without mixing deposits and withdrawals into the same

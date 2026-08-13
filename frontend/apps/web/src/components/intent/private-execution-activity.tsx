@@ -113,6 +113,7 @@ export function PrivateExecutionActivity() {
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
 
   const [selectedExecution, setSelectedExecution] = useState<MatchExecution | null>(null);
+  const [executionDetailsOpen, setExecutionDetailsOpen] = useState(false);
 
   const [tab, setTab] = useState<ActivityTab>("executions");
   const [refreshingExecution, setRefreshingExecution] = useState(false);
@@ -164,6 +165,7 @@ export function PrivateExecutionActivity() {
     setActivity(null);
     setSelectedMatchId(null);
     setSelectedExecution(null);
+    setExecutionDetailsOpen(false);
     setError(null);
   }, [wallet.address]);
 
@@ -323,15 +325,15 @@ export function PrivateExecutionActivity() {
   ];
 
   return (
-    <section className="bg-[#f5f6f8] px-6 py-7 xl:px-8">
-      <div className="mx-auto max-w-[1500px] overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-        <div className="flex flex-col gap-5 border-b border-slate-200 px-6 py-6 lg:flex-row lg:items-center lg:justify-between">
+    <section className="bg-[#f5f6f8] px-3 py-5 sm:px-5 sm:py-6 xl:px-8 xl:py-7">
+      <div className="mx-auto max-w-[1500px] overflow-hidden rounded-[18px] border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.03)] sm:rounded-[26px]">
+        <div className="flex flex-col gap-5 border-b border-slate-200 px-4 py-5 sm:px-6 sm:py-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#e62058]">
               My private activity
             </p>
 
-            <h2 className="mt-2 text-[26px] font-semibold tracking-[-0.035em] text-[#0a0b0d]">
+            <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.035em] text-[#0a0b0d] sm:text-[26px]">
               Orders and executions
             </h2>
 
@@ -341,7 +343,7 @@ export function PrivateExecutionActivity() {
             </p>
           </div>
 
-          <div className="flex flex-col items-end gap-2">
+          <div className="flex flex-col items-start gap-2 sm:items-end">
             <p className="text-[11px] font-semibold text-slate-600">
               {!wallet.isConnected
                 ? "Connect wallet to view private activity"
@@ -358,7 +360,7 @@ export function PrivateExecutionActivity() {
 
             {wallet.isConnected && !wallet.privateActivitySignature ? (
               <button
-                className="clean-button inline-flex h-9 items-center justify-center rounded-[10px] bg-[#e62058] px-4 text-[11px] font-semibold text-white shadow-[0_5px_14px_rgba(230,32,88,0.16)] transition hover:bg-[#cf184d] disabled:cursor-not-allowed disabled:opacity-50"
+                className="clean-button inline-flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded-[10px] bg-[#e62058] px-4 text-[11px] font-semibold text-white shadow-[0_5px_14px_rgba(230,32,88,0.16)] transition hover:bg-[#cf184d] disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={authorizingActivity}
                 onClick={() => {
                   void authorizePrivateActivity();
@@ -420,13 +422,13 @@ export function PrivateExecutionActivity() {
           </div>
         ) : (
           <>
-            <div className="flex overflow-x-auto border-b border-slate-200 px-4">
+            <div className="flex overflow-x-auto border-b border-slate-200 px-2 sm:px-4">
               {tabs.map((item) => (
                 <button
                   className={
                     tab === item.id
-                      ? "border-b-2 border-[#e62058] px-4 py-4 text-[12px] font-semibold text-[#e62058]"
-                      : "border-b-2 border-transparent px-4 py-4 text-[12px] font-semibold text-slate-500 transition hover:text-slate-900"
+                      ? "border-b-2 border-[#e62058] px-3 py-3.5 text-[11px] sm:px-4 sm:py-4 sm:text-[12px] font-semibold text-[#e62058]"
+                      : "border-b-2 border-transparent px-3 py-3.5 text-[11px] sm:px-4 sm:py-4 sm:text-[12px] font-semibold text-slate-500 transition hover:text-slate-900"
                   }
                   key={item.id}
                   onClick={() => setTab(item.id)}
@@ -454,7 +456,7 @@ export function PrivateExecutionActivity() {
             </div>
 
             {tab === "orders" && (
-              <div className="p-5">
+              <div className="p-3 sm:p-5">
                 {activity.intents.length === 0 ? (
                   <p className="rounded-2xl bg-slate-50 px-5 py-8 text-center text-[11px] text-slate-500">
                     No private orders for this wallet.
@@ -465,13 +467,13 @@ export function PrivateExecutionActivity() {
                       <div
                         className={
                           index === activity.intents.length - 1
-                            ? "flex items-center justify-between gap-5 px-4 py-4"
-                            : "flex items-center justify-between gap-5 border-b border-slate-100 px-4 py-4"
+                            ? "flex flex-col items-start justify-between gap-3 px-4 py-4 sm:flex-row sm:items-center sm:gap-5"
+                            : "flex flex-col items-start justify-between gap-3 border-b border-slate-100 px-4 py-4 sm:flex-row sm:items-center sm:gap-5"
                         }
                         key={intent.intentId}
                       >
                         <div className="min-w-0">
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
                             <p className="text-[12px] font-semibold capitalize text-slate-900">
                               {intent.orderType} order
                             </p>
@@ -487,7 +489,7 @@ export function PrivateExecutionActivity() {
                           </p>
                         </div>
 
-                        <div className="shrink-0 text-right">
+                        <div className="shrink-0 text-left sm:text-right">
                           <span
                             className={`rounded-full px-2.5 py-1 text-[9px] font-semibold capitalize ${orderStatusClass(
                               intent.status,
@@ -508,8 +510,8 @@ export function PrivateExecutionActivity() {
             )}
 
             {tab === "executions" && (
-              <div className="grid xl:grid-cols-[0.72fr_1.28fr]">
-                <div className="border-b border-slate-200 p-4 xl:border-b-0 xl:border-r">
+              <div className="grid min-w-0 2xl:grid-cols-[0.72fr_1.28fr]">
+                <div className="border-b border-slate-200 p-3 sm:p-4 2xl:border-b-0 2xl:border-r">
                   <p className="px-1 pb-3 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
                     Executions
                   </p>
@@ -521,7 +523,8 @@ export function PrivateExecutionActivity() {
                   ) : (
                     <div className="grid gap-2">
                       {activity.executions.map((execution, index) => {
-                        const active = execution.matchId === selectedMatchId;
+                        const active =
+                          executionDetailsOpen && execution.matchId === selectedMatchId;
 
                         return (
                           <button
@@ -536,6 +539,7 @@ export function PrivateExecutionActivity() {
 
                               setSelectedMatchId(execution.matchId);
                               setSelectedExecution(execution);
+                              setExecutionDetailsOpen(true);
                             }}
                             type="button"
                           >
@@ -550,13 +554,22 @@ export function PrivateExecutionActivity() {
                                 </p>
                               </div>
 
-                              <span
-                                className={`rounded-full px-2.5 py-1 text-[9px] font-semibold ${stageClass(
-                                  execution.stage,
-                                )}`}
-                              >
-                                {stageLabel(execution.stage)}
-                              </span>
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className={`rounded-full px-2.5 py-1 text-[9px] font-semibold ${stageClass(
+                                    execution.stage,
+                                  )}`}
+                                >
+                                  {stageLabel(execution.stage)}
+                                </span>
+
+                                <span
+                                  aria-hidden="true"
+                                  className="text-[16px] leading-none text-slate-300 2xl:hidden"
+                                >
+                                  →
+                                </span>
+                              </div>
                             </div>
                           </button>
                         );
@@ -565,13 +578,49 @@ export function PrivateExecutionActivity() {
                   )}
                 </div>
 
-                <div className="p-5">
-                  {!selectedExecution ? (
+                {selectedExecution && executionDetailsOpen ? (
+                  <button
+                    aria-label="Close execution details"
+                    className="fixed inset-0 z-[80] cursor-default bg-slate-950/25 backdrop-blur-[1px] 2xl:hidden"
+                    onClick={() => setExecutionDetailsOpen(false)}
+                    type="button"
+                  />
+                ) : null}
+
+                <div
+                  className={
+                    selectedExecution && executionDetailsOpen
+                      ? "fixed inset-y-0 right-0 z-[90] w-[min(600px,calc(100vw-12px))] translate-x-0 overflow-y-auto border-l border-slate-200 bg-white p-4 shadow-[-24px_0_70px_rgba(15,23,42,0.18)] transition-transform duration-300 ease-out sm:w-[min(600px,calc(100vw-32px))] sm:p-5 2xl:static 2xl:z-auto 2xl:w-auto 2xl:translate-x-0 2xl:overflow-visible 2xl:border-l-0 2xl:p-5 2xl:shadow-none"
+                      : "pointer-events-none fixed inset-y-0 right-0 z-[90] w-[min(600px,calc(100vw-12px))] translate-x-full overflow-y-auto border-l border-slate-200 bg-white p-4 shadow-[-24px_0_70px_rgba(15,23,42,0.18)] transition-transform duration-300 ease-out sm:w-[min(600px,calc(100vw-32px))] sm:p-5 2xl:pointer-events-auto 2xl:static 2xl:z-auto 2xl:w-auto 2xl:translate-x-0 2xl:overflow-visible 2xl:border-l-0 2xl:p-5 2xl:shadow-none"
+                  }
+                >
+                  {!selectedExecution || !executionDetailsOpen ? (
                     <div className="rounded-2xl bg-slate-50 px-5 py-10 text-center text-[11px] text-slate-500">
-                      Select an execution.
+                      Select an execution to view its details.
                     </div>
                   ) : (
                     <>
+                      <div className="mb-5 flex items-center justify-between border-b border-slate-200 pb-4 2xl:hidden">
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#e62058]">
+                            Execution details
+                          </p>
+
+                          <p className="mt-1 text-[16px] font-semibold text-slate-900">
+                            Private execution
+                          </p>
+                        </div>
+
+                        <button
+                          aria-label="Close execution details"
+                          className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-[22px] leading-none text-slate-500 transition hover:bg-slate-50 hover:text-slate-900"
+                          onClick={() => setExecutionDetailsOpen(false)}
+                          type="button"
+                        >
+                          ×
+                        </button>
+                      </div>
+
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                           <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#e62058]">
@@ -579,14 +628,14 @@ export function PrivateExecutionActivity() {
                           </p>
 
                           <p
-                            className="mt-2 font-mono text-[10px] text-slate-600"
+                            className="mt-2 break-all font-mono text-[10px] text-slate-600"
                             title={selectedExecution.matchId}
                           >
                             {shorten(selectedExecution.matchId, 16, 10)}
                           </p>
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <span
                             className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${stageClass(
                               selectedExecution.stage,
@@ -733,7 +782,7 @@ export function PrivateExecutionActivity() {
         )}
 
         {error && (
-          <p className="mx-6 mb-6 rounded-xl border border-red-200 bg-red-50 p-3 text-[11px] font-medium text-red-700">
+          <p className="mx-3 mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-[11px] font-medium text-red-700 sm:mx-6 sm:mb-6">
             {error}
           </p>
         )}
