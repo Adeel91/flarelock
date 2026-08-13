@@ -82,9 +82,7 @@ function ExecutionConstellation() {
                 FXRP / C2FLR
               </p>
 
-              <p className="mt-1 text-[11px] text-slate-500">
-                Confidential Limit execution on Flare
-              </p>
+              <p className="mt-1 text-[11px] text-slate-500">Private Limit execution on Flare</p>
             </div>
           </div>
 
@@ -212,7 +210,7 @@ export default function HomePage() {
         <div className="pointer-events-none absolute -right-[160px] bottom-[8%] h-[560px] w-[560px] rounded-full bg-[radial-gradient(circle,rgba(15,23,42,0.025),transparent_70%)]" />
         <div className="flarelock-hero-grid pointer-events-none absolute inset-0" />
 
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
           <div className="flarelock-hero-radar absolute left-1/2 top-1/2 h-[560px] w-[560px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#c10f45]/[0.07] sm:h-[700px] sm:w-[700px]" />
 
           <div className="flarelock-hero-radar flarelock-hero-radar-reverse absolute left-1/2 top-1/2 h-[390px] w-[390px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-slate-300/25 sm:h-[500px] sm:w-[500px]" />
@@ -273,9 +271,9 @@ export default function HomePage() {
             <span className="h-2.5 w-2.5 rounded-full border border-[#c10f45]/35 bg-white" />
           </div>
 
-          <div className="flarelock-hero-orbit-dot flarelock-hero-orbit-dot-one absolute left-1/2 top-1/2 h-2.5 w-2.5 rounded-full bg-[#c10f45] shadow-[0_0_18px_rgba(193,15,69,0.42)]" />
+          <div className="flarelock-hero-orbit-dot flarelock-hero-orbit-dot-one absolute left-1/2 top-1/2 z-0 h-2.5 w-2.5 rounded-full bg-[#c10f45] shadow-[0_0_18px_rgba(193,15,69,0.42)]" />
 
-          <div className="flarelock-hero-orbit-dot flarelock-hero-orbit-dot-two absolute left-1/2 top-1/2 h-2 w-2 rounded-full bg-[#c10f45]/75 shadow-[0_0_14px_rgba(193,15,69,0.32)]" />
+          <div className="flarelock-hero-orbit-dot flarelock-hero-orbit-dot-two absolute left-1/2 top-1/2 z-0 h-2 w-2 rounded-full bg-[#c10f45]/75 shadow-[0_0_14px_rgba(193,15,69,0.32)]" />
         </div>
 
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -349,7 +347,7 @@ export default function HomePage() {
           <div className="absolute bottom-[23%] right-[23%] h-1.5 w-1.5 rounded-full bg-[#c10f45]/65 shadow-[0_0_16px_rgba(193,15,69,0.3)]" />
         </div>
 
-        <div className="relative mx-auto w-full max-w-[1480px] px-4 py-14 text-center sm:px-6 sm:py-16 lg:px-10 lg:py-20">
+        <div className="relative z-10 mx-auto w-full max-w-[1480px] px-4 py-14 text-center sm:px-6 sm:py-16 lg:px-10 lg:py-20">
           <div className="mx-auto flex h-[74px] w-[74px] items-center justify-center rounded-[24px] border border-[#c10f45]/15 bg-white/80 text-[#c10f45] shadow-[0_18px_60px_rgba(193,15,69,0.12)] backdrop-blur-xl">
             <LockGlyph />
           </div>
@@ -433,7 +431,7 @@ export default function HomePage() {
             </p>
 
             <h2 className="mt-4 text-[32px] font-semibold leading-[1.02] tracking-[-0.05em] text-[#101217] sm:text-[42px] lg:text-[48px]">
-              From reference price to atomic result.
+              A private Limit order, settled end to end.
             </h2>
 
             <p className="mx-auto mt-4 max-w-[650px] text-[13px] leading-6 text-slate-500 sm:text-[15px] sm:leading-7">
@@ -470,12 +468,12 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="flarelock-constellation relative mx-auto mt-14 h-[800px] max-w-[1240px] lg:h-[820px]">
-            <div className="flarelock-constellation-orbit flarelock-orbit-a pointer-events-none absolute left-1/2 top-1/2 h-[620px] w-[620px] -translate-x-1/2 -translate-y-1/2 rounded-full" />
+          <div className="flarelock-constellation relative mx-auto mt-10 grid h-auto max-w-[1240px] grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 md:mt-14 md:block md:h-[800px] lg:h-[820px]">
+            <div className="flarelock-constellation-orbit hidden md:block flarelock-orbit-a pointer-events-none absolute left-1/2 top-1/2 h-[620px] w-[620px] -translate-x-1/2 -translate-y-1/2 rounded-full" />
 
-            <div className="flarelock-constellation-orbit flarelock-orbit-b pointer-events-none absolute left-1/2 top-1/2 h-[430px] w-[430px] -translate-x-1/2 -translate-y-1/2 rounded-full" />
+            <div className="flarelock-constellation-orbit hidden md:block flarelock-orbit-b pointer-events-none absolute left-1/2 top-1/2 h-[430px] w-[430px] -translate-x-1/2 -translate-y-1/2 rounded-full" />
 
-            <div className="flarelock-constellation-orbit flarelock-orbit-c pointer-events-none absolute left-1/2 top-1/2 h-[760px] w-[920px] -translate-x-1/2 -translate-y-1/2 rounded-[50%]" />
+            <div className="flarelock-constellation-orbit hidden md:block flarelock-orbit-c pointer-events-none absolute left-1/2 top-1/2 h-[760px] w-[920px] -translate-x-1/2 -translate-y-1/2 rounded-[50%]" />
 
             <svg
               aria-hidden="true"
@@ -539,7 +537,7 @@ export default function HomePage() {
               </circle>
             </svg>
 
-            <div className="flarelock-core absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2">
+            <div className="flarelock-core relative z-20 col-span-1 mx-auto mb-6 sm:col-span-2 md:absolute md:left-1/2 md:top-1/2 md:mb-0 md:-translate-x-1/2 md:-translate-y-1/2">
               <div className="flarelock-core-glow absolute inset-[-70px] rounded-full" />
 
               <div className="flarelock-core-shell relative grid h-[170px] w-[170px] place-items-center rounded-full border border-[#c10f45]/20 bg-white/90 shadow-[0_28px_80px_rgba(193,15,69,0.10)] backdrop-blur-xl transition-[border-color,box-shadow] duration-300 hover:border-[#c10f45]/40 hover:shadow-[0_30px_90px_rgba(193,15,69,0.16)] sm:h-[190px] sm:w-[190px]">
@@ -568,15 +566,15 @@ export default function HomePage() {
               {
                 className: "right-[1%] top-[7%] sm:right-[8%]",
                 label: "Private intents",
-                title: "Market · Limit · Stop",
-                detail: "Wallet signed and encrypted",
+                title: "Market · Limit · Stop Loss",
+                detail: "Market · Limit · Stop Loss intents",
                 marker: "ORDER",
               },
               {
                 className: "right-0 top-[43%] sm:right-[3%]",
                 label: "FCC",
                 title: "Confidential compute",
-                detail: "Live Limit execution path",
+                detail: "Live matched Limit verification",
                 marker: "FCC",
               },
               {
@@ -597,7 +595,7 @@ export default function HomePage() {
                 className: "left-0 top-[46%] sm:left-[3%]",
                 label: "FAssets",
                 title: "XRPL redemption",
-                detail: "FXRP redemption toward XRP Ledger",
+                detail: "FXRP redemption path toward XRP Ledger",
                 marker: "REDEEM",
               },
             ].map((node) => (
@@ -607,7 +605,7 @@ export default function HomePage() {
               >
                 <div className="flarelock-feature-dot absolute left-1/2 top-1/2 -z-10 h-28 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full" />
 
-                <div className="flarelock-feature-node-content relative min-w-[165px] cursor-default sm:min-w-[205px]">
+                <div className="flarelock-feature-node-content relative w-full min-w-0 cursor-default md:min-w-[205px]">
                   <div className="flex items-center gap-3">
                     <span className="flarelock-node-marker grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[#c10f45]/20 bg-[#fbfbfc]/70 text-[7px] font-bold tracking-[0.06em] text-[#c10f45] backdrop-blur-md transition duration-300 group-hover:scale-110 group-hover:border-[#c10f45]/50 group-hover:bg-[#fff4f7] group-hover:text-[#c10f45]">
                       {node.marker}
@@ -658,7 +656,7 @@ export default function HomePage() {
       <section className="flarelock-stack-section relative overflow-hidden border-y border-slate-200 bg-white py-10 sm:py-12">
         <div className="mx-auto mb-6 max-w-[1480px] px-4 sm:px-6 lg:px-10">
           <p className="text-center text-[10px] font-bold uppercase tracking-[0.18em] text-[#c10f45]">
-            FlareLock protocol stack
+            FlareLock execution stack
           </p>
         </div>
 
@@ -674,16 +672,16 @@ export default function HomePage() {
                 key={group}
               >
                 {[
-                  ["FTSOv2", "Live pricing"],
-                  ["Private Intents", "Market · Limit · Stop"],
-                  ["FCC", "Confidential compute"],
-                  ["Escrow", "Two-sided funding"],
-                  ["Atomic Settlement", "Onchain receipt"],
-                  ["Firelight", "Deposit · yield · exit · claim"],
+                  ["FTSOv2", "Reference pricing"],
+                  ["Private Intents", "Market · Limit · Stop Loss"],
+                  ["FCC", "Limit verification"],
+                  ["Escrow", "Atomic funding"],
+                  ["Settlement", "Onchain receipt"],
+                  ["Firelight", "FXRP yield lifecycle"],
                   ["FAssets", "FXRP interoperability"],
-                  ["XRPL", "Redemption path"],
-                  ["Orders", "Private activity"],
-                  ["Executions", "Settlement lifecycle"],
+                  ["XRPL", "Redemption destination"],
+                  ["Orders", "Private intent history"],
+                  ["Executions", "Matched Limit lifecycle"],
                 ].map(([title, detail]) => (
                   <div
                     className="flarelock-stack-item group relative flex h-[92px] w-[250px] shrink-0 items-center px-5 sm:h-[100px] sm:w-[280px] sm:px-6"
@@ -725,9 +723,8 @@ export default function HomePage() {
             </h2>
 
             <p className="mt-7 text-[14px] leading-7 text-slate-500 sm:text-[16px]">
-              FlareLock keeps the execution intent private while exposing the evidence users
-              actually need: funding state, confidential verification and the final atomic
-              settlement receipt.
+              The intent remains private while execution evidence stays inspectable: escrow funding,
+              FCC verification, settlement amounts and the final onchain receipt.
             </p>
 
             <div className="mt-9 flex flex-wrap gap-x-6 gap-y-4">
@@ -745,10 +742,10 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="flarelock-dashboard-stage relative mx-auto h-[610px] w-full max-w-[820px] sm:h-[650px] lg:h-[680px]">
+          <div className="flarelock-dashboard-stage relative mx-auto flex h-auto w-full max-w-[820px] flex-col gap-5 sm:block sm:h-[650px] lg:h-[680px]">
             <div className="flarelock-dashboard-grid pointer-events-none absolute inset-0" />
 
-            <div className="flarelock-dashboard-back absolute right-0 top-0 z-10 w-[86%] overflow-hidden rounded-[26px] border border-slate-200/90 bg-white/82 shadow-[0_30px_80px_rgba(15,23,42,0.08)] backdrop-blur-xl sm:w-[76%] origin-center transition-[transform,border-color,box-shadow] duration-300 ease-out hover:z-30 hover:scale-[1.025] hover:border-[#c10f45]/50 hover:shadow-[0_38px_100px_rgba(15,23,42,0.14)]">
+            <div className="flarelock-dashboard-back relative inset-auto z-10 w-full hover:z-10 hover:scale-100 sm:absolute sm:right-0 sm:top-0 sm:w-[76%] sm:hover:z-30 sm:hover:scale-[1.025] w-[86%] overflow-hidden rounded-[26px] border border-slate-200/90 bg-white/82 shadow-[0_30px_80px_rgba(15,23,42,0.08)] backdrop-blur-xl sm:w-[76%] origin-center transition-[transform,border-color,box-shadow] duration-300 ease-out hover:z-30 hover:scale-[1.025] hover:border-[#c10f45]/50 hover:shadow-[0_38px_100px_rgba(15,23,42,0.14)]">
               <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 sm:px-6">
                 <div>
                   <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-[#c10f45]">
@@ -813,7 +810,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="flarelock-dashboard-front absolute bottom-0 left-0 z-20 w-[94%] overflow-hidden rounded-[28px] border border-[#c10f45]/16 bg-white/94 shadow-[0_36px_100px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:w-[82%] origin-center transition-[transform,border-color,box-shadow] duration-300 ease-out hover:z-40 hover:scale-[1.025] hover:border-[#c10f45]/55 hover:shadow-[0_42px_110px_rgba(15,23,42,0.16)]">
+            <div className="flarelock-dashboard-front relative inset-auto z-20 w-full hover:z-20 hover:scale-100 sm:absolute sm:bottom-0 sm:left-0 sm:w-[82%] sm:hover:z-40 sm:hover:scale-[1.025] overflow-hidden rounded-[28px] border border-[#c10f45]/16 bg-white/94 shadow-[0_36px_100px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:w-[82%] origin-center transition-[transform,border-color,box-shadow] duration-300 ease-out hover:z-40 hover:scale-[1.025] hover:border-[#c10f45]/55 hover:shadow-[0_42px_110px_rgba(15,23,42,0.16)]">
               <div className="flex flex-col gap-4 border-b border-slate-200 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                 <div>
                   <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-[#c10f45]">
@@ -910,7 +907,7 @@ export default function HomePage() {
               Private execution
             </p>
 
-            <h2 className="mt-4 text-[42px] font-semibold leading-[0.99] tracking-[-0.065em] sm:text-[58px] lg:text-[68px]">
+            <h2 className="mt-4 text-[34px] font-semibold leading-[0.98] tracking-[-0.055em] sm:text-[52px] sm:tracking-[-0.065em] lg:text-[68px]">
               Hide the intent.
               <span className="block text-[#c10f45]">Prove the result.</span>
             </h2>
@@ -953,7 +950,8 @@ export default function HomePage() {
               {
                 number: "02",
                 title: "Match",
-                detail: "Check compatible Limit intents confidentially.",
+                detail:
+                  "Compare compatible encrypted Limit intents without exposing their conditions.",
                 tag: "PRIVATE",
               },
               {
@@ -965,7 +963,7 @@ export default function HomePage() {
               {
                 number: "04",
                 title: "Verify",
-                detail: "FCC produces the signed confidential execution result.",
+                detail: "FCC verifies the confidential Limit execution result.",
                 tag: "FCC",
               },
               {
@@ -1038,7 +1036,7 @@ export default function HomePage() {
             <div className="flarelock-lifecycle-track pointer-events-none absolute left-[8%] right-[8%] top-[52px] hidden h-px md:block" />
             <div className="flarelock-lifecycle-signal pointer-events-none absolute left-[8%] top-[48px] hidden h-[9px] w-[9px] rounded-full bg-[#c10f45] md:block" />
 
-            <div className="grid gap-10 md:grid-cols-6 md:gap-3">
+            <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-6 md:gap-3 md:overflow-visible md:px-0 md:pb-0">
               {[
                 {
                   title: "XRP Ledger",
@@ -1073,29 +1071,31 @@ export default function HomePage() {
                 {
                   title: "XRP Ledger",
                   detail: "XRP",
-                  hover: "Return path",
+                  hover: "Redemption destination",
                   icon: "06",
                 },
               ].map((stage, index) => (
                 <div
-                  className="flarelock-lifecycle-node group relative cursor-default text-center"
+                  className="flarelock-lifecycle-node group relative w-[148px] shrink-0 snap-center cursor-default text-center sm:w-[170px] md:w-auto md:shrink"
                   key={`${stage.title}-${index}`}
                 >
                   <div
                     className={
                       stage.icon === "LOCK"
-                        ? "flarelock-lifecycle-circle mx-auto grid h-[104px] w-[104px] place-items-center rounded-full bg-[#c10f45] text-white shadow-[0_16px_46px_rgba(193,15,69,0.22)]"
-                        : "flarelock-lifecycle-circle mx-auto grid h-[104px] w-[104px] place-items-center rounded-full border border-slate-200 bg-[#fbfbfc]/75 text-[11px] font-bold text-slate-500 backdrop-blur-md"
+                        ? "flarelock-lifecycle-circle mx-auto grid h-[76px] w-[76px] place-items-center rounded-full bg-[#c10f45] md:h-[104px] md:w-[104px] text-white shadow-[0_16px_46px_rgba(193,15,69,0.22)]"
+                        : "flarelock-lifecycle-circle mx-auto grid h-[76px] w-[76px] place-items-center rounded-full border md:h-[104px] md:w-[104px] border-slate-200 bg-[#fbfbfc]/75 text-[11px] font-bold text-slate-500 backdrop-blur-md"
                     }
                   >
                     {stage.icon === "LOCK" ? <LockGlyph /> : stage.icon}
                   </div>
 
-                  <p className="mt-6 text-[14px] font-semibold text-slate-900">{stage.title}</p>
+                  <p className="mt-4 text-[13px] font-semibold text-slate-900 md:mt-6 md:text-[14px]">
+                    {stage.title}
+                  </p>
 
                   <p className="mt-1 text-[10px] font-medium text-slate-400">{stage.detail}</p>
 
-                  <p className="flarelock-lifecycle-detail mx-auto mt-3 max-w-[150px] text-[9px] leading-4 text-[#c10f45] opacity-0 transition duration-300 group-hover:-translate-y-1 group-hover:opacity-100">
+                  <p className="flarelock-lifecycle-detail mx-auto mt-3 hidden max-w-[150px] text-[9px] leading-4 text-[#c10f45] opacity-0 transition duration-300 group-hover:-translate-y-1 group-hover:opacity-100 md:block">
                     {stage.hover}
                   </p>
                 </div>
@@ -1125,7 +1125,7 @@ export default function HomePage() {
           </h2>
 
           <p className="mx-auto mt-5 max-w-[620px] text-[14px] leading-7 text-slate-500">
-            Connect your wallet to enter the live Coston2 application.
+            Enter the live Coston2 prototype and inspect the execution flow yourself.
           </p>
 
           <div className="flarelock-landing-cta-connect mt-8 flex justify-center">
