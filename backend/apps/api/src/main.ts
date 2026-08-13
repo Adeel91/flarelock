@@ -9,8 +9,27 @@ async function bootstrap() {
     new FastifyAdapter({ logger: true }),
   );
 
+  const allowedOrigins = [
+    "http://localhost:3000",
+    ...(process.env.CORS_ORIGINS ?? "")
+      .split(",")
+      .map((origin) => origin.trim())
+      .filter(Boolean),
+  ];
+
   app.enableCors({
-    origin: ["http://localhost:3000"],
+    origin: (origin, callback) => {
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        /^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin)
+      ) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error(`Origin ${origin} is not allowed by CORS`), false);
+    },
     credentials: true,
   });
 
