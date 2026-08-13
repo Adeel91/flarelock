@@ -48,7 +48,6 @@ export function LiveChainBaseline() {
     chainId: coston2.id,
     query: {
       enabled: Boolean(address),
-      refetchInterval: 12_000,
     },
   });
 
@@ -56,20 +55,17 @@ export function LiveChainBaseline() {
     chainId: coston2.id,
     query: {
       enabled: Boolean(address),
-      refetchInterval: 12_000,
     },
   });
 
   const chainStatus = useQuery({
     queryKey: ["chain-status"],
     queryFn: getChainStatus,
-    refetchInterval: 30_000,
   });
 
   const fxrpToken = useQuery({
     queryKey: ["fxrp-token", "Coston2"],
     queryFn: getFxrpTokenStatus,
-    refetchInterval: 30_000,
   });
 
   const fxrpBalance = useQuery({
@@ -82,7 +78,6 @@ export function LiveChainBaseline() {
       return getFxrpWalletBalance(address);
     },
     enabled: Boolean(address) && isCoston2,
-    refetchInterval: 12_000,
   });
 
   async function handleWatchFxrp() {

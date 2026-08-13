@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { useFlareWallet } from "@/components/wallet/wallet-provider";
@@ -30,6 +31,7 @@ function stepLabel(step: SettlementStep) {
 
 export function ConfidentialSettlementAction({ execution, onSettled }: Props) {
   const wallet = useFlareWallet();
+  const queryClient = useQueryClient();
 
   const [step, setStep] = useState<SettlementStep>("idle");
 
@@ -68,6 +70,7 @@ export function ConfidentialSettlementAction({ execution, onSettled }: Props) {
       setStep("complete");
 
       await onSettled();
+      await queryClient.invalidateQueries();
     } catch (cause) {
       setStep("idle");
 

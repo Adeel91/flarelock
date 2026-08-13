@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { encodeFunctionData, parseAbi } from "viem";
 
@@ -51,6 +52,7 @@ function formatRawAmount(amountRaw: string, asset: "C2FLR" | "FXRP") {
 
 export function MatchEscrowFunding({ matchId }: Props) {
   const wallet = useFlareWallet();
+  const queryClient = useQueryClient();
   const [stage, setStage] = useState<Stage>("idle");
   const [execution, setExecution] = useState<MatchExecution | null>(null);
 
@@ -62,6 +64,8 @@ export function MatchEscrowFunding({ matchId }: Props) {
         detail: { matchId },
       }),
     );
+
+    void queryClient.invalidateQueries();
   }, [execution, matchId]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 

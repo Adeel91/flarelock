@@ -20,8 +20,6 @@ export function LiveMarketOverview() {
         side: "sell",
         toAsset: "C2FLR",
       }),
-    refetchInterval: 15_000,
-    refetchIntervalInBackground: true,
   });
 
   return (

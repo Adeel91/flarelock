@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { MatchEscrowFunding } from "@/components/intent/match-escrow-funding";
@@ -107,6 +108,7 @@ function StatusDot({ active, complete }: { active?: boolean; complete?: boolean 
 
 export function SealIntentButton({ quote, order }: Props) {
   const wallet = useFlareWallet();
+  const queryClient = useQueryClient();
 
   const [stage, setStage] = useState<ExecutionStage>("idle");
   const [sealedIntent, setSealedIntent] = useState<SealedIntent | null>(null);
@@ -160,6 +162,8 @@ export function SealIntentButton({ quote, order }: Props) {
       });
 
       setSealedIntent(result);
+
+      void queryClient.invalidateQueries();
 
       const counterparty = readPendingCounterparty(quote.side);
 

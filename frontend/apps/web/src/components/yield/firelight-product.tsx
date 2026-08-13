@@ -31,7 +31,6 @@ export function FirelightProduct() {
   const status = useQuery({
     queryKey: ["firelight-status"],
     queryFn: getFirelightStatus,
-    refetchInterval: 15_000,
   });
 
   const wallet = useQuery({
@@ -44,7 +43,6 @@ export function FirelightProduct() {
       return getFirelightWallet(address);
     },
     enabled: Boolean(address),
-    refetchInterval: 15_000,
   });
 
   const withdrawals = useQuery({
@@ -57,7 +55,6 @@ export function FirelightProduct() {
       return getFirelightWithdrawals(address);
     },
     enabled: Boolean(address),
-    refetchInterval: 15_000,
   });
 
   const pendingExit =

@@ -305,33 +305,6 @@ export function PrivateExecutionActivity() {
                 Your orders and executions are not exposed in the public aggregated order book.
               </p>
             </div>
-
-            {activity && selectedExecution && (
-              <div className="mt-5 rounded-2xl border border-slate-200 p-5">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                      Current execution
-                    </p>
-                    <p className="mt-2 font-mono text-[10px] text-slate-700">
-                      {shorten(selectedExecution.matchId, 14, 10)}
-                    </p>
-                  </div>
-
-                  <span
-                    className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${stageClass(
-                      selectedExecution.stage,
-                    )}`}
-                  >
-                    {stageLabel(selectedExecution.stage)}
-                  </span>
-                </div>
-
-                <div className="mt-5">
-                  <MatchEscrowFunding matchId={selectedExecution.matchId} />
-                </div>
-              </div>
-            )}
           </div>
         ) : (
           <>
@@ -546,6 +519,80 @@ export function PrivateExecutionActivity() {
                           );
                         })}
                       </div>
+
+                      {selectedExecution.stage === "settled" &&
+                        selectedExecution.buyer &&
+                        selectedExecution.seller && (
+                          <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-5">
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                              <div>
+                                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-emerald-700">
+                                  Settlement receipt
+                                </p>
+
+                                <p className="mt-2 text-[14px] font-semibold text-slate-900">
+                                  Atomic swap completed
+                                </p>
+
+                                <p className="mt-1 text-[11px] leading-5 text-slate-600">
+                                  Both escrow legs settled successfully on Coston2 through the
+                                  confidential FCC flow.
+                                </p>
+                              </div>
+
+                              <span className="w-fit rounded-full bg-emerald-100 px-3 py-1.5 text-[10px] font-semibold text-emerald-700">
+                                Verified
+                              </span>
+                            </div>
+
+                            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                              <div className="rounded-xl border border-emerald-100 bg-white px-4 py-3">
+                                <p className="text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400">
+                                  Buyer received
+                                </p>
+
+                                <p className="mt-2 text-[16px] font-semibold text-slate-900">
+                                  {formatRawAmount(
+                                    selectedExecution.seller.amountRaw,
+                                    selectedExecution.seller.asset,
+                                  )}{" "}
+                                  {selectedExecution.seller.asset}
+                                </p>
+                              </div>
+
+                              <div className="rounded-xl border border-emerald-100 bg-white px-4 py-3">
+                                <p className="text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400">
+                                  Seller received
+                                </p>
+
+                                <p className="mt-2 text-[16px] font-semibold text-slate-900">
+                                  {formatRawAmount(
+                                    selectedExecution.buyer.amountRaw,
+                                    selectedExecution.buyer.asset,
+                                  )}{" "}
+                                  {selectedExecution.buyer.asset}
+                                </p>
+                              </div>
+                            </div>
+
+                            {selectedExecution.transactions.find(
+                              (transaction) => transaction.kind === "settlement",
+                            ) ? (
+                              <a
+                                className="mt-4 inline-flex items-center rounded-xl border border-emerald-200 bg-white px-4 py-2.5 text-[10px] font-semibold text-emerald-700 transition hover:bg-emerald-50"
+                                href={`${EXPLORER}${
+                                  selectedExecution.transactions.find(
+                                    (transaction) => transaction.kind === "settlement",
+                                  )?.hash
+                                }`}
+                                rel="noreferrer"
+                                target="_blank"
+                              >
+                                View settlement transaction ↗
+                              </a>
+                            ) : null}
+                          </div>
+                        )}
 
                       <div className="mt-5">
                         <MatchEscrowFunding matchId={selectedExecution.matchId} />
