@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
 
 import { MatchEscrowFunding } from "@/components/intent/match-escrow-funding";
+import { primaryActionClass } from "@/components/ui/action-styles";
 import { useFlareWallet } from "@/components/wallet/wallet-provider";
 import {
   getMatchExecution,
@@ -375,7 +376,7 @@ export function PrivateExecutionActivity() {
 
             {wallet.isConnected && wallet.privateActivitySignature && activity ? (
               <button
-                className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className={`${primaryActionClass} h-10 whitespace-nowrap px-4 text-[12px]`}
                 disabled={privateActivityQuery.isFetching}
                 onClick={() => {
                   void privateActivityQuery.refetch();
