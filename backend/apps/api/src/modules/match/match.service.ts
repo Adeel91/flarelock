@@ -1453,7 +1453,7 @@ export class MatchService {
     for (const intent of intents) {
       if (
         intent.status !== "sealed" ||
-        intent.matchStatus === "expired" ||
+        intent.matchStatus !== "searching" ||
         (intent.orderType === "stop" && intent.stopStatus !== "triggered")
       ) {
         continue;
@@ -1613,16 +1613,15 @@ export class MatchService {
 
         newMatches.push(storedMatch);
 
-        buy.remainingBaseAmount = round(buy.remainingBaseAmount - fillBaseAmount);
-
-        sell.remainingBaseAmount = round(sell.remainingBaseAmount - fillBaseAmount);
+        // FCC settlement currently operates on the complete signed intent pair.
+        // Do not reuse residual quantities across additional matches.
+        buy.remainingBaseAmount = 0;
+        sell.remainingBaseAmount = 0;
 
         this.updateIntentMatchState(buy);
         this.updateIntentMatchState(sell);
 
-        if (buy.remainingBaseAmount <= EPSILON) {
-          break;
-        }
+        break;
       }
     }
 
