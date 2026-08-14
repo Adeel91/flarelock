@@ -55,6 +55,7 @@ export function MatchEscrowFunding({ matchId, initialExecution }: Props) {
   const [stage, setStage] = useState<Stage>("idle");
   const [execution, setExecution] = useState<MatchExecution | null>(initialExecution ?? null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [connectedSideAlreadyFunded, setConnectedSideAlreadyFunded] = useState(false);
 
   useEffect(() => {
     if (initialExecution?.matchId === matchId) {
@@ -84,13 +85,6 @@ export function MatchEscrowFunding({ matchId, initialExecution }: Props) {
   }, [initialExecution, matchId]);
 
   const allFunded = Boolean(execution?.buyer && execution?.seller);
-
-  const connectedSideAlreadyFunded = Boolean(
-    wallet.address &&
-      [execution?.buyer, execution?.seller].some(
-        (funding) => funding?.depositor.toLowerCase() === wallet.address?.toLowerCase(),
-      ),
-  );
 
   const fundingLabel = useMemo(() => {
     if (stage === "authorizing") return "Confirm ownership in MetaMask…";
@@ -187,6 +181,7 @@ export function MatchEscrowFunding({ matchId, initialExecution }: Props) {
       );
 
       setExecution(nextExecution);
+      setConnectedSideAlreadyFunded(true);
 
       window.dispatchEvent(
         new CustomEvent("flarelock:execution-updated", {
