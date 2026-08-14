@@ -17,7 +17,7 @@
   &nbsp;·&nbsp;
   <a href="https://api.shaderift.com/chain/status"><strong>Live API</strong></a>
   &nbsp;·&nbsp;
-  <a href="https://coston2-explorer.flare.network"><strong>Coston2 Explorer</strong></a>
+  <a href="https://coston2-explorer.flare.network/tx/0x109455da0ea4ba7c98639eec4f08f8653c4bb3eee61c81590767999d969cba24"><strong>Verified Settlement</strong></a>
 </p>
 
 <p align="center">
@@ -103,7 +103,7 @@ A fully funded Limit execution moves through:
 
 **encrypted intents → private match → escrow funding → FCC protocol path → settlement instruction → atomic settlement**
 
-The Coston2 prototype uses the real FCC protocol flow with the hackathon **simulated TEE environment**. It does not claim hardware-backed confidentiality.
+The Coston2 prototype uses the FCC protocol flow with the hackathon **simulated TEE environment**. It does not claim hardware-backed confidentiality.
 
 ---
 
@@ -135,7 +135,7 @@ Limit orders implement FlareLock's complete settlement path.
 
 A compatible Buy and Sell Limit pair can move through:
 
-**sealed → matched → funded → FCC verified → settled → receipt**
+**sealed → matched → funded → FCC execution → settled → receipt**
 
 ---
 
@@ -400,7 +400,7 @@ FlareLock has completed an atomic matched Limit settlement on Coston2 through th
 
 ### 🧾 Settlement Transaction
 
-`0x109455da0ea4ba7c98639eec4f08f8653c4bb3eee61c81590767999d969cba24`
+[`0x109455da0ea4ba7c98639eec4f08f8653c4bb3eee61c81590767999d969cba24`](https://coston2-explorer.flare.network/tx/0x109455da0ea4ba7c98639eec4f08f8653c4bb3eee61c81590767999d969cba24)
 
 ### 💱 Result
 
@@ -427,7 +427,7 @@ FlareLock has completed an atomic matched Limit settlement on Coston2 through th
 
 | Component | Address |
 | --- | --- |
-| FlareLock Escrow | `0x71A27096640D3D24545D505B5F830ea3d94355d6` |
+| FlareLock Escrow | [`0x71A27096640D3D24545D505B5F830ea3d94355d6`](https://coston2-explorer.flare.network/address/0x71A27096640D3D24545D505B5F830ea3d94355d6) |
 | Instruction Sender | `0xaeB8E980C87E58093E02d8d45698Fc9ECBb42cea` |
 | Configured TEE Identity | `0x427AdD02E981D73146Aa16173ec1d44e003429Bf` |
 | FXRP | `0x0b6A3645c240605887a5532109323A3E12273dc7` |
@@ -468,6 +468,16 @@ FlareLock has completed an atomic matched Limit settlement on Coston2 through th
 | FXRP Wallet | `GET /fassets/fxrp/wallet/:owner` |
 | Redemption | `GET /fassets/fxrp/redemption/:owner` |
 | Firelight | `GET /yield/firelight/wallet/:owner` |
+
+---
+
+## 📚 Documentation
+
+For deeper project details:
+
+- [Architecture](docs/architecture.md) — protocol components, privacy model, FCC path and settlement architecture
+- [Demo Plan](docs/demo_plan.md) — end-to-end product demonstration flow
+- [Project Pitch](docs/pitch.md) — concise problem, solution and hackathon-track summary
 
 ---
 
