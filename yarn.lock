@@ -468,12 +468,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@flarelock/alert-engine@workspace:backend/packages/alert_engine":
-  version: 0.0.0-use.local
-  resolution: "@flarelock/alert-engine@workspace:backend/packages/alert_engine"
-  languageName: unknown
-  linkType: soft
-
 "@flarelock/api@workspace:backend/apps/api":
   version: 0.0.0-use.local
   resolution: "@flarelock/api@workspace:backend/apps/api"
@@ -490,21 +484,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@flarelock/bot@workspace:backend/apps/bot":
-  version: 0.0.0-use.local
-  resolution: "@flarelock/bot@workspace:backend/apps/bot"
-  languageName: unknown
-  linkType: soft
-
 "@flarelock/config@workspace:*, @flarelock/config@workspace:frontend/packages/config":
   version: 0.0.0-use.local
   resolution: "@flarelock/config@workspace:frontend/packages/config"
-  languageName: unknown
-  linkType: soft
-
-"@flarelock/database@workspace:backend/packages/database":
-  version: 0.0.0-use.local
-  resolution: "@flarelock/database@workspace:backend/packages/database"
   languageName: unknown
   linkType: soft
 
@@ -514,35 +496,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@flarelock/matching-engine@workspace:backend/packages/matching_engine":
-  version: 0.0.0-use.local
-  resolution: "@flarelock/matching-engine@workspace:backend/packages/matching_engine"
-  languageName: unknown
-  linkType: soft
-
-"@flarelock/matching-prover@workspace:confidential/matching_prover":
-  version: 0.0.0-use.local
-  resolution: "@flarelock/matching-prover@workspace:confidential/matching_prover"
-  languageName: unknown
-  linkType: soft
-
 "@flarelock/risk-engine@workspace:*, @flarelock/risk-engine@workspace:backend/packages/risk_engine":
   version: 0.0.0-use.local
   resolution: "@flarelock/risk-engine@workspace:backend/packages/risk_engine"
   dependencies:
     "@types/node": "npm:latest"
-  languageName: unknown
-  linkType: soft
-
-"@flarelock/shared@workspace:backend/packages/shared":
-  version: 0.0.0-use.local
-  resolution: "@flarelock/shared@workspace:backend/packages/shared"
-  languageName: unknown
-  linkType: soft
-
-"@flarelock/tee-mock@workspace:confidential/tee_mock":
-  version: 0.0.0-use.local
-  resolution: "@flarelock/tee-mock@workspace:confidential/tee_mock"
   languageName: unknown
   linkType: soft
 
@@ -585,12 +543,6 @@ __metadata:
     viem: "npm:latest"
     wagmi: "npm:latest"
     zustand: "npm:latest"
-  languageName: unknown
-  linkType: soft
-
-"@flarelock/worker@workspace:backend/apps/worker":
-  version: 0.0.0-use.local
-  resolution: "@flarelock/worker@workspace:backend/apps/worker"
   languageName: unknown
   linkType: soft
 
