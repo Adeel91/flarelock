@@ -85,6 +85,13 @@ export function MatchEscrowFunding({ matchId, initialExecution }: Props) {
 
   const allFunded = Boolean(execution?.buyer && execution?.seller);
 
+  const connectedSideAlreadyFunded = Boolean(
+    wallet.address &&
+      [execution?.buyer, execution?.seller].some(
+        (funding) => funding?.depositor.toLowerCase() === wallet.address?.toLowerCase(),
+      ),
+  );
+
   const fundingLabel = useMemo(() => {
     if (stage === "authorizing") return "Confirm ownership in MetaMask…";
     if (stage === "approving") return "Approve FXRP in MetaMask…";
@@ -247,7 +254,7 @@ export function MatchEscrowFunding({ matchId, initialExecution }: Props) {
         })}
       </div>
 
-      {!allFunded && (
+      {!allFunded && !connectedSideAlreadyFunded && (
         <button
           className={`${primaryActionClass} mt-4 w-full`}
           disabled={stage !== "idle" && stage !== "error"}
@@ -256,6 +263,15 @@ export function MatchEscrowFunding({ matchId, initialExecution }: Props) {
         >
           {fundingLabel}
         </button>
+      )}
+
+      {!allFunded && connectedSideAlreadyFunded && (
+        <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
+          <p className="text-[12px] font-semibold text-slate-700">Your side is funded</p>
+          <p className="mt-1 text-[11px] leading-5 text-slate-500">
+            Waiting for the counterparty to fund their escrow deposit.
+          </p>
+        </div>
       )}
 
       {allFunded && (
