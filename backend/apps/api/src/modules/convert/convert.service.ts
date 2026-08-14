@@ -151,14 +151,17 @@ export class ConvertService {
     const side = normalizeSide(input.side);
     const { fromAsset, toAsset } = normalizePair(side, input.fromAsset, input.toAsset);
 
-    const amount = normalizeAmount(input.amount);
+    const requestedAmount = normalizeAmount(input.amount);
     const feeds = await getFeedSnapshot();
 
     const xrpInFlr = feeds.xrpUsd / feeds.flrUsd;
 
     const rate = fromAsset === "FXRP" ? xrpInFlr : 1 / xrpInFlr;
 
-    const outputAmount = round(amount * rate);
+    // Amount precision must match the asset before the quote is hashed and signed.
+    // FXRP uses 6 decimals and native C2FLR uses 18 decimals.
+    const inputAmount = round(requestedAmount, fromAsset === "FXRP" ? 6 : 18);
+    const outputAmount = round(inputAmount * rate, toAsset === "FXRP" ? 6 : 18);
     const receiveAmount = outputAmount;
 
     const feedTimestamp = new Date(feeds.timestamp * 1_000).toISOString();
@@ -170,7 +173,7 @@ export class ConvertService {
       side,
       fromAsset,
       toAsset,
-      amount.toString(),
+      inputAmount.toString(),
       rate.toString(),
       feeds.xrpUsd.toString(),
       feeds.flrUsd.toString(),
@@ -191,7 +194,7 @@ export class ConvertService {
       side,
       fromAsset,
       toAsset,
-      inputAmount: amount,
+      inputAmount,
       outputAmount,
       receiveAmount,
       rate: round(rate, 10),
