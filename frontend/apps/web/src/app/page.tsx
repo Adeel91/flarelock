@@ -449,6 +449,287 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section
+        className="relative overflow-hidden border-y border-slate-200 bg-[#0d0e12] text-white"
+        id="tracks"
+      >
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(193,15,69,0.16),transparent_42%)]" />
+        <div className="pointer-events-none absolute -left-[280px] top-[5%] h-[720px] w-[720px] rounded-full bg-[radial-gradient(circle,rgba(193,15,69,0.11),transparent_68%)] blur-2xl" />
+        <div className="pointer-events-none absolute -right-[260px] bottom-[-20%] h-[760px] w-[760px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.045),transparent_70%)]" />
+
+        <div className="relative mx-auto max-w-[1480px] px-4 py-20 sm:px-6 sm:py-24 lg:px-10 lg:py-28">
+          <div className="mx-auto max-w-[900px] text-center">
+            <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.045] px-4 py-2 backdrop-blur-xl">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#c10f45] shadow-[0_0_14px_rgba(193,15,69,0.7)]" />
+
+              <span className="text-[9px] font-bold uppercase tracking-[0.17em] text-white/65 sm:text-[10px]">
+                Built on Flare
+              </span>
+            </div>
+
+            <h2 className="mt-6 text-[40px] font-semibold leading-[0.98] tracking-[-0.065em] text-white sm:text-[58px] lg:text-[72px]">
+              Built at the intersection of
+              <span className="block text-[#df295c]">privacy and interoperability.</span>
+            </h2>
+
+            <p className="mx-auto mt-6 max-w-[760px] text-[14px] leading-7 text-white/52 sm:text-[16px] sm:leading-8">
+              FlareLock connects confidential execution with the full FXRP asset lifecycle. Trading
+              intent can stay private while settlement, yield and redemption remain verifiable
+              across Flare-native infrastructure.
+            </p>
+          </div>
+
+          <div className="relative mx-auto mt-14 max-w-[1280px] sm:mt-16">
+            <div className="pointer-events-none absolute left-1/2 top-[46%] hidden h-[68%] w-px -translate-x-1/2 -translate-y-1/2 bg-gradient-to-b from-transparent via-[#c10f45]/40 to-transparent lg:block" />
+
+            <div className="grid gap-5 lg:grid-cols-2 lg:gap-6">
+              <article className="group relative overflow-hidden rounded-[30px] border border-white/[0.08] bg-white/[0.045] p-6 shadow-[0_28px_80px_rgba(0,0,0,0.20)] backdrop-blur-xl transition duration-500 hover:-translate-y-1 hover:border-[#c10f45]/35 hover:bg-white/[0.06] sm:p-8 lg:p-9">
+                <div className="pointer-events-none absolute right-[-80px] top-[-80px] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle,rgba(193,15,69,0.18),transparent_67%)] opacity-60 transition duration-500 group-hover:opacity-100" />
+
+                <div className="relative">
+                  <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <p className="text-[9px] font-bold uppercase tracking-[0.17em] text-[#df295c]">
+                        Track 01
+                      </p>
+
+                      <h3 className="mt-3 max-w-[460px] text-[27px] font-semibold leading-[1.02] tracking-[-0.05em] text-white sm:text-[34px]">
+                        Interoperable Asset Products
+                      </h3>
+
+                      <p className="mt-4 max-w-[530px] text-[13px] leading-6 text-white/48 sm:text-[14px] sm:leading-7">
+                        FXRP is not treated as an isolated wrapped asset. FlareLock gives it a
+                        connected path through market context, private execution, settlement,
+                        Firelight and FAssets redemption.
+                      </p>
+                    </div>
+
+                    <div className="flex shrink-0 items-center">
+                      <XrpIcon size={48} />
+                      <FlareIcon className="-ml-2 ring-4 ring-[#0d0e12]" size={38} />
+                    </div>
+                  </div>
+
+                  <div className="mt-8 rounded-[22px] border border-white/[0.07] bg-black/15 p-5 sm:p-6">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {["FTSOv2", "FXRP", "C2FLR", "Firelight", "FAssets", "XRPL Testnet"].map(
+                        (item) => (
+                          <span
+                            className="rounded-full border border-white/[0.08] bg-white/[0.045] px-3 py-1.5 text-[8px] font-bold uppercase tracking-[0.1em] text-white/55"
+                            key={item}
+                          >
+                            {item}
+                          </span>
+                        ),
+                      )}
+                    </div>
+
+                    <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                      {[
+                        {
+                          title: "Live FXRP market context",
+                          detail: "FTSOv2-powered FXRP / C2FLR pricing and execution context.",
+                        },
+                        {
+                          title: "Atomic asset settlement",
+                          detail: "Buyer FXRP and seller C2FLR settle through the deployed escrow.",
+                        },
+                        {
+                          title: "Firelight lifecycle",
+                          detail: "Deposit, position, exit, pending withdrawal and claim state.",
+                        },
+                        {
+                          title: "FAssets redemption",
+                          detail:
+                            "FXRP redemption requests toward an XRP Ledger Testnet destination.",
+                        },
+                      ].map((feature) => (
+                        <div
+                          className="group/item rounded-[17px] border border-white/[0.055] bg-white/[0.025] p-4 transition duration-300 hover:border-[#c10f45]/28 hover:bg-white/[0.04]"
+                          key={feature.title}
+                        >
+                          <div className="flex items-start gap-3">
+                            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#df295c] shadow-[0_0_10px_rgba(223,41,92,0.55)]" />
+
+                            <div>
+                              <p className="text-[12px] font-semibold tracking-[-0.02em] text-white/90">
+                                {feature.title}
+                              </p>
+
+                              <p className="mt-2 text-[10px] leading-5 text-white/38 transition group-hover/item:text-white/50">
+                                {feature.detail}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mt-7">
+                    <p className="text-[8px] font-bold uppercase tracking-[0.14em] text-white/30">
+                      Connected asset path
+                    </p>
+
+                    <div className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-3 text-[9px] font-semibold text-white/55 sm:text-[10px]">
+                      {[
+                        "FTSOv2 market",
+                        "Private trade",
+                        "Atomic settlement",
+                        "Firelight",
+                        "FAssets redemption",
+                        "XRPL Testnet",
+                      ].map((item, index, items) => (
+                        <div className="flex items-center gap-2" key={item}>
+                          <span>{item}</span>
+
+                          {index < items.length - 1 ? (
+                            <span className="text-[#df295c]/70">→</span>
+                          ) : null}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              <article className="group relative overflow-hidden rounded-[30px] border border-white/[0.08] bg-white/[0.045] p-6 shadow-[0_28px_80px_rgba(0,0,0,0.20)] backdrop-blur-xl transition duration-500 hover:-translate-y-1 hover:border-[#c10f45]/35 hover:bg-white/[0.06] sm:p-8 lg:p-9">
+                <div className="pointer-events-none absolute left-[-80px] bottom-[-90px] h-[280px] w-[280px] rounded-full bg-[radial-gradient(circle,rgba(193,15,69,0.15),transparent_67%)] opacity-60 transition duration-500 group-hover:opacity-100" />
+
+                <div className="relative">
+                  <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <p className="text-[9px] font-bold uppercase tracking-[0.17em] text-[#df295c]">
+                        Track 02
+                      </p>
+
+                      <h3 className="mt-3 max-w-[460px] text-[27px] font-semibold leading-[1.02] tracking-[-0.05em] text-white sm:text-[34px]">
+                        Confidential Compute Apps
+                      </h3>
+
+                      <p className="mt-4 max-w-[530px] text-[13px] leading-6 text-white/48 sm:text-[14px] sm:leading-7">
+                        FlareLock separates private trading intent from public settlement proof.
+                        Orders stay sealed while matched Limit executions move through escrow, FCC
+                        and atomic onchain settlement.
+                      </p>
+                    </div>
+
+                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-[16px] border border-[#c10f45]/25 bg-[#c10f45]/10 text-[#df295c] shadow-[0_12px_35px_rgba(193,15,69,0.12)]">
+                      <LockGlyph />
+                    </div>
+                  </div>
+
+                  <div className="mt-8 rounded-[22px] border border-white/[0.07] bg-black/15 p-5 sm:p-6">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {[
+                        "Encrypted intents",
+                        "Private matching",
+                        "Escrow",
+                        "FCC",
+                        "TEE",
+                        "Onchain proof",
+                      ].map((item) => (
+                        <span
+                          className="rounded-full border border-white/[0.08] bg-white/[0.045] px-3 py-1.5 text-[8px] font-bold uppercase tracking-[0.1em] text-white/55"
+                          key={item}
+                        >
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+
+                    <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                      {[
+                        {
+                          title: "Encrypted order intents",
+                          detail:
+                            "Market, Limit and Stop Loss parameters are stored as sealed private intent data.",
+                        },
+                        {
+                          title: "Private Limit matching",
+                          detail:
+                            "Compatible Buy and Sell Limit intents can match without a public plaintext order book.",
+                        },
+                        {
+                          title: "FCC execution path",
+                          detail:
+                            "Fully funded matched Limits move through the FCC protocol flow before settlement.",
+                        },
+                        {
+                          title: "Public settlement proof",
+                          detail:
+                            "Final FXRP / C2FLR settlement stays independently verifiable on Coston2.",
+                        },
+                      ].map((feature) => (
+                        <div
+                          className="group/item rounded-[17px] border border-white/[0.055] bg-white/[0.025] p-4 transition duration-300 hover:border-[#c10f45]/28 hover:bg-white/[0.04]"
+                          key={feature.title}
+                        >
+                          <div className="flex items-start gap-3">
+                            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#df295c] shadow-[0_0_10px_rgba(223,41,92,0.55)]" />
+
+                            <div>
+                              <p className="text-[12px] font-semibold tracking-[-0.02em] text-white/90">
+                                {feature.title}
+                              </p>
+
+                              <p className="mt-2 text-[10px] leading-5 text-white/38 transition group-hover/item:text-white/50">
+                                {feature.detail}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mt-7">
+                    <p className="text-[8px] font-bold uppercase tracking-[0.14em] text-white/30">
+                      Matched Limit path
+                    </p>
+
+                    <div className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-3 text-[9px] font-semibold text-white/55 sm:text-[10px]">
+                      {["Seal", "Match", "Escrow", "Fund", "FCC", "Settle", "Receipt"].map(
+                        (item, index, items) => (
+                          <div className="flex items-center gap-2" key={item}>
+                            <span>{item}</span>
+
+                            {index < items.length - 1 ? (
+                              <span className="text-[#df295c]/70">→</span>
+                            ) : null}
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+
+            <div className="relative mx-auto mt-6 overflow-hidden rounded-[24px] border border-[#c10f45]/20 bg-[#c10f45]/[0.07] px-5 py-5 text-center sm:px-8 sm:py-6">
+              <div className="pointer-events-none absolute left-1/2 top-1/2 h-[220px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(193,15,69,0.14),transparent_70%)]" />
+
+              <p className="relative text-[14px] font-semibold leading-6 tracking-[-0.025em] text-white/88 sm:text-[16px]">
+                Private where execution needs privacy.
+                <span className="text-[#df295c]"> Verifiable where settlement needs proof.</span>
+                <span className="block sm:inline">
+                  {" "}
+                  Interoperable where the asset needs to move.
+                </span>
+              </p>
+            </div>
+
+            <div className="mt-5 flex justify-center">
+              <p className="max-w-[780px] text-center text-[9px] leading-5 text-white/28">
+                The current Coston2 FCC deployment uses the hackathon simulated TEE environment.
+                Market and Stop Loss are private intent products. The full FCC settlement lifecycle
+                currently applies to matched Limit orders.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="relative overflow-hidden" id="protocol">
         <div className="flarelock-protocol-grid pointer-events-none absolute inset-0" />
 
