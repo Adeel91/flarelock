@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useCallback, useEffect, useState } from "react";
 
+import { ConfidentialSettlementAction } from "@/components/intent/confidential-settlement-action";
 import { MatchEscrowFunding } from "@/components/intent/match-escrow-funding";
 import { primaryActionClass } from "@/components/ui/action-styles";
 import { useFlareWallet } from "@/components/wallet/wallet-provider";
@@ -774,6 +775,11 @@ export function PrivateExecutionActivity() {
                         <MatchEscrowFunding
                           initialExecution={selectedExecution}
                           matchId={selectedExecution.matchId}
+                        />
+
+                        <ConfidentialSettlementAction
+                          execution={selectedExecution}
+                          onSettled={() => refreshExecution(selectedExecution.matchId, true)}
                         />
                       </div>
                     </>
