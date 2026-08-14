@@ -475,21 +475,30 @@ FlareLock has completed an atomic matched Limit settlement on Coston2 through th
 
 For deeper project details:
 
-- [Architecture](docs/architecture.md) — protocol components, privacy model, FCC path and settlement architecture
-- [Demo Plan](docs/demo_plan.md) — end-to-end product demonstration flow
-- [Project Pitch](docs/pitch.md) — concise problem, solution and hackathon-track summary
+- [Architecture](docs/architecture.md) - protocol components, privacy model, FCC path and settlement architecture
+- [Demo Walkthrough](docs/demo_plan.md) - end-to-end walkthrough of the live FlareLock flow
+- [Project Pitch](docs/pitch.md) - concise problem, solution and hackathon-track summary
+- [Backend](backend/README.md) - API responsibilities, private runtime state, order model and future backend boundaries
+- [Confidential Compute](confidential/README.md) - FCC integration, simulated TEE environment and verified settlement path
+- [FCC Architecture](confidential/fcc_service/docs/architecture.md) - detailed FCC service structure and runtime design
+- [FCC Live Coston2 Proof](confidential/fcc_service/docs/flarelock-coston2-live-proof.md) - deployed FlareLock FCC execution and settlement evidence
+- [FCC Getting Started](confidential/fcc_service/docs/getting-started.md) - local FCC setup and service flow
+- [FCC Coston2 Testing](confidential/fcc_service/docs/testing-against-coston2.md) - Coston2-specific FCC testing flow
+- [FCC Deployment Steps](confidential/fcc_service/docs/deployment-steps.md) - deployment sequence for the FCC extension
+- [FCC Instruction Sender](confidential/fcc_service/docs/instruction-sender.md) - settlement instruction sender integration
+
 
 ---
 
 ## 📁 Repository Layout
 
-- `frontend/apps/web` — Next.js production application
-- `frontend/packages` — shared configuration, UI and Web3 packages
-- `backend/apps/api` — FlareLock API
-- `backend/packages` — matching, risk and shared backend modules
-- `contracts` — Solidity contracts, tests and deployment scripts
-- `confidential/fcc_service` — FCC proxy and execution infrastructure
-- `docs/images` — README product screenshots
+- `frontend/apps/web` - Next.js production application
+- `frontend/packages` - shared configuration, UI and Web3 packages
+- `backend/apps/api` - FlareLock API
+- `backend/packages` - matching, risk and shared backend modules
+- `contracts` - Solidity contracts, tests and deployment scripts
+- `confidential/fcc_service` - FCC proxy and execution infrastructure
+- `docs/images` - README product screenshots
 
 ---
 
